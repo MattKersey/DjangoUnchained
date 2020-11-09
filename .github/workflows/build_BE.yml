@@ -30,4 +30,4 @@ jobs:
 
       # Insert Other Steps Here
       - name: Run Pytest
-        run: pytest [test_file.py] --junitxml=report.xml
+        run: pytest dummy_test.py --junitxml=report.xml
