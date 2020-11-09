@@ -1,0 +1,10 @@
+# Directories
+venv
+__pycache__
+.tox
+
+# Files
+db.sqlite3
+.coverage
+.pytest_cache
+coverage_html_report
