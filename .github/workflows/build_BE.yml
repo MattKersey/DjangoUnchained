@@ -69,10 +69,9 @@ jobs:
 
       - name: Linter - JS Lint
         uses: goto-bus-stop/standard-action@v1
-        working-directory: ./frontend
         with:
-          files: src/*.js
-          annotate: false
+          files: ./frontend/src/*.js
+          annotate: true
 
       - name: Bug Finder - Pyflakes
         uses: reviewdog/action-pyflakes@master
