@@ -31,3 +31,9 @@ jobs:
       # Insert Other Steps Here
       - name: Run Pytest
         run: pytest test_dummy.py --junitxml=report.xml
+
+      - name: Run Jest
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm test
