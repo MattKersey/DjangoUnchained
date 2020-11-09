@@ -81,6 +81,5 @@ jobs:
 
       - name: Bug Finder - JSHint
         uses: moneyforward/jshint-action@v0
-        working-directory: ./frontend
         with:
-          files: src/*.js
+          files: ./frontend/src/*.js
