@@ -29,3 +29,5 @@ jobs:
           pip install -r requirements.txt
 
       # Insert Other Steps Here
+      - name: Run Pytest
+        run: pytest [test_file.py] --junitxml=report.xml
