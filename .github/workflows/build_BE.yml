@@ -30,7 +30,21 @@ jobs:
 
       # Insert Other Steps Here
       - name: Run Pytest
-        run: pytest test_dummy.py --junitxml=report.xml
+        run: pytest test_dummy.py --cov-report=xml
+
+      - name: Code Coverage Report
+        uses: codecov/codecov-action@v1.0.14
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: Django Unchained - Backend
+          file: ./coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Black Code Formatter
+        uses: lgeiger/black-action@master
+        with:
+          args: "*/*.py --check"
 
       - name: Run Jest
         working-directory: ./frontend
