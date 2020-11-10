@@ -28,9 +28,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Insert Other Steps Here
       - name: Run Pytest
-        run: pytest test_dummy.py --junitxml=report.xml
+        run: pytest -v --cov=./ --cov-report=xml
+
+      - name: Code Coverage Report
+        uses: codecov/codecov-action@v1.0.14
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: Django Unchained - Backend
+          files: ./backend/coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Black Code Formatter
+        uses: lgeiger/black-action@master
+        with:
+          args: "*/*.py --check"
 
       - name: Run Jest
         working-directory: ./frontend
