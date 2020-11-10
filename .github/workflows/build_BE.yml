@@ -45,22 +45,25 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      # [TODO] Install dependecies for Frontend
-      # - name: Frontend - Install Dependencies
-      #   working-directory: ./frontend
-      #   run: ...
+          
+      - name: Test - Pytest
+        run: pytest -v --cov=./ --cov-report=xml
 
       # [TODO] Update coverage to include Frontend
-
-      - name: Test - Pytest
-        run: pytest test_dummy.py --junitxml=report.xml
-
       - name: Test - Jest
         working-directory: ./frontend
         run: |
           npm install
           npm test
+          
+      - name: Code Coverage Report
+        uses: codecov/codecov-action@v1.0.14
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: Django Unchained - Backend
+          files: ./backend/coverage.xml
+          fail_ci_if_error: false
+          verbose: true
 
       - name: Linter - Black
         uses: lgeiger/black-action@master
@@ -74,10 +77,7 @@ jobs:
           annotate: true
 
       - name: Bug Finder - Pyflakes
-        uses: reviewdog/action-pyflakes@master
-        with:
-          github_token: ${{secrets.GITHUB_TOKEN}}
-          reporter: github-pr-check
+        uses: lgeiger/pyflakes-action@v1.0.1
 
       - name: Bug Finder - JSHint
         uses: moneyforward/jshint-action@v0
