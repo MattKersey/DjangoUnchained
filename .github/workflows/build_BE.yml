@@ -74,7 +74,7 @@ jobs:
         uses: goto-bus-stop/standard-action@v1
         with:
           files: ./frontend/src/*.js
-          annotate: true
+          annotate: false
 
       - name: Bug Finder - Pyflakes
         uses: lgeiger/pyflakes-action@v1.0.1
