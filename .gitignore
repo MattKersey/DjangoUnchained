@@ -2,9 +2,10 @@
 venv
 __pycache__
 .tox
+coverage_html_report
+.pytest_cache
 
 # Files
 db.sqlite3
 .coverage
-.pytest_cache
-coverage_html_report
+coverage.xml

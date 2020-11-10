@@ -30,14 +30,15 @@ jobs:
 
       # Insert Other Steps Here
       - name: Run Pytest
-        run: pytest test_dummy.py --cov-report=xml
+        run: |
+          pytest -v --cov=./ --cov-report=xml
 
       - name: Code Coverage Report
         uses: codecov/codecov-action@v1.0.14
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           name: Django Unchained - Backend
-          file: ./coverage.xml
+          file: coverage.xml
           fail_ci_if_error: false
           verbose: true
 
