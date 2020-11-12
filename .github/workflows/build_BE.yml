@@ -30,9 +30,9 @@ jobs:
 
       - name: Run Pytest
         run: 
-          python backend/manage.py makemigrations api
-          python3 backend/manage.py migrate
-          pytest backend -v --cov=./ --cov-report=xml
+          python manage.py makemigrations api
+          python manage.py migrate
+          pytest ./ -v --cov=./ --cov-report=xml
 
       - name: Code Coverage Report
         uses: codecov/codecov-action@v1.0.14
