@@ -46,9 +46,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run ESLint
-        run: eslint ./frontend --ext .js,.jsx,.ts,.tsx
-
       - name: Bug Finder - Pyflakes
         uses: lgeiger/pyflakes-action@v1.0.1
           
@@ -68,6 +65,7 @@ jobs:
         run: |
           npm install
           npm test
+          eslint src
           
       - name: Code Coverage Report
         uses: codecov/codecov-action@v1.0.14
