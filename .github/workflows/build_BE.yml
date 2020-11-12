@@ -28,9 +28,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      # Insert Other Steps Here
       - name: Run Pytest
-        run: pytest test_dummy.py --junitxml=report.xml
+        run: 
+          python backend/manage.py makemigrations api
+          python3 backend/manage.py migrate
+          pytest backend --junitxml=report.xml
 
       - name: Run Jest
         working-directory: ./frontend

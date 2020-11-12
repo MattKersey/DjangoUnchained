@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator
+from django.contrib.auth.models import PermissionsMixin
 
 
 class Item(models.Model):
@@ -34,7 +35,7 @@ class Store(models.Model):
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email, password=None):
+    def create_user(self, email, password=None, is_superuser=False, stores=None):
         """
         Creates and saves a User with the given email and password.
         """
@@ -43,30 +44,39 @@ class UserManager(BaseUserManager):
 
         user = self.model(
             email=self.normalize_email(email),
+            is_superuser=is_superuser,
         )
         user.set_password(password)
-        user.save(using=self._db)
+        if stores is None:
+            user.save(using=self._db)
+        else:
+            user.stores.set(stores)
+            user.save()
         return user
 
-    def create_staffuser(self, email, password):
+    def create_staffuser(self, email, password, stores=None):
         """
         Creates and saves a staff user with the given email and password.
         """
         user = self.create_user(
             email,
             password=password,
+            is_superuser=False,
+            stores=stores,
         )
         user.staff = True
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password):
+    def create_superuser(self, email, password, stores=None):
         """
         Creates and saves a superuser with the given email and password.
         """
         user = self.create_user(
             email,
             password=password,
+            is_superuser=True,
+            stores=None,
         )
         user.staff = True
         user.admin = True
@@ -74,7 +84,8 @@ class UserManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
+    username = None
     email = models.EmailField(
         verbose_name="email address",
         max_length=255,
