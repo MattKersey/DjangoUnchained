@@ -45,9 +45,22 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
+      - name: Run ESLint
+        run: eslint ./frontend --ext .js,.jsx,.ts,.tsx
+
+      - name: Bug Finder - Pyflakes
+        uses: lgeiger/pyflakes-action@v1.0.1
           
       - name: Test - Pytest
         run: pytest -v --cov=./ --cov-report=xml
+
+      - name: Lint - Flake8
+        uses: TrueBrain/actions-flake8@master
+        with:
+          path: ./backend
+          max_line_length: 100
+          only_warn: 0
 
       # [TODO] Update coverage to include Frontend
       - name: Test - Jest
@@ -64,22 +77,3 @@ jobs:
           files: ./backend/coverage.xml
           fail_ci_if_error: false
           verbose: true
-
-      - name: Linter - Black
-        uses: lgeiger/black-action@master
-        with:
-          args: "*/*.py --check"
-
-      - name: Linter - JS Lint
-        uses: goto-bus-stop/standard-action@v1
-        with:
-          files: ./frontend/src/*.js
-          annotate: false
-
-      - name: Bug Finder - Pyflakes
-        uses: lgeiger/pyflakes-action@v1.0.1
-
-      - name: Bug Finder - JSHint
-        uses: moneyforward/jshint-action@v0
-        with:
-          files: ./frontend/src/*.js
