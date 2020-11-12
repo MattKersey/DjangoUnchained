@@ -59,12 +59,11 @@ jobs:
           max_line_length: 100
           only_warn: 0
 
-      # [TODO] Update coverage to include Frontend
       - name: Test - Jest
         working-directory: ./frontend
         run: |
           npm install
-          npm test
+          npm test --watchAll=false --coverage
         # [TODO] Add eslint to package.json and run command  
         # eslint src
           
@@ -73,6 +72,6 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           name: Django Unchained - Backend
-          files: ./backend/coverage.xml
+          files: ./backend/coverage.xml,./frontend/coverage/clover.xml,./frontend/coverage/lcov.info
           fail_ci_if_error: false
           verbose: true
