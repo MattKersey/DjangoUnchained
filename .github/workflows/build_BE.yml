@@ -63,7 +63,7 @@ jobs:
         working-directory: ./frontend
         run: |
           npm install
-          npm test --watchAll=false --coverage
+          npm test -- --watchAll=false --coverage
         # [TODO] Add eslint to package.json and run command  
         # eslint src
           
