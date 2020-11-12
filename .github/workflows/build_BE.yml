@@ -32,7 +32,21 @@ jobs:
         run: 
           python backend/manage.py makemigrations api
           python3 backend/manage.py migrate
-          pytest backend --junitxml=report.xml
+          pytest backend -v --cov=./ --cov-report=xml
+
+      - name: Code Coverage Report
+        uses: codecov/codecov-action@v1.0.14
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          name: Django Unchained - Backend
+          files: ./backend/coverage.xml
+          fail_ci_if_error: false
+          verbose: true
+
+      - name: Black Code Formatter
+        uses: lgeiger/black-action@master
+        with:
+          args: "*/*.py --check"
 
       - name: Run Jest
         working-directory: ./frontend
