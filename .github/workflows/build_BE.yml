@@ -85,13 +85,16 @@ jobs:
         shell: bash
 
       - name: Commiting Reports
+        if: ${{matrix.python-version}}-${{matrix.node-version}} == '3.8-12'
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git commit -m "Add changes" -a
+          git add ../*_report.txt
+          git commit -m "Adding Reports"
       
       - name: Pushing Reports
+        if: ${{matrix.python-version}}-${{matrix.node-version}} == '3.8-12'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          force: true
+          branch: ${{ github.HEAD_REF }}
