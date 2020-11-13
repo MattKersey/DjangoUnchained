@@ -75,8 +75,11 @@ jobs:
 
       - name: Creating Lint + Bug Reports
         run: |
-          flake8 ./*/*.py --verbose --output-file=../lint_report.txt --ignore=E
-          flake8 ./*/*.py --verbose --output-file=../bug_report.txt --ignore=W
+          rm ../*_report.txt
+          pip install flake8
+          flake8 ./*/*.py --show-source --statistics --verbose --ignore=E --output-file=../lint_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --ignore=W --output-file=../bug_report.txt
+        shell: bash
 
       - name: Commiting Reports
         run: |
