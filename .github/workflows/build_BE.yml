@@ -75,7 +75,7 @@ jobs:
 
       - name: Creating Lint + Bug Reports
         run: |
-          rm ../*_report.txt
+          rm -f ../*_report.txt
           pip install flake8
           flake8 ./*/*.py --show-source --statistics --verbose --ignore=E --output-file=../lint_report.txt
           flake8 ./*/*.py --show-source --statistics --verbose --ignore=W --output-file=../bug_report.txt
