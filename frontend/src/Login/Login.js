@@ -18,7 +18,7 @@ function Copyright () {
     <Typography variant='body2' color='textSecondary' align='center'>
       {'Copyright © '}
       <Link color='inherit' href='https://material-ui.com/'>
-        Your Website
+        PyMarket
       </Link>{' '}
       {new Date().getFullYear()}
       .
@@ -67,7 +67,7 @@ class Login extends React.Component {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component='h1' variant='h5'>
-            Sign in
+            Sign into your PyMarket Account
           </Typography>
           <form className={classes.form} noValidate>
             <TextField
