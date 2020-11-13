@@ -45,14 +45,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Bug Finder - Pyflakes
-        uses: lgeiger/pyflakes-action@v1.0.1
           
       - name: Test + Coverage - Pytest
         run: pytest -v --cov=./ --cov-report=xml
 
-      - name: Lint - Flake8
+      - name: Lint + Bug Finding - Flake8
         uses: TrueBrain/actions-flake8@master
         with:
           path: ./backend
@@ -75,3 +72,20 @@ jobs:
           files: ./backend/coverage.xml,./frontend/coverage/clover.xml,./frontend/coverage/lcov.info
           fail_ci_if_error: false
           verbose: true
+
+      - name: Creating Lint + Bug Reports
+        run: |
+          flake8 ./*/*.py --verbose --output-file=../lint_report.txt --ignore=E
+          flake8 ./*/*.py --verbose --output-file=../bug_report.txt --ignore=W
+
+      - name: Commiting Reports
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git commit -m "Add changes" -a
+      
+      - name: Pushing Reports
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
