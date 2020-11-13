@@ -1,5 +1,6 @@
 from pathlib import Path
 
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "3a!ltam)4n!!kbtmo7%-s3(=g!plrv38u8jp5%pmm!18c0)6g4"
@@ -55,10 +56,11 @@ DATABASES = {
     }
 }
 
+VALIDATOR = "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth."
-        + "password_validation.UserAttributeSimilarityValidator",
+        "NAME": VALIDATOR,
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",

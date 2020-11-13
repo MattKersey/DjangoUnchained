@@ -1,8 +1,6 @@
 from django.test import TestCase
-
 # from django.core.files.uploadedfile import SimpleUploadedFile
 from .models import User, Category, Store, Role, Association
-
 # from .modesl import Item
 import datetime
 

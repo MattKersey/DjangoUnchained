@@ -15,41 +15,89 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.6, 3.7, 3.8]
+        node-version: ['10', '11', '12' ]
+    services:
+      postgres:
+        image: postgres:10.8
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: github_actions
+        ports:
+          - 5432:5432
+        # needed because the postgres container does not provide a healthcheck
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@master
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      
       - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v1
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: ${{matrix.python-version}}
+      
+      - name: Set up Node ${{matrix.node-version}}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{matrix.node-version}}
 
-      - name: Install Dependencies
+      - name: Backend - Install Dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-
-      - name: Run Pytest
+          
+      - name: Test + Coverage - Pytest
         run: |
           python manage.py makemigrations api
           python manage.py migrate
           pytest ./ -v --cov=./ --cov-report=xml
 
+      - name: Lint + Bug Finding - Flake8
+        uses: TrueBrain/actions-flake8@master
+        with:
+          path: ./backend
+          max_line_length: 100
+          only_warn: 0
+
+      - name: Test + Coverage - Jest
+        working-directory: ./frontend
+        run: |
+          npm install
+          npm test -- --watchAll=false --coverage
+        # [TODO] Add eslint to package.json and run command  
+        # eslint src
+          
       - name: Code Coverage Report
         uses: codecov/codecov-action@v1.0.14
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
-          name: Django Unchained - Backend
-          files: ./backend/coverage.xml
+          name: Django Unchained
+          files: ./backend/coverage.xml,./frontend/coverage/clover.xml,./frontend/coverage/lcov.info
           fail_ci_if_error: false
           verbose: true
 
-      - name: Black Code Formatter
-        uses: lgeiger/black-action@master
-        with:
-          args: "*/*.py --check"
-
-      - name: Run Jest
-        working-directory: ./frontend
+      - name: Creating Lint + Bug Reports
         run: |
-          npm install
-          npm test
+          rm -f ../*_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../lint_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../bug_report.txt
+        shell: bash
+
+      - name: Commiting Reports
+        if: ${{ matrix.python-version == 3.8 && matrix.node-version == '12' }}
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add ../*_report.txt
+          git commit -m "Adding Reports"
+      
+      - name: Pushing Reports
+        if: ${{ matrix.python-version == 3.8 && matrix.node-version == '12' }}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.HEAD_REF }}
