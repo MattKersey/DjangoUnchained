@@ -51,7 +51,10 @@ jobs:
           pip install -r requirements.txt
           
       - name: Test + Coverage - Pytest
-        run: pytest -v --cov=./ --cov-report=xml
+        run: |
+          python manage.py makemigrations api
+          python manage.py migrate
+          pytest ./ -v --cov=./ --cov-report=xml
 
       - name: Lint + Bug Finding - Flake8
         uses: TrueBrain/actions-flake8@master
