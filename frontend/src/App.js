@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import PropTypes from 'prop-types'
 import { BrowserRouter, Route, Switch } from 'react-router-dom'
 
 import Home from './Home/Home'
@@ -28,6 +29,12 @@ class App extends Component {
       </BrowserRouter>
     )
   }
+}
+
+App.propTypes = {
+  history: PropTypes.shape({
+    push: PropTypes.func.isRequired
+  }).isRequired
 }
 
 export default App

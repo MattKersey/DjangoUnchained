@@ -68,9 +68,11 @@ jobs:
         run: |
           npm install
           npm test -- --watchAll=false --coverage
-        # [TODO] Add eslint to package.json and run command  
-        # eslint src
-          
+
+      - name: Lint + Bug Finding - ESLint
+        working-directory: ./frontend
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+
       - name: Code Coverage Report
         uses: codecov/codecov-action@v1.0.14
         with:
