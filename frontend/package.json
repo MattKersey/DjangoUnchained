@@ -50,20 +50,7 @@
     "eslint-plugin-import": "^2.22.1",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-react": "^7.21.5"
-  },
-  "standard": {
-    "env": [
-      "jest"
-    ]
-  },
-  "standard.options": {
-    "ignore": [
-      "node_modules/**"
-    ],
-    "plugins": [
-      "html"
-    ],
-    "parser": "babel-eslint"
+    "eslint-plugin-react": "^7.21.5",
+    "postcss-safe-parser": "^5.0.2"
   }
 }
