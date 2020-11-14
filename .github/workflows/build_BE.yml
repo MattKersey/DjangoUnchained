@@ -56,6 +56,11 @@ jobs:
           python manage.py migrate
           pytest ./ -v --cov=./ --cov-report=xml
 
+      - name: Removing Migrations File
+        # Flake8 Action reports errors in annotations
+        run: rm -Rf api/migrations
+        shell: bash
+
       - name: Lint + Bug Finding - Flake8
         uses: TrueBrain/actions-flake8@master
         with:

@@ -2,10 +2,12 @@
 branch = True
 omit = 
     *migrations*
+    *venv*
 
 [report]
 omit = 
     *migrations*
+    *venv*
 
 [html]
 directory = coverage_html_report
