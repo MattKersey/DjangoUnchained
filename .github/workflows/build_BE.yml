@@ -60,6 +60,11 @@ jobs:
           max_line_length: 100
           only_warn: 0
 
+      - name: Lint + Bug Finding - ESLint
+        run: eslint . --ext .js,.jsx,.ts,.tsx
+        with:
+          path: ./frontend
+
       - name: Test + Coverage - Jest
         working-directory: ./frontend
         run: |
