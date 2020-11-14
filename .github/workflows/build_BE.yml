@@ -61,9 +61,8 @@ jobs:
           only_warn: 0
 
       - name: Lint + Bug Finding - ESLint
+        working-directory: ./frontend
         run: eslint . --ext .js,.jsx,.ts,.tsx
-        with:
-          path: ./frontend
 
       - name: Test + Coverage - Jest
         working-directory: ./frontend

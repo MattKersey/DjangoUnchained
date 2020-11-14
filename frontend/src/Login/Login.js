@@ -12,6 +12,7 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
+import PropTypes from 'prop-types'
 
 function Copyright () {
   return (
@@ -113,7 +114,7 @@ class Login extends React.Component {
               </Grid>
               <Grid item>
                 <Link href='#' variant='body2'>
-                  Don't have an account? Sign Up
+                  Don&apos;t have an account? Sign Up
                 </Link>
               </Grid>
             </Grid>
@@ -126,4 +127,9 @@ class Login extends React.Component {
     )
   }
 }
+
+Login.propTypes = {
+  classes: PropTypes.any
+}
+
 export default withStyles(styles, { withTheme: true })(Login)

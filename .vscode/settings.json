@@ -6,7 +6,5 @@
     ],
     "python.linting.enabled": true,
     "python.pythonPath": "backend/venv/bin/python",
-    "jshint.nodePath": "frontend/node_modules/jshint",
-    "javascript.validate.enable": false,
-    "standardFormat.formatOnSave": true
+    "javascript.validate.enable": false
 }
