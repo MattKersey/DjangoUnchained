@@ -95,7 +95,7 @@ jobs:
         shell: bash
 
       - name: Commiting Reports
-        if: ${{ matrix.python-version == 3.8 && matrix.node-version == '12' }}
+        if: ${{ github.event.pull_request.merged == false && matrix.python-version == 3.8 && matrix.node-version == '12' }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
@@ -103,7 +103,7 @@ jobs:
           git commit -m "Adding Reports"
       
       - name: Pushing Reports
-        if: ${{ matrix.python-version == 3.8 && matrix.node-version == '12' }}
+        if: ${{ github.event.pull_request.merged == false && matrix.python-version == 3.8 && matrix.node-version == '12' }}
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
