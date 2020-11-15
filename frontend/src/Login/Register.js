@@ -88,7 +88,6 @@ class Register extends React.Component {
               label='Last Name'
               name='last_name'
               autoComplete='last_name'
-              autoFocus
             />
             <TextField
               variant='outlined'
@@ -99,7 +98,6 @@ class Register extends React.Component {
               label='Email Address'
               name='email'
               autoComplete='email'
-              autoFocus
             />
             <TextField
               variant='outlined'
