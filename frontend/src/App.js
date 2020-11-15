@@ -6,6 +6,7 @@ import Home from './Home/Home'
 import Login from './Login/Login'
 import Error from './shared/Error'
 import NavBar from './shared/Navigation'
+import Register from './Login/Register'
 
 class App extends Component {
   componentDidMount () {
@@ -23,6 +24,7 @@ class App extends Component {
           <Switch>
             <Route path='/dummy' component={Home} exact />
             <Route path='/' component={Login} exact />
+            <Route path='/register' component={Register} exact />
             <Route component={Error} />
           </Switch>
         </div>
