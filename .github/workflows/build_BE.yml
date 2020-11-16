@@ -15,7 +15,7 @@ jobs:
       max-parallel: 4
       matrix:
         python-version: [3.8]
-        node-version: []
+        node-version: ['12']
     services:
       postgres:
         image: postgres:10.8
