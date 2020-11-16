@@ -1,13 +1,9 @@
 import React from 'react'
-import axios from 'axios'
 import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TextField from '@material-ui/core/TextField'
-import FormControlLabel from '@material-ui/core/FormControlLabel'
-import Checkbox from '@material-ui/core/Checkbox'
 import Link from '@material-ui/core/Link'
-import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined'
 import Typography from '@material-ui/core/Typography'
@@ -47,41 +43,19 @@ const styles = theme => ({
   }
 })
 
-class Login extends React.Component {
+class Register extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      username: '',
-      password: '',
-      error: false
+      first_name: '',
+      last_name: '',
+      email: '',
+      password: ''
     }
   }
-
-  // ---------- prototype some error messages when extracting data ----------
-  handleClick (event) {
-    const apiBaseUrl = '#'
-    const payload = {
-      username: this.state.username,
-      password: this.state.password
-    }
-
-    axios.post(apiBaseUrl + 'login', payload)
-      .then(function (response) {
-        console.log(response)
-        if (response.data.code === 204) {
-          console.log('Username password do not match')
-          window.alert('username password do not match')
-        } else {
-          console.log('Username does not exists')
-          window.alert('Username does not exist')
-        }
-      })
-  }
-  // ------------------------ incomplete -------------------------
 
   render () {
-    const error = this.state.error
     const { classes } = this.props
     return (
       <Container component='main' maxWidth='xs'>
@@ -91,9 +65,30 @@ class Login extends React.Component {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component='h1' variant='h5'>
-            Sign into your PyMarket Account
+            Create a new PyMarket Account
           </Typography>
           <form className={classes.form}>
+            <TextField
+              variant='outlined'
+              margin='normal'
+              required
+              fullWidth
+              id='first_name'
+              label='First Name'
+              name='first_name'
+              autoComplete='first_name'
+              autoFocus
+            />
+            <TextField
+              variant='outlined'
+              margin='normal'
+              required
+              fullWidth
+              id='last_name'
+              label='Last Name'
+              name='last_name'
+              autoComplete='last_name'
+            />
             <TextField
               variant='outlined'
               margin='normal'
@@ -103,7 +98,6 @@ class Login extends React.Component {
               label='Email Address'
               name='email'
               autoComplete='email'
-              autoFocus
             />
             <TextField
               variant='outlined'
@@ -116,32 +110,15 @@ class Login extends React.Component {
               id='password'
               autoComplete='current-password'
             />
-            <FormControlLabel
-              control={<Checkbox value='remember' color='primary' />}
-              label={error}
-            />
             <Button
               type='submit'
               fullWidth
               variant='contained'
               color='primary'
               className={classes.submit}
-              onClick={(event) => this.handleClick(event)}
             >
-              Sign In
+              Create Account
             </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href='#' variant='body2'>
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href='/register' variant='body2'>
-                  Don&apos;t have an account? Sign Up
-                </Link>
-              </Grid>
-            </Grid>
           </form>
         </div>
         <Box mt={8}>
@@ -152,8 +129,8 @@ class Login extends React.Component {
   }
 }
 
-Login.propTypes = {
+Register.propTypes = {
   classes: PropTypes.any
 }
 
-export default withStyles(styles, { withTheme: true })(Login)
+export default withStyles(styles, { withTheme: true })(Register)
