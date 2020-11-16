@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios'
 import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -57,6 +58,28 @@ class Login extends React.Component {
     }
   }
 
+  // ---------- prototype some error messages when extracting data ----------
+  handleClick (event) {
+    const apiBaseUrl = '#'
+    const payload = {
+      username: this.state.username,
+      password: this.state.password
+    }
+
+    axios.post(apiBaseUrl + 'login', payload)
+      .then(function (response) {
+        console.log(response)
+        if (response.data.code === 204) {
+          console.log('Username password do not match')
+          window.alert('username password do not match')
+        } else {
+          console.log('Username does not exists')
+          window.alert('Username does not exist')
+        }
+      })
+  }
+  // ------------------------ incomplete -------------------------
+
   render () {
     const error = this.state.error
     const { classes } = this.props
@@ -70,7 +93,7 @@ class Login extends React.Component {
           <Typography component='h1' variant='h5'>
             Sign into your PyMarket Account
           </Typography>
-          <form className={classes.form} noValidate>
+          <form className={classes.form}>
             <TextField
               variant='outlined'
               margin='normal'
@@ -103,6 +126,7 @@ class Login extends React.Component {
               variant='contained'
               color='primary'
               className={classes.submit}
+              onClick={(event) => this.handleClick(event)}
             >
               Sign In
             </Button>
