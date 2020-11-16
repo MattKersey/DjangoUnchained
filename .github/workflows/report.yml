@@ -14,7 +14,9 @@ jobs:
         node-version: ['12']
 
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
+        with:
+          path: main
       
       - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v1
@@ -49,11 +51,12 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add ../BE_*_report.*
-          git add ../FE_*_report.*
+          git add BE_*_report.*
+          git add FE_*_report.*
           git commit -m "Adding Reports : Post Merge"
       
       - name: Pushing Reports
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
