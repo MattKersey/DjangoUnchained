@@ -1,9 +1,18 @@
+import { render, screen } from '@testing-library/react'
 import React from 'react'
-import { render } from '@testing-library/react'
 import App from './App'
-import '@testing-library/jest-dom/extend-expect'
+import Login from './Login/Login'
 
-test('renders learn react link', () => {
-  render(<App />)
-  expect(1).toBe(1)
+test('Get Login Screen by default', () => {
+  render(
+    <App />
+  )
+  // verify page content for expected route
+  // often you'd use a data-testid or role query, but this is also possible
+  expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
+})
+
+test('Test Login Component', () => {
+  render(<Login />)
+  expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
 })
