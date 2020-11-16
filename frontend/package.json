@@ -18,6 +18,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
     "react-test-renderer": "^17.0.1",
+    "standard": "^16.0.2",
     "standard-reporter": "^1.0.5",
     "web-vitals": "^0.2.4"
   },
@@ -31,6 +32,11 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ]
+  },
+  "standard": {
+    "ignore": [
+      "src/App.test.js"
     ]
   },
   "browserslist": {
