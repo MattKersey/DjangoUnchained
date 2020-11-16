@@ -90,8 +90,10 @@ jobs:
       - name: Creating Lint + Bug Reports
         run: |
           rm -f ../*_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../lint_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../bug_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../BE_lint_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../BE_bug_report.txt
+          npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../FE_bug_report.html
+          npx standard | npx standard-reporter --json > ../FE_lint_report.json
         shell: bash
 
       - name: Commiting Reports
@@ -100,6 +102,8 @@ jobs:
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add ../*_report.txt
+          git add ../FE_bug_report.html
+          git add ../FE_lint_report.json
           git commit -m "Adding Reports"
       
       - name: Pushing Reports
