@@ -1,13 +1,9 @@
-name: CI
+name: Build Workflow
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
-defaults:
-  run:
-    working-directory: ./backend
+    types: [opened, synchronize, reopened]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -30,10 +26,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@master
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
       
       - name: Set up Python ${{matrix.python-version}}
         uses: actions/setup-python@v1
@@ -46,18 +38,20 @@ jobs:
           node-version: ${{matrix.node-version}}
 
       - name: Backend - Install Dependencies
+        working-directory: ./backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           
       - name: Test + Coverage - Pytest
+        working-directory: ./backend
         run: |
           python manage.py makemigrations api
           python manage.py migrate
           pytest ./ -v --cov=./ --cov-report=xml
 
       - name: Removing Migrations File
-        # Flake8 Action reports errors in annotations
+        working-directory: ./backend
         run: rm -Rf api/migrations
         shell: bash
 
@@ -86,35 +80,3 @@ jobs:
           files: ./backend/coverage.xml,./frontend/coverage/clover.xml,./frontend/coverage/lcov.info
           fail_ci_if_error: false
           verbose: true
-
-      - name: Creating Lint + Bug Reports - Back-End
-        run: |
-          rm -f ../*_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../BE_lint_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../BE_bug_report.txt
-        shell: bash
-     
-      - name: Creating Lint + Bug Reports - Front-End
-        working-directory: ./frontend
-        run: |
-          rm -f ../FE_bug_report.html
-          rm -f ../FE_lint_report.json
-          npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../FE_bug_report.html
-          npx standard | npx standard-reporter --json > ../FE_lint_report.json
-        
-      - name: Commiting Reports
-        if: ${{ github.event.pull_request.merged == false && matrix.python-version == 3.8 && matrix.node-version == '12' }}
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add ../*_report.txt
-          git add ../FE_bug_report.html
-          git add ../FE_lint_report.json
-          git commit -m "Adding Reports"
-      
-      - name: Pushing Reports
-        if: ${{ github.event.pull_request.merged == false && matrix.python-version == 3.8 && matrix.node-version == '12' }}
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: ${{ github.HEAD_REF }}
