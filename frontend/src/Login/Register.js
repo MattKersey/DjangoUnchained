@@ -67,7 +67,7 @@ class Register extends React.Component {
           <Typography component='h1' variant='h5'>
             Create a new PyMarket Account
           </Typography>
-          <form className={classes.form} noValidate>
+          <form className={classes.form}>
             <TextField
               variant='outlined'
               margin='normal'
