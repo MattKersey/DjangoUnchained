@@ -9,6 +9,7 @@
     "@testing-library/react": "^11.1.2",
     "@testing-library/user-event": "^12.2.2",
     "axios": "^0.21.0",
+    "eslint-html-reporter": "^0.7.4",
     "material-ui-icons": "^1.0.0-beta.36",
     "node-forge": "^0.10.0",
     "prop-types": "^15.7.2",
@@ -17,6 +18,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "4.0.0",
     "react-test-renderer": "^17.0.1",
+    "standard": "^16.0.2",
+    "standard-reporter": "^1.0.5",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
@@ -29,6 +32,11 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ]
+  },
+  "standard": {
+    "ignore": [
+      "src/App.test.js"
     ]
   },
   "browserslist": {

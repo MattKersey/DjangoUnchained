@@ -14,8 +14,8 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.6, 3.7, 3.8]
-        node-version: ['10', '11', '12' ]
+        python-version: [3.8]
+        node-version: ['12']
     services:
       postgres:
         image: postgres:10.8
@@ -87,19 +87,29 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
-      - name: Creating Lint + Bug Reports
+      - name: Creating Lint + Bug Reports - Back-End
         run: |
           rm -f ../*_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../lint_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../bug_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../BE_lint_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../BE_bug_report.txt
         shell: bash
-
+     
+      - name: Creating Lint + Bug Reports - Front-End
+        working-directory: ./frontend
+        run: |
+          rm -f ../FE_bug_report.html
+          rm -f ../FE_lint_report.json
+          npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../FE_bug_report.html
+          npx standard | npx standard-reporter --json > ../FE_lint_report.json
+        
       - name: Commiting Reports
         if: ${{ github.event.pull_request.merged == false && matrix.python-version == 3.8 && matrix.node-version == '12' }}
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
           git add ../*_report.txt
+          git add ../FE_bug_report.html
+          git add ../FE_lint_report.json
           git commit -m "Adding Reports"
       
       - name: Pushing Reports
