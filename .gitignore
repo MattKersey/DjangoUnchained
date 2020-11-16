@@ -4,6 +4,7 @@ __pycache__
 .tox
 coverage_html_report
 .pytest_cache
+items
 
 # Files
 db.sqlite3

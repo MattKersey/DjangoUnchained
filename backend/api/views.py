@@ -8,7 +8,7 @@ from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHa
 
 class UserViewSet(viewsets.ViewSet):
     """
-    API endpoint that allows users to be viewed or created.
+    API endpoint that allows users to be viewed.
     """
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasReadWriteScope]
@@ -18,10 +18,7 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def create(self, request):
-        data = request.data
-        User.objects.create_staffuser(email=data["email"], password=data["password"])
-        return Response(request.data)
+    # TODO: Add endpoint for adding users to stores and setting the staff flag to true
 
 
 class StoreViewSet(viewsets.ViewSet):
@@ -35,6 +32,17 @@ class StoreViewSet(viewsets.ViewSet):
         queryset = Store.objects.all()
         serializer = StoreSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class RegisterUserViewSet(viewsets.ViewSet):
+    """
+    API endpoint that allows a basic user to be registered.
+    """
+
+    def create(self, request):
+        data = request.data
+        User.objects.create_user(email=data["email"], password=data["password"])
+        return Response(request.data)
 
 
 class PingViewSet(viewsets.ViewSet):
