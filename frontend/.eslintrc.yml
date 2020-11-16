@@ -11,4 +11,5 @@ parserOptions:
   sourceType: module
 plugins:
   - react
+ignorePatterns: ["App.test.js"]
 rules: {}
