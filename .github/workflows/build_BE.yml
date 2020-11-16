@@ -44,7 +44,6 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{matrix.node-version}}
-        run: npm install
 
       - name: Backend - Install Dependencies
         run: |
@@ -100,7 +99,8 @@ jobs:
         run: |
           rm -f ../FE_bug_report.html
           rm -f ../FE_lint_report.json
-          npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../FE_bug_report.html
+          npm install
+          npx eslint . -f ./node_modules/eslint-html-reporter/reporter.js -o ../FE_bug_report.html
           npx standard | npx standard-reporter --json > ../FE_lint_report.json
         
       - name: Commiting Reports
