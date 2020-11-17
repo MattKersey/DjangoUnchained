@@ -11,6 +11,8 @@ import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
+import { withRouter } from "react-router-dom";
+import Login from './Login'
 
 function Copyright() {
   return (
@@ -59,12 +61,13 @@ class Register extends React.Component {
   handleClick(event) {
     const apiBaseUrl = 'http://127.0.0.1:8000/api'
     const payload = {
-      username: this.state.email,
+      email: this.state.email,
       password: this.state.password
     }
     axios.post(apiBaseUrl + '/register', payload)
       .then(function (response) {
-        console.log(response)
+        console.log("registration successful")
+        this.context.history.push('/')
       })
       .catch(function (error) {
         console.log(error)
@@ -150,4 +153,4 @@ Register.propTypes = {
   classes: PropTypes.any
 }
 
-export default withStyles(styles, { withTheme: true })(Register)
+export default withRouter(withStyles(styles, { withTheme: true })(Register))
