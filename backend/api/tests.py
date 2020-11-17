@@ -7,6 +7,7 @@ from .models import User, Category, Store, Role, Association
 
 # from .modesl import Item
 import datetime
+import os
 
 from oauth2_provider.models import get_application_model, get_access_token_model
 Application = get_application_model()
@@ -125,9 +126,10 @@ class Test_Association_Model(TestCase):
 
 class Test_OAuth(APITestCase):
     def setUp(self):
-        # oauth2_settings._SCOPES = ["read", "write"
-        CLIENT_ID = 'abselskfjlskdfj'
-        CLIENT_SECRET = 'laksdfjlaksjdflksjdflksdjf'
+        CLIENT_ID = 'alksdjflksjdflkasjfdhg'
+        CLIENT_SECRET = 'lejtoiejgsklnvlkjsdfgkljshfkjsdflksjfaslketbreljnkjsdfnkjsa'
+        os.environ['CLIENT_ID'] = CLIENT_ID
+        os.environ['CLIENT_SECRET'] = CLIENT_SECRET
         self.user = User.objects.create_superuser(
             email="superuserOAuth@email.com", password="superuser"
         )
@@ -137,7 +139,8 @@ class Test_OAuth(APITestCase):
             authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
             client_type=Application.CLIENT_CONFIDENTIAL,
             name='OAuth-Test-API',
-            redirect_uris='http://127.0.0.1:8000/authredirect/'
+            redirect_uris='http://127.0.0.1:8000/authredirect/',
+            skip_authorization=True
         )
         self.application.save()
         self.token = AccessToken.objects.create(
@@ -167,7 +170,19 @@ class Test_OAuth(APITestCase):
             r.content
         )
 
+    def test_OAuth_redirect(self):
+        self.client.force_login(self.user)
+        url = 'http://127.0.0.1:8000/o/authorize/'
+        url += '?response_type=code'
+        url += '&client_id=' + self.application.client_id
+        url += '&redirect_uri=http://127.0.0.1:8000/authredirect/'
+        r = self.client.get(url)
+        self.assertRedirects(r, 'http://127.0.0.1:8000/o/authorize/', status_code=302, target_status_code=200, msg_prefix='', fetch_redirect_response=True)
+        self.assertEqual("hello world!", r.content)
+        pass
+
     def tearDown(self):
+        self.user.delete()
         self.application.delete()
         self.token.delete()
         pass
