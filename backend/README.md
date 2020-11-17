@@ -50,3 +50,38 @@ You should receive back an access token, a refresh token, and information about 
 
 **8. Use the token to access endpoints**
 Submit requests to the server with a header containing `Authorization: Bearer <Your Token Here>`.
+
+### Alternative Flow for OAuth (Simpler)
+
+**1. Setup Django**
+Follow steps 1-4 above
+
+**2. Setup OAuth application**
+Go to /o/applications/register/ to setup the application. The options are as above with one change (Redirect uris): 
+
+* **Name:** PyMarket-API
+* **Client id:** Default (Note this value)
+* **Client secret:** Default (Note this value)
+* **Client type:** Confidential
+* **Authoration grant type:** Authorization Code
+* **Redirect uris:** http://127.0.0.1:8000/authredirect/
+
+**3. Create a .env file and add the client info**
+The .env file should be located in backend/backend (same folder as wsgi.py). You might have to restart the server for it to next step to work. The file should contain the following:
+
+```plaintext
+CLIENT_ID=<Your client id>
+CLIENT_SECRET=<Your client secret>
+```
+
+**4. Access the authorization endpoint**
+Submit a GET request to /o/authorize/ with the following parameters:
+
+* **response_type:** code
+* **client_id:** client id you noted earlier
+* **redirect_uri:** http://127.0.0.1:8000/authredirect/
+
+This should return the token as well as all necessary information about it.
+
+**5. Use the token to access endpoints**
+Submit requests to the server with a header containing `Authorization: Bearer <Your Token Here>`.
