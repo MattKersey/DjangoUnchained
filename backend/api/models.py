@@ -18,6 +18,9 @@ class Item(models.Model):
     )
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 
 class Category(models.TextChoices):
     FOOD = "Food"
@@ -32,6 +35,9 @@ class Store(models.Model):
         choices=Category.choices, max_length=10, default=Category.OTHER
     )
     items = models.ManyToManyField(Item)
+
+    def __str__(self):
+        return self.name
 
 
 class UserManager(BaseUserManager):
@@ -138,3 +144,6 @@ class Association(models.Model):
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     membership = models.DateField(auto_now=True)
     role = models.CharField(choices=Role.choices, max_length=10, default=Role.EMPLOYEE)
+
+    def __str__(self):
+        return f"[{self.role}] {self.user} --> {self.store.name}"
