@@ -29,7 +29,6 @@ def clean():
         for fileName in files:
             if fileName in deleteFiles:
                 os.remove(f"{root}/{fileName}")
-    subprocess.run(args=["black", "*/*.py"], cwd=BACKEND_DIR)
     print("Finish: Cleaning Project")
 
 
@@ -47,7 +46,7 @@ def install_frontend():
 
 
 @task(install_backend, install_frontend)
-def install_eveything(only_backend=False, only_frontend=False):
+def install_eveything():
     """Installs Dependencies for Backend + Frontend"""
     pass
 
@@ -102,6 +101,7 @@ def setup_backend():
 @task(install_frontend)
 def setup_frontend():
     """Installs Dependencies"""
+    # [TODO] Add more frontend tasks if necessary
     pass
 
 
