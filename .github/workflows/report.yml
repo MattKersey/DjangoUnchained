@@ -49,8 +49,8 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add BE_*_report.*
-          git add FE_*_report.*
+          git add ./reports/backend/*_report.*
+          git add ./reports/frontend/*_report.*
           git commit -m "Adding Reports : Post Merge"
       
       - name: Pushing Reports
