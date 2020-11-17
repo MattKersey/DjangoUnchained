@@ -54,6 +54,3 @@ class PingViewSet(viewsets.ViewSet):
 
     def list(self, request):
         return Response(data={"ping": "pong"})
-
-    def create(self, request):
-        return Response(request.data)
