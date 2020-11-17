@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios'
 import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -11,7 +12,7 @@ import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
 
-function Copyright () {
+function Copyright() {
   return (
     <Typography variant='body2' color='textSecondary' align='center'>
       {'Copyright © '}
@@ -44,7 +45,7 @@ const styles = theme => ({
 })
 
 class Register extends React.Component {
-  constructor (props) {
+  constructor(props) {
     super(props)
 
     this.state = {
@@ -55,7 +56,22 @@ class Register extends React.Component {
     }
   }
 
-  render () {
+  handleClick(event) {
+    const apiBaseUrl = 'http://localhost:8000/api'
+    const payload = {
+      username: this.state.email,
+      password: this.state.password
+    }
+    axios.post(apiBaseUrl + '/register', payload)
+      .then(function (response) {
+        console.log(response)
+      })
+      .catch(function (error) {
+        console.log(error)
+      })
+  }
+
+  render() {
     const { classes } = this.props
     return (
       <Container component='main' maxWidth='xs'>
@@ -116,6 +132,7 @@ class Register extends React.Component {
               variant='contained'
               color='primary'
               className={classes.submit}
+              onClick={(event) => this.handleClick(event)}
             >
               Create Account
             </Button>
