@@ -39,9 +39,12 @@ class RegisterUserViewSet(viewsets.ViewSet):
     API endpoint that allows a basic user to be registered.
     """
 
+    authentication_classes = []
+    permission_classes = []
+
     def create(self, request):
         data = request.data
-        User.objects.create_user(email=data["email"], password=data["password"])
+        User.objects.create_staffuser(email=data["email"], password=data["password"])
         return Response(request.data)
 
 
