@@ -1,0 +1,62 @@
+[
+    {
+        "model": "api.item",
+        "pk": 1,
+        "fields": {
+            "image": "items/JMan.jpeg",
+            "name": "Juan",
+            "stock": 10,
+            "price": "0.10",
+            "description": "one doggo"
+        }
+    },
+    {
+        "model": "api.item",
+        "pk": 2,
+        "fields": {
+            "image": "items/carlos_id.jpg",
+            "name": "One Man",
+            "stock": 1,
+            "price": "10.00",
+            "description": "One Man"
+        }
+    },
+    {
+        "model": "api.store",
+        "pk": 1,
+        "fields": {
+            "address": "123 Happy Lane",
+            "name": "Store",
+            "category": "Food",
+            "items": [
+                1,
+                2
+            ]
+        }
+    },
+    {
+        "model": "api.user",
+        "pk": 1,
+        "fields": {
+            "password": "pbkdf2_sha256$216000$yUZbw3rXBiWV$7V/Ic79aVzMhQwP0ZN2tA4HGHoBfIQ1g8k0KqBqZhM8=",
+            "last_login": "2020-11-17T20:01:33.857Z",
+            "is_superuser": true,
+            "email": "cee2130@columbia.edu",
+            "active": true,
+            "staff": true,
+            "admin": true,
+            "groups": [],
+            "user_permissions": []
+        }
+    },
+    {
+        "model": "api.association",
+        "pk": 1,
+        "fields": {
+            "user": 1,
+            "store": 1,
+            "membership": "2020-11-17",
+            "role": "Manager"
+        }
+    }
+]

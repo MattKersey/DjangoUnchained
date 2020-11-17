@@ -1,0 +1,212 @@
+[
+   {
+      "model": "api.association",
+      "pk": 1,
+      "fields": {
+         "user": 1,
+         "store": 1,
+         "membership": "2020-11-15",
+         "role": "Vendor"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 2,
+      "fields": {
+         "user": 1,
+         "store": 2,
+         "membership": "2020-11-15",
+         "role": "Employee"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 3,
+      "fields": {
+         "user": 2,
+         "store": 2,
+         "membership": "2020-11-15",
+         "role": "Vendor"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 4,
+      "fields": {
+         "user": 2,
+         "store": 3,
+         "membership": "2020-11-15",
+         "role": "Employee"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 5,
+      "fields": {
+         "user": 3,
+         "store": 3,
+         "membership": "2020-11-15",
+         "role": "Vendor"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 6,
+      "fields": {
+         "user": 3,
+         "store": 4,
+         "membership": "2020-11-15",
+         "role": "Employee"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 7,
+      "fields": {
+         "user": 4,
+         "store": 4,
+         "membership": "2020-11-15",
+         "role": "Vendor"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 8,
+      "fields": {
+         "user": 4,
+         "store": 5,
+         "membership": "2020-11-15",
+         "role": "Employee"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 9,
+      "fields": {
+         "user": 5,
+         "store": 5,
+         "membership": "2020-11-15",
+         "role": "Vendor"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 10,
+      "fields": {
+         "user": 5,
+         "store": 6,
+         "membership": "2020-11-15",
+         "role": "Employee"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 11,
+      "fields": {
+         "user": 6,
+         "store": 6,
+         "membership": "2020-11-15",
+         "role": "Vendor"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 12,
+      "fields": {
+         "user": 6,
+         "store": 7,
+         "membership": "2020-11-15",
+         "role": "Employee"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 13,
+      "fields": {
+         "user": 6,
+         "store": 8,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 14,
+      "fields": {
+         "user": 7,
+         "store": 1,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 15,
+      "fields": {
+         "user": 7,
+         "store": 5,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 16,
+      "fields": {
+         "user": 8,
+         "store": 2,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 17,
+      "fields": {
+         "user": 8,
+         "store": 6,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 18,
+      "fields": {
+         "user": 9,
+         "store": 3,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 19,
+      "fields": {
+         "user": 9,
+         "store": 7,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 20,
+      "fields": {
+         "user": 10,
+         "store": 4,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   },
+   {
+      "model": "api.association",
+      "pk": 21,
+      "fields": {
+         "user": 10,
+         "store": 8,
+         "membership": "2020-11-15",
+         "role": "Manager"
+      }
+   }
+]
