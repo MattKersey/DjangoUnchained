@@ -67,7 +67,7 @@ Go to /o/applications/register/ to setup the application. The options are as abo
 * **Redirect uris:** http://127.0.0.1:8000/authredirect/
 
 **3. Create a .env file and add the client info**
-The .env file should be located in backend/backend (same folder as wsgi.py). It should contain the following:
+The .env file should be located in backend/backend (same folder as wsgi.py). You might have to restart the server for it to next step to work. The file should contain the following:
 
 ```plaintext
 CLIENT_ID=<Your client id>
