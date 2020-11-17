@@ -32,8 +32,8 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           rm -f ../reports/backend/*_report.*
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../reports/backend/Bug_report.txt
-          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../reports/backend/Lint_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../reports/backend/GOOD_Bug_report.txt
+          flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../reports/backend/GOOD_Lint_report.txt
         shell: bash
           
       - name: Frontend - Creating Lint + Bug Reports
@@ -41,8 +41,8 @@ jobs:
         run: |
           npm install
           rm -f ../reports/frontend/*_report.*
-          npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../reports/frontend/Bug_report.html
-          npx standard | npx standard-reporter --json > ../reports/frontend/Lint_report.json
+          npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../reports/frontend/GOOD_Bug_report.html
+          npx standard | npx standard-reporter --json > ../reports/frontend/GOOD_Lint_report.json
         shell: bash
 
       - name: Commiting Reports
