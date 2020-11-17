@@ -9,13 +9,6 @@ import NavBar from './shared/Navigation'
 import Register from './Login/Register'
 
 class App extends Component {
-  componentDidMount () {
-    const isAuthenticated = false
-    if (isAuthenticated) {
-      this.props.history.push('/login')
-    }
-  }
-
   render () {
     return (
       <BrowserRouter>
