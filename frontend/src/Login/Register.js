@@ -57,7 +57,7 @@ class Register extends React.Component {
   }
 
   handleClick(event) {
-    const apiBaseUrl = 'http://localhost:8000/api'
+    const apiBaseUrl = 'http://127.0.0.1:8000/api'
     const payload = {
       username: this.state.email,
       password: this.state.password
