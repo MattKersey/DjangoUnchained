@@ -10,7 +10,7 @@ To use OAuth, follow these steps:
 Activate the virtual environment and run `pip install -r requirements.txt`
 
 **2. Run migrations for Django normally**
-`python manage.py make migrations` and `python manage.py migrate --run-syncdb`
+`python manage.py makemigrations` and `python manage.py migrate --run-syncdb`
 
 **3. Create a superuser**
 `python manage.py createsuperuser`
