@@ -12,3 +12,4 @@ db.sqlite3
 .coverage
 coverage.xml
 .DS_Store
+.env
