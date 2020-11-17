@@ -85,7 +85,7 @@ def add_data_to_db():
     """Creates Superuser and Adds Fixtures to DB"""
     print("Start: Add Data to DB")
     command = "from django.contrib.auth import get_user_model; User = get_user_model(); "
-    command += f"User.objects.create_user('{SUPER_EMAIL}', '{SUPER_PASSWORD}'); "
+    command += f"User.objects.create_superuser('{SUPER_EMAIL}', '{SUPER_PASSWORD}'); "
     print(">>> Adding superuser to DB.")
     subprocess.call(f"echo \"{command}\" | python3 manage.py shell", shell=True, cwd=BACKEND_DIR)
     print("Finish: Add Data to DB")
