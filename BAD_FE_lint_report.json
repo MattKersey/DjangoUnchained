@@ -1,0 +1,42 @@
+{
+  "files": [
+    {
+      "type": "file",
+      "file": "/home/jyk2149/Linux Fall2020/AdvancedSWE/DjangoUnchained/frontend/src/Login/Login.js",
+      "errors": [
+        {
+          "type": "error",
+          "file": "/home/jyk2149/Linux Fall2020/AdvancedSWE/DjangoUnchained/frontend/src/Login/Login.js",
+          "line": "22",
+          "column": "18",
+          "message": "Multiple spaces found before '='.",
+          "rule": ""
+        },
+        {
+          "type": "error",
+          "file": "/home/jyk2149/Linux Fall2020/AdvancedSWE/DjangoUnchained/frontend/src/Login/Login.js",
+          "line": "22",
+          "column": "20",
+          "message": "There should be no space before '='",
+          "rule": ""
+        },
+        {
+          "type": "error",
+          "file": "/home/jyk2149/Linux Fall2020/AdvancedSWE/DjangoUnchained/frontend/src/Login/Login.js",
+          "line": "22",
+          "column": "20",
+          "message": "There should be no space after '='",
+          "rule": ""
+        },
+        {
+          "type": "error",
+          "file": "/home/jyk2149/Linux Fall2020/AdvancedSWE/DjangoUnchained/frontend/src/Login/Login.js",
+          "line": "22",
+          "column": "21",
+          "message": "Multiple spaces found before ''inherit''.",
+          "rule": ""
+        }
+      ]
+    }
+  ]
+}
