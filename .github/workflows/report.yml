@@ -36,6 +36,8 @@ jobs:
         shell: bash
       
       - name: Backend - Creating Lint + Bug Reports
+        working-directory: ./backend
+        run: |
           rm -f ../reports/backend/*_report.*
           echo "Finished Deleting Backend Reports"
           flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../reports/backend/GOOD_Bug_report.txt
@@ -49,6 +51,8 @@ jobs:
           npm install
 
       - name: Frontend - Creating Lint + Bug Reports
+        working-directory: ./frontend
+        run: |
           rm -f ../reports/frontend/*_report.*
           echo "Finished Deleting Backend Reports"
           npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../reports/frontend/GOOD_Bug_report.html
@@ -66,6 +70,7 @@ jobs:
           echo "Finished Adding Reports"
           git commit -m "Adding Reports : Post Merge"
           echo "Finished Commiting Reports"
+        shell: bash
       
       - name: Pushing Reports
         uses: ad-m/github-push-action@master
