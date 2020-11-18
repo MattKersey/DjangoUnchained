@@ -17,9 +17,9 @@ class StoreSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class AssociationSerializer(serializers.ModelSerializer):
-    store_address = serializers.ReadOnlyField(source='store.address')
-    store_name = serializers.ReadOnlyField(source='store.name')
-    store_category = serializers.ReadOnlyField(source='store.category')
+    store_address = serializers.ReadOnlyField(source="store.address")
+    store_name = serializers.ReadOnlyField(source="store.name")
+    store_category = serializers.ReadOnlyField(source="store.category")
 
     class Meta:
         model = Association

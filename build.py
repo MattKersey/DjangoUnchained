@@ -137,14 +137,14 @@ def start_frontend():
     subprocess.run(args=["npm", "start"], cwd=FRONTEND_DIR)
 
 
-@task()
-def setup_everything(setup_backend, setup_frontend):
+@task(setup_backend, setup_frontend)
+def setup_everything():
     """Installs all Dependencies and Setups the Backend"""
     pass
 
 
-@task()
-def test_everything(test_backend, test_frontend):
+@task(test_backend, test_frontend)
+def test_everything():
     """Runs Tests on Backend + Frontend"""
     pass
 
