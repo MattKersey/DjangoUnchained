@@ -1,10 +1,8 @@
 from django.contrib import admin
 from django.urls import include, re_path
+from django.conf.urls.static import static
+from django.conf import settings
 from .views import OAuthCallbackViewSet
-# from api import views
-# from api import views
-
-# from django.conf.urls import include
 
 
 urlpatterns = [
@@ -13,3 +11,7 @@ urlpatterns = [
     re_path(r'^authredirect/', OAuthCallbackViewSet.as_view({'get': 'list'})),
     re_path(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
 ]
+
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

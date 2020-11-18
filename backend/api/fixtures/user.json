@@ -1,0 +1,163 @@
+[
+   {
+      "model": "api.user",
+      "pk": 1,
+      "fields": {
+         "email": "user1@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": false,
+         "admin": false,
+         "is_superuser": false,
+         "stores": [
+            1,
+            2
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 2,
+      "fields": {
+         "email": "user2@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": false,
+         "admin": false,
+         "is_superuser": false,
+         "stores": [
+            2,
+            3
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 3,
+      "fields": {
+         "email": "user3@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": false,
+         "admin": false,
+         "is_superuser": false,
+         "stores": [
+            3,
+            4
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 4,
+      "fields": {
+         "email": "user4@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": false,
+         "admin": false,
+         "is_superuser": false,
+         "stores": [
+            4,
+            5
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 5,
+      "fields": {
+         "email": "user5@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": false,
+         "admin": false,
+         "is_superuser": false,
+         "stores": [
+            5,
+            6
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 6,
+      "fields": {
+         "email": "user6@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": false,
+         "admin": false,
+         "is_superuser": false,
+         "stores": [
+            6,
+            7,
+            8
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 7,
+      "fields": {
+         "email": "cee2130@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": true,
+         "admin": true,
+         "is_superuser": true,
+         "stores": [
+            1,
+            5
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 8,
+      "fields": {
+         "email": "jyk2149@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": true,
+         "admin": true,
+         "is_superuser": true,
+         "stores": [
+            2,
+            6
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 9,
+      "fields": {
+         "email": "mlk2194@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": true,
+         "admin": true,
+         "is_superuser": true,
+         "stores": [
+            3,
+            7
+         ]
+      }
+   },
+   {
+      "model": "api.user",
+      "pk": 10,
+      "fields": {
+         "email": "yl4629@columbia.edu",
+         "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
+         "active": true,
+         "staff": true,
+         "admin": true,
+         "is_superuser": true,
+         "stores": [
+            4,
+            8
+         ]
+      }
+   }
+]

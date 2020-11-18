@@ -1,0 +1,110 @@
+[
+   {
+      "model": "api.store",
+      "pk": 1,
+      "fields": {
+         "address": "123 Food Lane",
+         "name": "Food 1 Store",
+         "category": "Food",
+         "items": [
+            1,
+            2
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 2,
+      "fields": {
+         "address": "123 Food Lane",
+         "name": "Food 2 Store",
+         "category": "Food",
+         "items": [
+            3,
+            4
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 3,
+      "fields": {
+         "address": "123 Food Lane",
+         "name": "Food 3 Store",
+         "category": "Food",
+         "items": [
+            5
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 4,
+      "fields": {
+         "address": "123 Clothing Lane",
+         "name": "Clothing 1 Store",
+         "category": "Clothing",
+         "items": [
+            6,
+            7
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 5,
+      "fields": {
+         "address": "123 Clothing Lane",
+         "name": "Clothing 2 Store",
+         "category": "Clothing",
+         "items": [
+            8,
+            9
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 6,
+      "fields": {
+         "address": "123 Clothing Lane",
+         "name": "Clothing 3 Store",
+         "category": "Clothing",
+         "items": [
+            10
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 7,
+      "fields": {
+         "address": "123 Other Lane",
+         "name": "Other 1 Store",
+         "category": "Other",
+         "items": [
+            11,
+            12,
+            13,
+            14
+         ]
+      }
+   },
+   {
+      "model": "api.store",
+      "pk": 8,
+      "fields": {
+         "address": "123 Other Lane",
+         "name": "Other 2 Store",
+         "category": "Other",
+         "items": [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+         ]
+      }
+   }
+]

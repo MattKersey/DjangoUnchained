@@ -35,7 +35,9 @@ def clean():
 @task()
 def install_backend():
     """Installs Backend Dependencies"""
-    subprocess.run(args=["python3", "-m", "install", "--upgrade", "pip"], cwd=BACKEND_DIR)
+    subprocess.run(
+        args=["python3", "-m", "install", "--upgrade", "pip"], cwd=BACKEND_DIR
+    )
     subprocess.run(args=["pip3", "install", "-r", "requirements.txt"], cwd=BACKEND_DIR)
 
 
@@ -56,7 +58,9 @@ def create_db_tables():
     """Builds the Django Backend for Testing"""
     print("Start: Building Backend")
     print(">>> Running Make Migrations")
-    subprocess.run(args=["python3", "manage.py", "makemigrations", "api"], cwd=BACKEND_DIR)
+    subprocess.run(
+        args=["python3", "manage.py", "makemigrations", "api"], cwd=BACKEND_DIR
+    )
     print(">>> Running Migrate")
     subprocess.run(args=["python3", "manage.py", "migrate"], cwd=BACKEND_DIR)
     print("Finish: Building Backend")
@@ -83,13 +87,14 @@ def reset_db():
 @task()
 def add_data_to_db():
     """Creates Superuser and Adds Fixtures to DB"""
-    print("Start: Add Data to DB")
-    command = "from django.contrib.auth import get_user_model; User = get_user_model(); "
-    command += f"User.objects.create_superuser('{SUPER_EMAIL}', '{SUPER_PASSWORD}'); "
-    print(">>> Adding superuser to DB.")
-    subprocess.call(f"echo \"{command}\" | python3 manage.py shell", shell=True, cwd=BACKEND_DIR)
+    print(">>> Uploading Fixtures to DB.")
+    models = ["item", "store", "user", "association"]  # the order matters
+    for model in models:
+        subprocess.run(
+            args=["python3", "manage.py", "loaddata", f"api/fixtures/{model}.json"],
+            cwd=BACKEND_DIR,
+        )
     print("Finish: Add Data to DB")
-    # [TODO]: Add fixtures command when fixtures are created
 
 
 @task(install_backend, reset_db, create_db_tables, add_data_to_db)
@@ -108,26 +113,28 @@ def setup_frontend():
 @task()
 def test_backend():
     """Runs Backend Tests and Coverage via Tox"""
-    subprocess.run(args=['coverage', 'erase'], cwd=BACKEND_DIR)
-    subprocess.run(args=['coverage', 'run', '-m', 'tox'], cwd=BACKEND_DIR)
+    subprocess.run(args=["coverage", "erase"], cwd=BACKEND_DIR)
+    subprocess.run(args=["coverage", "run", "-m", "tox"], cwd=BACKEND_DIR)
 
 
 @task()
 def test_frontend():
     """Runs Frontend Tests and Coverage via Jest"""
-    subprocess.run(args=["npm", "test", "--", "--watchAll=false", "--coverage"], cwd=FRONTEND_DIR)
+    subprocess.run(
+        args=["npm", "test", "--", "--watchAll=false", "--coverage"], cwd=FRONTEND_DIR
+    )
 
 
 @task()
 def start_backend():
     """Runs Backend App"""
-    subprocess.run(args=['python3', 'manage.py', 'runserver', '8000'], cwd=BACKEND_DIR)
+    subprocess.run(args=["python3", "manage.py", "runserver", "8000"], cwd=BACKEND_DIR)
 
 
 @task()
 def start_frontend():
     """Runs Frontend App"""
-    subprocess.run(args=['npm', 'start'], cwd=FRONTEND_DIR)
+    subprocess.run(args=["npm", "start"], cwd=FRONTEND_DIR)
 
 
 @task()
