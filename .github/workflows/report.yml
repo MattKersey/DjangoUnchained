@@ -26,32 +26,51 @@ jobs:
         with:
           node-version: ${{matrix.node-version}}
 
-      - name: Backend - Creating Lint + Bug Reports
+      - name: Backend - Installing Requirements
         working-directory: ./backend
         run: |
           python -m pip install --upgrade pip
+          echo "Finished Upgrading PIP"
           pip install -r requirements.txt
+          echo "Finished Installing Requirements"
+        shell: bash
+      
+      - name: Backend - Creating Lint + Bug Reports
+        working-directory: ./backend
+        run: |
           rm -f ../reports/backend/*_report.*
+          echo "Finished Deleting Backend Reports"
           flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=W --output-file=../reports/backend/GOOD_Bug_report.txt
           flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../reports/backend/GOOD_Lint_report.txt
+          echo "Finished Creating Backend Reports"
         shell: bash
           
-      - name: Frontend - Creating Lint + Bug Reports
+      - name: Frontend - Installing Requirements
         working-directory: ./frontend
         run: |
           npm install
+
+      - name: Frontend - Creating Lint + Bug Reports
+        working-directory: ./frontend
+        run: |
           rm -f ../reports/frontend/*_report.*
+          echo "Finished Deleting Backend Reports"
           npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../reports/frontend/GOOD_Bug_report.html
           npx standard | npx standard-reporter --json > ../reports/frontend/GOOD_Lint_report.json
+          echo "Finished Creating Backend Reports"
         shell: bash
 
       - name: Commiting Reports
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          echo "Finished Configuring Git"
           git add ./reports/backend/*_report.*
           git add ./reports/frontend/*_report.*
+          echo "Finished Adding Reports"
           git commit -m "Adding Reports : Post Merge"
+          echo "Finished Commiting Reports"
+        shell: bash
       
       - name: Pushing Reports
         uses: ad-m/github-push-action@master

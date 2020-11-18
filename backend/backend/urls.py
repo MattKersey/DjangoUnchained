@@ -6,10 +6,10 @@ from .views import OAuthCallbackViewSet
 
 
 urlpatterns = [
-    re_path(r'^api/', include('api.urls')),
-    re_path(r'^admin/', admin.site.urls),
-    re_path(r'^authredirect/', OAuthCallbackViewSet.as_view({'get': 'list'})),
-    re_path(r'^o/', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    re_path(r"^api/", include("api.urls")),
+    re_path(r"^admin/", admin.site.urls),
+    re_path(r"^authredirect/", OAuthCallbackViewSet.as_view({"get": "list"})),
+    re_path(r"^o/", include("oauth2_provider.urls", namespace="oauth2_provider")),
 ]
 
 urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

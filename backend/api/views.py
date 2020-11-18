@@ -3,13 +3,17 @@ from api.models import User, Store
 from rest_framework import viewsets
 from rest_framework.response import Response
 from api.serializers import UserSerializer, StoreSerializer
-from oauth2_provider.contrib.rest_framework import OAuth2Authentication, TokenHasReadWriteScope
+from oauth2_provider.contrib.rest_framework import (
+    OAuth2Authentication,
+    TokenHasReadWriteScope,
+)
 
 
 class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed.
     """
+
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasReadWriteScope]
 
@@ -25,6 +29,7 @@ class StoreViewSet(viewsets.ViewSet):
     """
     API endpoint that allows stores to be viewed.
     """
+
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasReadWriteScope]
 
@@ -52,6 +57,7 @@ class PingViewSet(viewsets.ViewSet):
     """
     API endpoint for testing GET and POST.
     """
+
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasReadWriteScope]
 
