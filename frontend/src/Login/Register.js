@@ -75,7 +75,7 @@ class Register extends React.Component {
     axios.post(apiBaseUrl + 'register/', payload)
       .then(function (response) {
         console.log("registration successful")
-        this.context.history.push('/')
+        window.location = '/'
       })
       .catch(function (error) {
         console.log("oop")
