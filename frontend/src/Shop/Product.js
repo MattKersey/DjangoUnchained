@@ -1,3 +1,4 @@
+/* eslint react/prop-types: 0 */
 import React from 'react'
 import { makeStyles, withStyles } from '@material-ui/core/styles'
 import clsx from 'clsx'
