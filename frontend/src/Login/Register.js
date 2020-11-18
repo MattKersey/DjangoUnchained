@@ -56,22 +56,32 @@ class Register extends React.Component {
       email: '',
       password: ''
     }
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  handleClick(event) {
-    const apiBaseUrl = 'http://127.0.0.1:8000/api'
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value })
+  }
+
+  handleSubmit(event) {
+    const apiBaseUrl = 'http://127.0.0.1:8000/api/'
     const payload = {
       email: this.state.email,
       password: this.state.password
     }
-    axios.post(apiBaseUrl + '/register', payload)
+    console.log(payload)
+    axios.post(apiBaseUrl + 'register/', payload)
       .then(function (response) {
         console.log("registration successful")
         this.context.history.push('/')
       })
       .catch(function (error) {
+        console.log("oop")
         console.log(error)
       })
+    event.preventDefault()
   }
 
   render() {
@@ -86,7 +96,7 @@ class Register extends React.Component {
           <Typography component='h1' variant='h5'>
             Create a new PyMarket Account
           </Typography>
-          <form className={classes.form}>
+          <form className={classes.form} onSubmit={this.handleSubmit}>
             <TextField
               variant='outlined'
               margin='normal'
@@ -116,6 +126,7 @@ class Register extends React.Component {
               id='email'
               label='Email Address'
               name='email'
+              onChange={this.handleChange}
               autoComplete='email'
             />
             <TextField
@@ -127,6 +138,7 @@ class Register extends React.Component {
               label='Password'
               type='password'
               id='password'
+              onChange={this.handleChange}
               autoComplete='current-password'
             />
             <Button
@@ -135,7 +147,6 @@ class Register extends React.Component {
               variant='contained'
               color='primary'
               className={classes.submit}
-              onClick={(event) => this.handleClick(event)}
             >
               Create Account
             </Button>
