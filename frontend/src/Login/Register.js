@@ -1,4 +1,5 @@
 import React from 'react'
+import axios from 'axios'
 import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -10,6 +11,7 @@ import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
+import { withRouter } from 'react-router-dom'
 
 function Copyright () {
   return (
@@ -53,6 +55,32 @@ class Register extends React.Component {
       email: '',
       password: ''
     }
+
+    this.handleChange = this.handleChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
+  }
+
+  handleChange (event) {
+    this.setState({ [event.target.name]: event.target.value })
+  }
+
+  handleSubmit (event) {
+    const apiBaseUrl = 'http://127.0.0.1:8000/api/'
+    const payload = {
+      email: this.state.email,
+      password: this.state.password
+    }
+    console.log(payload)
+    axios.post(apiBaseUrl + 'register/', payload)
+      .then(function (response) {
+        console.log('registration successful')
+        window.location = '/'
+      })
+      .catch(function (error) {
+        console.log('oop')
+        console.log(error)
+      })
+    event.preventDefault()
   }
 
   render () {
@@ -67,7 +95,7 @@ class Register extends React.Component {
           <Typography component='h1' variant='h5'>
             Create a new PyMarket Account
           </Typography>
-          <form className={classes.form}>
+          <form className={classes.form} onSubmit={this.handleSubmit}>
             <TextField
               variant='outlined'
               margin='normal'
@@ -97,6 +125,7 @@ class Register extends React.Component {
               id='email'
               label='Email Address'
               name='email'
+              onChange={this.handleChange}
               autoComplete='email'
             />
             <TextField
@@ -108,6 +137,7 @@ class Register extends React.Component {
               label='Password'
               type='password'
               id='password'
+              onChange={this.handleChange}
               autoComplete='current-password'
             />
             <Button
@@ -133,4 +163,4 @@ Register.propTypes = {
   classes: PropTypes.any
 }
 
-export default withStyles(styles, { withTheme: true })(Register)
+export default withRouter(withStyles(styles, { withTheme: true })(Register))
