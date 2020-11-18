@@ -11,10 +11,9 @@ import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
-import { withRouter } from "react-router-dom";
-import Login from './Login'
+import { withRouter } from 'react-router-dom'
 
-function Copyright() {
+function Copyright () {
   return (
     <Typography variant='body2' color='textSecondary' align='center'>
       {'Copyright © '}
@@ -47,7 +46,7 @@ const styles = theme => ({
 })
 
 class Register extends React.Component {
-  constructor(props) {
+  constructor (props) {
     super(props)
 
     this.state = {
@@ -57,15 +56,15 @@ class Register extends React.Component {
       password: ''
     }
 
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this)
+    this.handleSubmit = this.handleSubmit.bind(this)
   }
 
-  handleChange(event) {
+  handleChange (event) {
     this.setState({ [event.target.name]: event.target.value })
   }
 
-  handleSubmit(event) {
+  handleSubmit (event) {
     const apiBaseUrl = 'http://127.0.0.1:8000/api/'
     const payload = {
       email: this.state.email,
@@ -74,17 +73,17 @@ class Register extends React.Component {
     console.log(payload)
     axios.post(apiBaseUrl + 'register/', payload)
       .then(function (response) {
-        console.log("registration successful")
+        console.log('registration successful')
         window.location = '/'
       })
       .catch(function (error) {
-        console.log("oop")
+        console.log('oop')
         console.log(error)
       })
     event.preventDefault()
   }
 
-  render() {
+  render () {
     const { classes } = this.props
     return (
       <Container component='main' maxWidth='xs'>
