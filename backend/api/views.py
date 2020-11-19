@@ -42,6 +42,16 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    def update(self, request, pk=None):
+        user = get_object_or_404(User.objects.all(), pk=pk)
+        data = request.data
+        user.email = data.get('email', user.email)
+        user.set_password(data.get('password', user.password))
+        # stores is handled in another endpoint
+        user.save()
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
     @action(detail=True, methods=['POST'])
     def add_store(self, request, pk=None):
         data = request.POST
@@ -88,6 +98,17 @@ class StoreViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         store = get_object_or_404(Store.objects.all(), pk=pk)
+        serializer = StoreSerializer(store)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        store = get_object_or_404(Store.objects.all(), pk=pk)
+        data = request.data
+        store.address = data.get('address', store.address)
+        store.name = data.get('name', store.name)
+        store.category = data.get('category', store.category)
+        # items is handled in another endpoint
+        store.save()
         serializer = StoreSerializer(store)
         return Response(serializer.data)
 
@@ -139,6 +160,18 @@ class ItemViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         item = get_object_or_404(Item.objects.all(), pk=pk)
+        serializer = ItemSerializer(item)
+        return Response(serializer.data)
+
+    def update(self, request, pk=None):
+        item = get_object_or_404(Item.objects.all(), pk=pk)
+        # item.image = ....
+        data = request.data
+        item.name = data.get('name', item.name)
+        item.stock = data.get('stock', item.stock)
+        item.price = data.get('price', item.price)
+        item.description = data.get('description', item.description)
+        item.save()
         serializer = ItemSerializer(item)
         return Response(serializer.data)
 
