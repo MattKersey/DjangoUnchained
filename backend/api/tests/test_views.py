@@ -2,6 +2,7 @@ from django.utils import timezone
 from rest_framework.test import APITestCase
 from api.models import User
 import datetime
+import requests_mock
 
 from oauth2_provider.models import get_application_model, get_access_token_model
 
@@ -24,6 +25,7 @@ class Test_OAuth(APITestCase):
             client_type=Application.CLIENT_CONFIDENTIAL,
             name="OAuth-Test-API",
             redirect_uris="http://127.0.0.1:8000/authredirect/",
+            skip_authorization=True
         )
         self.application.save()
         self.token = AccessToken.objects.create(
@@ -48,6 +50,24 @@ class Test_OAuth(APITestCase):
         r = self.client.get(url, HTTP_AUTHORIZATION="Bearer " + self.token.token)
         self.assertEqual(200, r.status_code)
         self.assertEqual(b'{"ping":"pong"}', r.content)
+
+    @requests_mock.Mocker()
+    def test_OAuth_redirect(self, m):
+        self.client.force_login(self.user)
+        m.register_uri(
+            'POST',
+            'http://127.0.0.1:8000/o/token/',
+            text="{\"testdata\": \"hello world!\"}"
+        )
+        url = 'http://127.0.0.1:8000/o/authorize/'
+        url += '?response_type=code'
+        url += '&client_id=' + self.application.client_id
+        url += '&redirect_uri=http://127.0.0.1:8000/authredirect/'
+        r = self.client.get(url, follow=True)
+        print(r.content)
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(b'{"testdata":"hello world!"}', r.content)
+        pass
 
     def tearDown(self):
         self.application.delete()

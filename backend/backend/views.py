@@ -14,13 +14,6 @@ class OAuthCallbackViewSet(viewsets.ViewSet):
         CLIENT_SECRET = os.getenv("CLIENT_SECRET")
         code = request.query_params["code"]
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
-        # print(request.query_params['code'])
-        # payload = 'client_id=' + os.getenv("CLIENT_ID")
-        # payload += '&client_secret=' + os.getenv("CLIENT_SECRET")
-        # payload += '&code=' + request.query_params['code']
-        # payload += '&redirect_uri=http://127.0.0.1:8000/authredirect/'
-        # payload += '&grant_type=authorization_code'
-
         payload = {
             "grant_type": "authorization_code",
             "client_id": CLIENT_ID,
