@@ -7,7 +7,7 @@ SECRET_KEY = "3a!ltam)4n!!kbtmo7%-s3(=g!plrv38u8jp5%pmm!18c0)6g4"
 
 DEBUG = True
 
-ALLOWED_HOSTS = ["127.0.0.1"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -30,7 +30,7 @@ INSTALLED_APPS = [
      'allauth.socialaccount.providers.facebook',
      'allauth.socialaccount.providers.google',
 ]
-SITE_ID = 1
+SITE_ID = 2
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -100,12 +100,16 @@ OAUTH2_PROVIDER = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "oauth2_provider.contrib.rest_framework.OAuth2Authentication",
+        'rest_framework.authentication.TokenAuthentication',
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_METADATA_CLASS": "rest_framework.metadata.SimpleMetadata",
 }
 
+AUTHENTICATION_BACKENDS = (
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
+)
 LANGUAGE_CODE = "en-us"
 
 TIME_ZONE = "UTC"

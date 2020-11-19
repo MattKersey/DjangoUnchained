@@ -14,7 +14,9 @@ import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
-import GoogleSocialAuth from './GoogleSocialAuth.js'
+import GoogleLogin from 'react-google-login'
+import googleLogin from './loginGoogle.js'
+import { useHistory } from 'react-router-dom'
 
 function Copyright () {
   return (
@@ -59,31 +61,19 @@ class Login extends React.Component {
     }
   }
 
-  // ---------- prototype some error messages when extracting data ----------
-  handleClick (event) {
-    const apiBaseUrl = '#'
-    const payload = {
-      username: this.state.username,
-      password: this.state.password
+  handleResponse (res) {
+    if (res.status === 200) {
+      localStorage.setItem('token', res.data.key)
+      window.location = '/'
     }
-
-    axios.post(apiBaseUrl + 'login', payload)
-      .then(function (response) {
-        console.log(response)
-        if (response.data.code === 204) {
-          console.log('Username password do not match')
-          window.alert('username password do not match')
-        } else {
-          console.log('Username does not exists')
-          window.alert('Username does not exist')
-        }
-      })
   }
-  // ------------------------ incomplete -------------------------
 
   render () {
-    const error = this.state.error
     const { classes } = this.props
+    const responseGoogle = async (response) => {
+      const res = await googleLogin(response.accessToken)
+      this.handleResponse(res)
+    }
     return (
       <Container component='main' maxWidth='xs'>
         <CssBaseline />
@@ -94,58 +84,12 @@ class Login extends React.Component {
           <Typography component='h1' variant='h5'>
             Sign into your PyMarket Account
           </Typography>
-          <GoogleSocialAuth />
-          {/*
-          <form className={classes.form}>
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              id='email'
-              label='Email Address'
-              name='email'
-              autoComplete='email'
-              autoFocus
-            />
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              name='password'
-              label='Password'
-              type='password'
-              id='password'
-              autoComplete='current-password'
-            />
-            <FormControlLabel
-              control={<Checkbox value='remember' color='primary' />}
-              label={error}
-            />
-            <Button
-              type='submit'
-              fullWidth
-              variant='contained'
-              color='primary'
-              className={classes.submit}
-              onClick={(event) => this.handleClick(event)}
-            >
-              Sign In
-            </Button>
-            <Grid container>
-              <Grid item xs>
-                <Link href='#' variant='body2'>
-                  Forgot password?
-                </Link>
-              </Grid>
-              <Grid item>
-                <Link href='/register' variant='body2'>
-                  Don&apos;t have an account? Sign Up
-                </Link>
-              </Grid>
-            </Grid>
-          </form> */}
+          <GoogleLogin
+            clientId='1099310677669-4lsl049eq46fe9tpct8ro6em04rcm0n1.apps.googleusercontent.com'
+            buttonText='LOGIN WITH GOOGLE'
+            onSuccess={responseGoogle}
+            onFailure={responseGoogle}
+          />
         </div>
         <Box mt={8}>
           <Copyright />

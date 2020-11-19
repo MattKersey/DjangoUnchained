@@ -3,6 +3,7 @@ from api.models import User, Store
 from rest_framework import viewsets
 from rest_framework.response import Response
 from api.serializers import UserSerializer, StoreSerializer
+from rest_framework.decorators import api_view
 from oauth2_provider.contrib.rest_framework import (
     OAuth2Authentication,
     TokenHasReadWriteScope,
@@ -63,3 +64,13 @@ class PingViewSet(viewsets.ViewSet):
 
     def list(self, request):
         return Response(data={"ping": "pong"})
+
+@api_view(['GET'])
+def current_user(request):
+    """
+    Determine the current user by their token, and return their data
+    """
+    authentication_classes = []
+    permission_classes = []
+    serializer = UserSerializer(request.user)
+    return Response(serializer.data)

@@ -10,6 +10,7 @@
     "@testing-library/user-event": "^12.2.2",
     "axios": "^0.21.0",
     "eslint-html-reporter": "^0.7.4",
+    "localstorage-polyfill": "^1.0.1",
     "material-ui-icons": "^1.0.0-beta.36",
     "node-forge": "^0.10.0",
     "prop-types": "^15.7.2",
