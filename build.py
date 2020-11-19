@@ -36,7 +36,7 @@ def clean():
 def install_backend():
     """Installs Backend Dependencies"""
     subprocess.run(
-        args=["python3", "-m", "install", "--upgrade", "pip"], cwd=BACKEND_DIR
+        args=["python3", "-m", "pip", "install", "--upgrade", "pip"], cwd=BACKEND_DIR
     )
     subprocess.run(args=["pip3", "install", "-r", "requirements.txt"], cwd=BACKEND_DIR)
 

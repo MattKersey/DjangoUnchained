@@ -5,7 +5,7 @@ from django.contrib.auth.models import PermissionsMixin
 
 
 class Item(models.Model):
-    image = models.ImageField(upload_to="items")
+    image = models.ImageField(null=True, blank=True, upload_to="items")
     name = models.CharField(max_length=50)
     stock = models.IntegerField(validators=[MinValueValidator(limit_value=0)])
     price = models.DecimalField(
@@ -20,6 +20,29 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Item_History(models.Model):
+    item = models.ManyToManyField(Item)
+    before_price = models.DecimalField(
+        null=True,
+        blank=True,
+        default=0.0,
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+    )
+    after_price = models.DecimalField(
+        null=True,
+        blank=True,
+        default=0.0,
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+    )
+    before_stock = models.IntegerField(validators=[MinValueValidator(limit_value=0)])
+    after_stock = models.IntegerField(validators=[MinValueValidator(limit_value=0)])
+    datetime = models.DateTimeField(auto_now=True)
 
 
 class Category(models.TextChoices):
