@@ -70,6 +70,7 @@ class Test_OAuth(APITestCase):
         pass
 
     def tearDown(self):
+        self.user.delete()
         self.application.delete()
         self.token.delete()
         pass
