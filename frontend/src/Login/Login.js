@@ -14,6 +14,7 @@ import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
+import GoogleSocialAuth from './GoogleSocialAuth.js'
 
 function Copyright () {
   return (
@@ -93,6 +94,8 @@ class Login extends React.Component {
           <Typography component='h1' variant='h5'>
             Sign into your PyMarket Account
           </Typography>
+          <GoogleSocialAuth />
+          {/*
           <form className={classes.form}>
             <TextField
               variant='outlined'
@@ -142,7 +145,7 @@ class Login extends React.Component {
                 </Link>
               </Grid>
             </Grid>
-          </form>
+          </form> */}
         </div>
         <Box mt={8}>
           <Copyright />
