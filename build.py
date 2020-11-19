@@ -16,7 +16,7 @@ SUPER_PASSWORD = "superuser@123"
 def clean():
     """Removes Cache and Coverage Output Files"""
     print("Start: Cleaning Project")
-    deleteDirs = set(["__pycache__", ".pytest_cache", "coverage"])
+    deleteDirs = set(["__pycache__", ".pytest_cache", "coverage", "htmlcov", "items"])
     deleteFiles = set([".coverage", "coverage.xml", ".pyo", ".pyc"])
     ignoreDirs = set([".git", "venv", ".tox"])
     for root, dirs, files in os.walk(CUR_DIR, topdown=True):
@@ -88,7 +88,8 @@ def reset_db():
 def add_data_to_db():
     """Creates Superuser and Adds Fixtures to DB"""
     print(">>> Uploading Fixtures to DB.")
-    models = ["item", "store", "user", "association"]  # the order matters
+    # the order below matters
+    models = ["item", "store", "user", "association", "oauth_application", "oauth_accesstoken"]
     for model in models:
         subprocess.run(
             args=["python3", "manage.py", "loaddata", f"api/fixtures/{model}.json"],

@@ -3,7 +3,7 @@
       "model": "api.item",
       "pk": 1,
       "fields": {
-         "image": "api/fixtures/food.png",
+         "image": "api/fixtures/food.jpeg",
          "name": "Food Item 1",
          "stock": 10,
          "price": 10,
@@ -14,7 +14,7 @@
       "model": "api.item",
       "pk": 2,
       "fields": {
-         "image": "api/fixtures/food.png",
+         "image": "api/fixtures/food.jpeg",
          "name": "Food Item 2",
          "stock": 20,
          "price": 20,
@@ -25,7 +25,7 @@
       "model": "api.item",
       "pk": 3,
       "fields": {
-         "image": "api/fixtures/food.png",
+         "image": "api/fixtures/food.jpeg",
          "name": "Food Item 3",
          "stock": 30,
          "price": 30,
@@ -36,7 +36,7 @@
       "model": "api.item",
       "pk": 4,
       "fields": {
-         "image": "api/fixtures/food.png",
+         "image": "api/fixtures/food.jpeg",
          "name": "Food Item 4",
          "stock": 40,
          "price": 40,
@@ -47,7 +47,7 @@
       "model": "api.item",
       "pk": 5,
       "fields": {
-         "image": "api/fixtures/food.png",
+         "image": "api/fixtures/food.jpeg",
          "name": "Food Item 5",
          "stock": 50,
          "price": 50,
@@ -58,7 +58,7 @@
       "model": "api.item",
       "pk": 6,
       "fields": {
-         "image": "api/fixtures/clothing.png",
+         "image": "api/fixtures/clothing.jpeg",
          "name": "Cloth 1",
          "stock": 10,
          "price": 10,
@@ -69,7 +69,7 @@
       "model": "api.item",
       "pk": 7,
       "fields": {
-         "image": "api/fixtures/clothing.png",
+         "image": "api/fixtures/clothing.jpeg",
          "name": "Cloth 2",
          "stock": 20,
          "price": 20,
@@ -80,7 +80,7 @@
       "model": "api.item",
       "pk": 8,
       "fields": {
-         "image": "api/fixtures/clothing.png",
+         "image": "api/fixtures/clothing.jpeg",
          "name": "Cloth 3",
          "stock": 30,
          "price": 30,
@@ -91,7 +91,7 @@
       "model": "api.item",
       "pk": 9,
       "fields": {
-         "image": "api/fixtures/clothing.png",
+         "image": "api/fixtures/clothing.jpeg",
          "name": "Cloth 4",
          "stock": 40,
          "price": 40,
@@ -102,7 +102,7 @@
       "model": "api.item",
       "pk": 10,
       "fields": {
-         "image": "api/fixtures/clothing.png",
+         "image": "api/fixtures/clothing.jpeg",
          "name": "Cloth 5",
          "stock": 50,
          "price": 50,
@@ -113,7 +113,7 @@
       "model": "api.item",
       "pk": 11,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 1",
          "stock": 10,
          "price": 10,
@@ -124,7 +124,7 @@
       "model": "api.item",
       "pk": 12,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 2",
          "stock": 20,
          "price": 20,
@@ -135,7 +135,7 @@
       "model": "api.item",
       "pk": 13,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 3",
          "stock": 30,
          "price": 30,
@@ -146,7 +146,7 @@
       "model": "api.item",
       "pk": 14,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 4",
          "stock": 40,
          "price": 40,
@@ -157,7 +157,7 @@
       "model": "api.item",
       "pk": 15,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 5",
          "stock": 50,
          "price": 50,
@@ -168,7 +168,7 @@
       "model": "api.item",
       "pk": 16,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 6",
          "stock": 60,
          "price": 60,
@@ -179,7 +179,7 @@
       "model": "api.item",
       "pk": 17,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 7",
          "stock": 70,
          "price": 70,
@@ -190,7 +190,7 @@
       "model": "api.item",
       "pk": 18,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 8",
          "stock": 80,
          "price": 80,
@@ -201,7 +201,7 @@
       "model": "api.item",
       "pk": 19,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 9",
          "stock": 90,
          "price": 90,
@@ -212,7 +212,7 @@
       "model": "api.item",
       "pk": 20,
       "fields": {
-         "image": "api/fixtures/other.png",
+         "image": "api/fixtures/other.jpeg",
          "name": "Other 10",
          "stock": 100,
          "price": 100,
