@@ -4,8 +4,36 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.models import PermissionsMixin
 
 
+class History_of_Item(models.Model):
+    before_name = models.CharField(max_length=50, blank=True, null=True)
+    after_name = models.CharField(max_length=50, blank=True, null=True)
+    before_price = models.DecimalField(
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+    )
+    after_price = models.DecimalField(
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+    )
+    before_stock = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], blank=True, null=True
+    )
+    after_stock = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], blank=True, null=True
+    )
+    before_description = models.TextField(blank=True, null=True)
+    after_description = models.TextField(blank=True, null=True)
+    datetime = models.DateTimeField(auto_now=True)
+
+
 class Item(models.Model):
-    image = models.ImageField(upload_to="items")
+    image = models.ImageField(null=True, blank=True, upload_to="items")
     name = models.CharField(max_length=50)
     stock = models.IntegerField(validators=[MinValueValidator(limit_value=0)])
     price = models.DecimalField(
@@ -17,6 +45,7 @@ class Item(models.Model):
         max_digits=12,
     )
     description = models.TextField()
+    history = models.ManyToManyField(History_of_Item)
 
     def __str__(self):
         return self.name
