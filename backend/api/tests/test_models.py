@@ -1,118 +1,270 @@
 from django.test import TestCase
+from django.core.files.uploadedfile import SimpleUploadedFile
+from api.models import User, Category, Store, Item, Association, Role
+import pytest
+from datetime import datetime
+from django.core.exceptions import ValidationError
+from django.db import IntegrityError
+from django.conf import settings
 
-# from django.core.files.uploadedfile import SimpleUploadedFile
-from api.models import User, Category, Store, Role, Association
-
-# from .modesl import Item
-import datetime
+TEST_USER_EMAIL = "test@email.com"
+TEST_USER_PASSWORD = "test@0987"
 
 
 class Test_User_Model(TestCase):
-
-    def setUp(self):
-        User.objects.create_user(email="user1@email.com")
-        User.objects.create_user(email="user2@email.com")
-        User.objects.create_user(email="user3@email.com")
-        User.objects.create_staffuser(
-            email="staffuser1@email.com", password="staffuser@1"
+    def test_user(self):
+        user = User.objects.create_user(
+            email=TEST_USER_EMAIL,
+            password=TEST_USER_PASSWORD,
+            stores=None,
         )
-        User.objects.create_staffuser(
-            email="staffuser2@email.com", password="staffuser@2"
+        print(user.is_active)
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.has_perm(perm=""))
+        self.assertTrue(user.has_perm(perm="", obj=""))
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_admin)
+        self.assertEqual(user.email, user.__str__())
+        self.assertEqual(1, User.objects.all().count())
+        other_user = User.objects.get(email=TEST_USER_EMAIL)
+        self.assertEqual(user.id, other_user.id)
+        self.assertEqual(0, user.stores.count())
+
+    # @pytest.mark.django_db
+    def test_invalid_email(self):
+        sample_email = f"{'abc'*100}@email.com"
+        with self.assertRaises(ValidationError):
+            user = User.objects.create(
+                email=sample_email,
+                password=TEST_USER_PASSWORD,
+            )
+            user.full_clean()
+
+    # @pytest.mark.django_db
+    def test_duplicate_email(self):
+        _ = User.objects.create_user(
+            email=TEST_USER_EMAIL,
+            password=TEST_USER_PASSWORD,
         )
-        User.objects.create_superuser(
-            email="superuser1@email.com", password="superuser@1"
+        with self.assertRaises(IntegrityError):
+            _ = User.objects.create_user(
+                email=TEST_USER_EMAIL,
+                password=TEST_USER_PASSWORD,
+            )
+
+    def test_staffuser(self):
+        user = User.objects.create_staffuser(
+            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD, stores=None
         )
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.has_perm(perm=""))
+        self.assertTrue(user.has_perm(perm="", obj=""))
+        self.assertTrue(user.is_staff)
+        self.assertFalse(user.is_admin)
+        self.assertEqual(user.email, user.__str__())
+        self.assertEqual(0, user.stores.count())
 
-    def test_regular_user_info(self):
-        regular_user = User.objects.get(email="user1@email.com")
-        self.assertEqual("user1@email.com", str(regular_user))
-        self.assertTrue(regular_user.is_active)
-        self.assertTrue(regular_user.has_perm("perm"))
-        self.assertFalse(regular_user.is_staff)
-        self.assertFalse(regular_user.is_admin)
+    def test_superuser(self):
+        user = User.objects.create_superuser(
+            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD, stores=None
+        )
+        self.assertTrue(user.is_active)
+        self.assertTrue(user.has_perm(perm=""))
+        self.assertTrue(user.has_perm(perm="", obj=""))
+        self.assertTrue(user.is_staff)
+        self.assertTrue(user.is_admin)
+        self.assertEqual(user.email, user.__str__())
+        self.assertEqual(0, user.stores.count())
 
-    def test_staff_user_info(self):
-        staff_user = User.objects.get(email="staffuser1@email.com")
-        self.assertEqual("staffuser1@email.com", str(staff_user))
-        self.assertTrue(staff_user.is_active)
-        self.assertTrue(staff_user.has_perm("perm"))
-        self.assertTrue(staff_user.is_staff)
-        self.assertFalse(staff_user.is_admin)
 
-    def test_super_user_info(self):
-        super_user = User.objects.get(email="superuser1@email.com")
-        self.assertEqual("superuser1@email.com", str(super_user))
-        self.assertTrue(super_user.is_active)
-        self.assertTrue(super_user.has_perm("perm"))
-        self.assertTrue(super_user.is_staff)
-        self.assertTrue(super_user.is_admin)
-
-    def test_count_regular_users(self):
-        regular_users = User.objects.filter(staff=False, admin=False)
-        self.assertEqual(3, regular_users.count())
-        self.assertLess(regular_users.count(), User.objects.all().count())
-
-    def test_count_staff_users(self):
-        staff_users = User.objects.filter(staff=True, admin=False)
-        self.assertEqual(2, staff_users.count())
-        self.assertLess(staff_users.count(), User.objects.all().count())
-
-    def test_count_super_users(self):
-        super_users = User.objects.filter(staff=True, admin=True)
-        self.assertEqual(1, super_users.count())
-        self.assertLess(super_users.count(), User.objects.all().count())
+TEST_ITEM_NAME = "Item"
+TEST_ITEM_DESCRIPTION = "Item Description"
+TEST_ITEM_STOCK = 1
+TEST_ITEM_PRICE = 1.0
 
 
 class Test_Item_Model(TestCase):
-    def setUp(self):
-        pass
-        # [TODO]: Create sample images
-        # image1 = SimpleUploadedFile(name='test_image_1.jpg',
-        #   content=open('path/to/test/image', 'rb').read(), content_type='image/jpeg')
-        # image2 = SimpleUploadedFile(name='test_image_2.jpg',
-        #   content=open('path/to/test/image', 'rb').read(), content_type='image/jpeg')
-        # image3 = SimpleUploadedFile(name='test_image_3.jpg',
-        #   content=open('path/to/test/image', 'rb').read(), content_type='image/jpeg')
-        # Item(image=image1, name="Item 1", stock=1, price=1.0, description="Some Item 1")
-        # Item(image=image2, name="Item 2", stock=2, price=2.0, description="Some Item 2")
-        # Item(image=image3, name="Item 3", stock=3, price=3.0, description="Some Item 3")
 
-    def test_count_items(self):
-        # self.assertEqual(3, Item.objects.all().count())
-        self.assertEqual(3, 1 + 2)
+    file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
+
+    def test_item(self):
+        with open(file=self.file_path, mode="rb") as infile:
+            file = SimpleUploadedFile(self.file_path, infile.read())
+            item = Item.objects.create(
+                image=file,
+                name=TEST_ITEM_NAME,
+                stock=TEST_ITEM_STOCK,
+                price=TEST_ITEM_PRICE,
+                description=TEST_ITEM_DESCRIPTION,
+            )
+            self.assertEqual(item.name, item.__str__())
+            self.assertEqual(item.stock, TEST_ITEM_STOCK)
+            self.assertEqual(item.price, TEST_ITEM_PRICE)
+            self.assertEqual(item.description, TEST_ITEM_DESCRIPTION)
+
+    def test_price_default(self):
+        with open(file=self.file_path, mode="rb") as infile:
+            file = SimpleUploadedFile(self.file_path, infile.read())
+            item = Item.objects.create(
+                image=file,
+                name=TEST_ITEM_NAME,
+                stock=TEST_ITEM_STOCK,
+                description=TEST_ITEM_DESCRIPTION,
+            )
+            self.assertEqual(item.price, 0.0)
+
+    def test_invalid_name(self):
+        sample_name = f"{'abc'*100}"
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=sample_name,
+                    stock=TEST_ITEM_STOCK,
+                    price=TEST_ITEM_PRICE,
+                    description=TEST_ITEM_DESCRIPTION,
+                )
+                item.full_clean()
+
+    def test_invalid_stock(self):
+        sample_stock = -1
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    stock=sample_stock,
+                    price=TEST_ITEM_PRICE,
+                    description=TEST_ITEM_DESCRIPTION,
+                )
+                item.full_clean()
+
+    def test_invalid_price(self):
+        sample_price = -1.0
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    stock=TEST_ITEM_STOCK,
+                    price=sample_price,
+                    description=TEST_ITEM_DESCRIPTION,
+                )
+                item.full_clean()
+
+        sample_price = 1.123
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    stock=TEST_ITEM_STOCK,
+                    price=sample_price,
+                    description=TEST_ITEM_DESCRIPTION,
+                )
+                item.full_clean()
+
+        sample_price = 1234567.123456
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    stock=TEST_ITEM_STOCK,
+                    price=sample_price,
+                    description=TEST_ITEM_DESCRIPTION,
+                )
+                item.full_clean()
+
+
+TEST_STORE_NAME = "Store"
+TEST_STORE_ADDRESS = "123 Lane"
+TEST_STORE_CATEGORY = Category.FOOD
 
 
 class Test_Store_Model(TestCase):
     def setUp(self):
-        for i in range(1, 4):
-            store = Store(name=f"Store {i}", address="{i} Lane", category=Category.FOOD)
-            # [TODO]: Add random category assignments
-            store.save()
-            # [TODO]: Add random item assignments
-            # store.items.set(collection_of_ids)
+        file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
+        file = None
+        with open(file=file_path, mode="rb") as infile:
+            file = SimpleUploadedFile(file_path, infile.read())
+        _ = Item.objects.create(
+            image=file,
+            name="Item 1",
+            stock=1,
+            price=1.0,
+            description="Item Description 1",
+        )
 
-    def test_count_stores(self):
-        self.assertEqual(3, Store.objects.all().count())
+        _ = Item.objects.create(
+            image=file,
+            name="Item 2",
+            stock=2,
+            price=2.0,
+            description="Item Description 2",
+        )
+
+    @pytest.mark.django_db
+    def test_store(self):
+        store = Store.objects.create(
+            name=TEST_STORE_NAME,
+            address=TEST_STORE_ADDRESS,
+            category=TEST_STORE_CATEGORY,
+        )
+        store.save()
+        self.assertEqual(store.name, TEST_STORE_NAME)
+        self.assertEqual(store.__str__(), TEST_STORE_NAME)
+        self.assertEqual(store.address, TEST_STORE_ADDRESS)
+        self.assertEqual(store.category, TEST_STORE_CATEGORY)
+        self.assertEqual(2, Item.objects.all().count())
+        sample_item = Item.objects.get(name="Item 1")
+        store.items.add(sample_item)
+        self.assertEqual(1, store.items.count())
+
+
+TEST_ASSOCIATION_ROLE = Role.EMPLOYEE
 
 
 class Test_Association_Model(TestCase):
-    def setUp(self):
-        for i in range(1, 4):
-            user = User.objects.create_user(email=f"user{i}@email.com")
-            store = Store(
-                name=f"Store {i}", address=f"{i} Lane", category=Category.FOOD
-            )
-            # [TODO]: Add random category assignments
-            store.save()
-            # [TODO]: Add random item assignments
-            # store.items.set(collection_of_ids)
-            # [NOTE]: We call the create button because of foreign key relationship
-            Association.objects.create(
-                user=user,
-                store=store,
-                membership=datetime.datetime.now(),
-                role=Role.MANAGER,
-            )
 
-    def test_count_associations(self):
-        self.assertEqual(3, Association.objects.all().count())
+    def setUp(self):
+        file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
+        file = None
+        with open(file=file_path, mode="rb") as infile:
+            file = SimpleUploadedFile(file_path, infile.read())
+        self.item = Item.objects.create(
+            image=file,
+            name=TEST_ITEM_NAME,
+            stock=TEST_ITEM_STOCK,
+            price=TEST_ITEM_PRICE,
+            description=TEST_ITEM_DESCRIPTION,
+        )
+        self.store = Store.objects.create(
+            name=TEST_STORE_NAME,
+            address=TEST_STORE_ADDRESS,
+            category=TEST_STORE_CATEGORY,
+        )
+        self.store.save()
+        self.store.items.add(self.item)
+        self.store.save()
+        self.user = User.objects.create_user(
+            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD
+        )
+
+    def test_association(self):
+        time = datetime.now().date()
+        association = Association.objects.create(
+            user=self.user,
+            store=self.store,
+            membership=time,
+            role=TEST_ASSOCIATION_ROLE,
+        )
+        self.assertEqual(association.user, self.user)
+        self.assertEqual(association.store, self.store)
+        self.assertEqual(association.role, TEST_ASSOCIATION_ROLE)
+        self.assertEqual(association.membership, time)
