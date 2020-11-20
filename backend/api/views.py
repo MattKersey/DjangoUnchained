@@ -217,7 +217,9 @@ class RegisterUserViewSet(viewsets.ViewSet):
         except IntegrityError:
             return Response(data={"status": 0}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            application = Application.objects.get(client_id=os.environ.get("CLIENT_ID"))
+            application = Application.objects.get(
+                client_id=os.getenv("CLIENT_ID", 'defaultTestClientID')
+            )
             TOKEN = "".join(random.choice(string.ascii_letters) for i in range(25))
             token = AccessToken.objects.create(
                 user=user,

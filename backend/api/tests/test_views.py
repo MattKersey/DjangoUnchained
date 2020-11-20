@@ -3,14 +3,15 @@ from rest_framework.test import APITestCase
 from api.models import User
 import datetime
 import requests_mock
+import os
 from oauth2_provider.models import get_application_model, get_access_token_model
 Application = get_application_model()
 AccessToken = get_access_token_model()
 
 
 def setupOAuth(self):
-    CLIENT_ID = "abselskfjlskdfj"
-    CLIENT_SECRET = "laksdfjlaksjdflksjdflksdjf"
+    CLIENT_ID = os.getenv('CLIENT_ID', 'defaultTestClientID')
+    CLIENT_SECRET = os.getenv('CLIENT_SECRET', 'defaultTestClientSecret')
     self.user = User.objects.create_superuser(
         email="superuserOAuth@email.com", password="superuser"
     )
@@ -37,7 +38,7 @@ def setupOAuth(self):
 class Test_UserVieww(APITestCase):
     def setUp(self):
         self.userExists = User.objects.create_user(
-            email="exists@email.com", password="password"
+            email="exists@example.com", password="password"
         )
         setupOAuth(self)
 
@@ -49,8 +50,8 @@ class Test_UserVieww(APITestCase):
         }
         r = self.client.post(url, user)
         print(r)
-        # self.assertEqual(201, r.status_code)
-        # self.assertEqual(1, r.data["status"])
+        self.assertEqual(201, r.status_code)
+        self.assertEqual(1, r.data["status"])
 
     def test_register_bad(self):
         url = "http://127.0.0.1:8000/api/register/"
@@ -59,17 +60,17 @@ class Test_UserVieww(APITestCase):
             "password": "testpassword"
         }
         r = self.client.post(url, user)
-        print(r)
-        # self.assertEqual(400, r.status_code)
-        # self.assertEqual(0, r.data["status"])
+        self.assertEqual(400, r.status_code)
+        self.assertEqual(0, r.data["status"])
 
     def test_retrieve_user(self):
         url = "http://127.0.0.1:8000/api/users/"
         r = self.client.get(
-            url + str(self.userExists.pk),
+            url + str(self.userExists.pk) + '/',
             HTTP_AUTHORIZATION="Bearer " + self.token.token
         )
-        print(r)
+        self.assertEqual(200, r.status_code)
+        self.assertEqual("exists@example.com", r.data["email"])
 
     def test_list_user(self):
         url = "http://127.0.0.1:8000/api/users/"
@@ -77,7 +78,8 @@ class Test_UserVieww(APITestCase):
             url,
             HTTP_AUTHORIZATION="Bearer " + self.token.token
         )
-        print(r)
+        self.assertEqual(200, r.status_code)
+        self.assertLessEqual(1, len(r.data))
 
     def test_add_store(self):
         pass
