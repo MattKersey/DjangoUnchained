@@ -117,7 +117,7 @@ class StoreViewSet(viewsets.ViewSet):
         # do some authentication with user
         data = request.POST
         item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
+        store = get_object_or_404(Store.objects.all(), pk=pk)
         store.items.add(item)
         store.save()
         serializer = StoreSerializer(store)
@@ -128,7 +128,7 @@ class StoreViewSet(viewsets.ViewSet):
         # do some authentication with user
         data = request.POST
         item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
+        store = get_object_or_404(Store.objects.all(), pk=pk)
         store.items.remove(item)
         store.save()
         serializer = StoreSerializer(store)

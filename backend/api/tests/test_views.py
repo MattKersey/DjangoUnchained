@@ -1,6 +1,8 @@
 from django.utils import timezone
+from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
-from api.models import User, Store, Category
+from api.models import User, Store, Category, Item
 import datetime
 import requests_mock
 import os
@@ -148,12 +150,84 @@ class Test_UserView(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Store.objects.filter(name="Store 1").count())
 
-    # def tearDown(self):
 
-    #     self.store1.delete()
-    #     self.store2.delete()
-    #     self.application.delete()
-    #     self.token.delete()
+class Test_StoreView(APITestCase):
+    def setUp(self):
+        setupOAuth(self)
+        self.file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
+        with open(file=self.file_path, mode="rb") as infile:
+            file = SimpleUploadedFile(self.file_path, infile.read())
+            self.item1 = Item.objects.create(
+                image=file,
+                name="Item 1",
+                stock=1,
+                price=1.0,
+                description="Item 1",
+            )
+            self.item2 = Item.objects.create(
+                image=file,
+                name="Item 2",
+                stock=1,
+                price=1.0,
+                description="Item 2",
+            )
+        self.store1 = Store.objects.create(
+            address="1 Main Street",
+            name="Store 1",
+            category=Category.FOOD
+        )
+        self.store2 = Store.objects.create(
+            address="2 Main Street",
+            name="Store 2",
+            category=Category.FOOD
+        )
+        self.store1.items.add(self.item2)
+        self.store1.save()
+
+    def test_retrieve_store(self):
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.get(
+            url + str(self.store1.pk) + '/',
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual("Store 1", r.data["name"])
+
+    def test_list_store(self):
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.get(
+            url,
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertLessEqual(1, len(r.data))
+
+    def test_update_store(self):
+        pass
+
+    def test_add_item(self):
+        url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
+        r = self.client.post(
+            url,
+            {"item_id": self.item1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(2, len(self.store1.items.all()))
+        self.store1.items.remove(self.item1)
+        self.assertEqual(1, len(self.store1.items.all()))
+
+    def test_remove_item(self):
+        url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/remove_item/"
+        r = self.client.post(
+            url,
+            {"item_id": self.item2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, len(self.store1.items.all()))
+        self.store1.items.add(self.item2)
+        self.assertEqual(1, len(self.store1.items.all()))
 
 
 class Test_OAuth(APITestCase):
