@@ -230,6 +230,49 @@ class Test_StoreView(APITestCase):
         self.assertEqual(1, len(self.store1.items.all()))
 
 
+class Test_ItemView(APITestCase):
+    def setUp(self):
+        setupOAuth(self)
+        self.file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
+        with open(file=self.file_path, mode="rb") as infile:
+            file = SimpleUploadedFile(self.file_path, infile.read())
+            self.item1 = Item.objects.create(
+                image=file,
+                name="Item 1",
+                stock=1,
+                price=1.0,
+                description="Item 1",
+            )
+            self.item2 = Item.objects.create(
+                image=file,
+                name="Item 2",
+                stock=1,
+                price=1.0,
+                description="Item 2",
+            )
+
+    def test_retrieve_item(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.get(
+            url + str(self.item1.pk) + '/',
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual("Item 1", r.data["name"])
+
+    def test_list_item(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.get(
+            url,
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertLessEqual(1, len(r.data))
+
+    def test_update_item(self):
+        pass
+
+
 class Test_OAuth(APITestCase):
     def setUp(self):
         setupOAuth(self)
