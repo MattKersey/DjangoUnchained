@@ -231,7 +231,6 @@ TEST_ASSOCIATION_ROLE = Role.EMPLOYEE
 
 
 class Test_Association_Model(TestCase):
-
     def setUp(self):
         file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
         file = None

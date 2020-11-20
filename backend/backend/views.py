@@ -10,8 +10,8 @@ class OAuthCallbackViewSet(viewsets.ViewSet):
     permission_classes = []
 
     def list(self, request):
-        CLIENT_ID = os.getenv("CLIENT_ID", 'defaultTestClientID')
-        CLIENT_SECRET = os.getenv("CLIENT_SECRET", 'defaultTestClientSecret')
+        CLIENT_ID = os.getenv("CLIENT_ID", "defaultTestClientID")
+        CLIENT_SECRET = os.getenv("CLIENT_SECRET", "defaultTestClientSecret")
         code = request.query_params["code"]
         headers = {"Content-Type": "application/x-www-form-urlencoded"}
         payload = {

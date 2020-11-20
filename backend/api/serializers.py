@@ -3,15 +3,18 @@ from rest_framework import serializers
 
 
 class ItemHistorySerializer(serializers.HyperlinkedModelSerializer):
-
     class Meta:
         model = History_of_Item
         fields = [
-            "before_name", "after_name",
-            "before_price", "after_price",
-            "before_stock", "after_stock",
-            "before_description", "after_description",
-            "datetime"
+            "before_name",
+            "after_name",
+            "before_price",
+            "after_price",
+            "before_stock",
+            "after_stock",
+            "before_description",
+            "after_description",
+            "datetime",
         ]
 
 
