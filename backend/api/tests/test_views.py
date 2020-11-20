@@ -171,6 +171,13 @@ class Test_StoreView(APITestCase):
                 price=1.0,
                 description="Item 2",
             )
+            self.item3 = Item.objects.create(
+                image=file,
+                name="Item 3",
+                stock=1,
+                price=1.0,
+                description="Item 3",
+            )
         self.store1 = Store.objects.create(
             address="1 Main Street",
             name="Store 1",
@@ -228,6 +235,16 @@ class Test_StoreView(APITestCase):
         self.assertEqual(0, len(self.store1.items.all()))
         self.store1.items.add(self.item2)
         self.assertEqual(1, len(self.store1.items.all()))
+
+    def test_delete_item(self):
+        url = "http://127.0.0.1:8000/api/stores/delete_item/"
+        r = self.client.delete(
+            url,
+            {"item_id": self.item3.pk, "store_id": self.store1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, Item.objects.filter(name="Item 3").count())
 
 
 class Test_ItemView(APITestCase):
