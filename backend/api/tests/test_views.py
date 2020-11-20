@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework.test import APITestCase
-from api.models import User
+from api.models import User, Store, Category
 import datetime
 import requests_mock
 import os
@@ -35,10 +35,30 @@ def setupOAuth(self):
     self.token.save()
 
 
-class Test_UserVieww(APITestCase):
+class Test_UserView(APITestCase):
     def setUp(self):
+        self.store1 = Store.objects.create(
+            address="1 Main Street",
+            name="Store 1",
+            category=Category.FOOD
+        )
+        self.store2 = Store.objects.create(
+            address="2 Main Street",
+            name="Store 2",
+            category=Category.FOOD
+        )
+        self.store3 = Store.objects.create(
+            address="3 Main Street",
+            name="Store 3",
+            category=Category.FOOD
+        )
         self.userExists = User.objects.create_user(
             email="exists@example.com", password="password"
+        )
+        self.userExists.stores.add(self.store2)
+        self.userExists.save()
+        self.userMods = User.objects.create_user(
+            email="before@example.com", password="password"
         )
         setupOAuth(self)
 
@@ -49,7 +69,6 @@ class Test_UserVieww(APITestCase):
             "password": "testpassword"
         }
         r = self.client.post(url, user)
-        print(r)
         self.assertEqual(201, r.status_code)
         self.assertEqual(1, r.data["status"])
 
@@ -81,14 +100,60 @@ class Test_UserVieww(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertLessEqual(1, len(r.data))
 
-    def test_add_store(self):
+    def test_update_user(self):
+        # url = "http://127.0.0.1:8000/api/users/"
+        # r = self.client.post(
+        #     url + str(self.userMods.pk),
+        #     {"email": "after@example.com"},
+        #     HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        #     follow=True
+        # )
+        # print(r)
+        # print(r.data)
+        # print(self.userMods.email)
+        # self.assertEqual(200, r.status_code)
         pass
+
+    def test_add_store(self):
+        url = "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
+        r = self.client.post(
+            url,
+            {"store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(2, len(self.userExists.stores.all()))
+        self.userExists.stores.remove(self.store3)
+        self.assertEqual(1, len(self.userExists.stores.all()))
 
     def test_remove_store(self):
-        pass
+        url = "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/remove_store/"
+        r = self.client.post(
+            url,
+            {"store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, len(self.userExists.stores.all()))
+        self.userExists.stores.add(self.store2)
+        self.assertEqual(1, len(self.userExists.stores.all()))
 
     def test_delete_store(self):
-        pass
+        url = "http://127.0.0.1:8000/api/users/delete_store/"
+        r = self.client.delete(
+            url,
+            {"user_id": self.userExists.pk, "store_id": self.store1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, Store.objects.filter(name="Store 1").count())
+
+    # def tearDown(self):
+
+    #     self.store1.delete()
+    #     self.store2.delete()
+    #     self.application.delete()
+    #     self.token.delete()
 
 
 class Test_OAuth(APITestCase):
@@ -122,7 +187,6 @@ class Test_OAuth(APITestCase):
         url += '&client_id=' + self.application.client_id
         url += '&redirect_uri=http://127.0.0.1:8000/authredirect/'
         r = self.client.get(url, follow=True)
-        print(r.content)
         self.assertEqual(200, r.status_code)
         self.assertEqual(b'{"testdata":"hello world!"}', r.content)
         pass
