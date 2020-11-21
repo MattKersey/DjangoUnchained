@@ -89,18 +89,16 @@ class Test_UserView(APITestCase):
         self.assertLessEqual(1, len(r.data))
 
     def test_update_user(self):
-        # url = "http://127.0.0.1:8000/api/users/"
-        # r = self.client.post(
-        #     url + str(self.userMods.pk),
-        #     {"email": "after@example.com"},
-        #     HTTP_AUTHORIZATION="Bearer " + self.token.token,
-        #     follow=True
-        # )
-        # print(r)
-        # print(r.data)
-        # print(self.userMods.email)
-        # self.assertEqual(200, r.status_code)
-        pass
+        url = "http://127.0.0.1:8000/api/users/"
+        r = self.client.put(
+            url + str(self.userMods.pk) + "/",
+            {"email": "after@example.com"},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, User.objects.filter(email="before@example.com").count())
+        self.assertEqual(1, User.objects.filter(email="after@example.com").count())
 
     def test_add_store(self):
         url = (
@@ -195,7 +193,16 @@ class Test_StoreView(APITestCase):
         self.assertLessEqual(1, len(r.data))
 
     def test_update_store(self):
-        pass
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.put(
+            url + str(self.store2.pk) + "/",
+            {"name": "Updated Name"},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, Store.objects.filter(name="Store 2").count())
+        self.assertEqual(1, Store.objects.filter(name="Updated Name").count())
 
     def test_add_item(self):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
@@ -254,6 +261,13 @@ class Test_ItemView(APITestCase):
                 price=1.0,
                 description="Item 2",
             )
+            self.item3 = Item.objects.create(
+                image=file,
+                name="Item 3",
+                stock=1,
+                price=1.0,
+                description="Item 2",
+            )
 
     def test_retrieve_item(self):
         url = "http://127.0.0.1:8000/api/items/"
@@ -271,7 +285,34 @@ class Test_ItemView(APITestCase):
         self.assertLessEqual(1, len(r.data))
 
     def test_update_item(self):
-        pass
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.put(
+            url + str(self.item2.pk) + "/",
+            {
+                "name": "Updated Name",
+                "description": "Updated Description",
+                "stock": 2,
+                "price": 2.0
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, Item.objects.filter(name="Item 2").count())
+        self.assertEqual(1, Item.objects.filter(name="Updated Name").count())
+        self.assertEqual(1, Item.objects.filter(description="Updated Description").count())
+        self.assertEqual(1, Item.objects.filter(stock=2).count())
+        self.assertEqual(1, Item.objects.filter(price=2.0).count())
+
+    def test_update_item_no_change(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.put(
+            url + str(self.item3.pk) + "/",
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(1, Item.objects.filter(name="Item 3").count())
 
 
 class Test_OAuth(APITestCase):
