@@ -77,10 +77,9 @@ class Register extends React.Component {
         window.location = '/'
       })
       .catch(function (error) {
-        console.log('oop')
         console.log(error)
       })
-    event.preventDefault()
+    //event.preventDefault()
   }
 
   render () {
@@ -163,4 +162,4 @@ Register.propTypes = {
   classes: PropTypes.any
 }
 
-export default withRouter(withStyles(styles, { withTheme: true })(Register))
+export default withStyles(styles, { withTheme: true })(Register)

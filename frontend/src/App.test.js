@@ -1,7 +1,13 @@
 import { render, screen } from '@testing-library/react'
 import React from 'react'
+import Enzyme, { shallow, mount } from 'enzyme'
+import Adapter from '@wojtekmaj/enzyme-adapter-react-17'
 import App from './App'
 import Login from './Login/Login'
+import Register from './Login/Register'
+import Product from './Shop/Product'
+import Shop from './Shop/Shop'
+Enzyme.configure({ adapter: new Adapter() })
 
 test('Get Login Screen by default', () => {
   render(
@@ -12,7 +18,73 @@ test('Get Login Screen by default', () => {
   expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
 })
 
-test('Test Login Component', () => {
-  render(<Login />)
-  expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
+describe('Test Login Component', () => {
+  let wrapper
+
+  beforeEach(() => {
+    wrapper = shallow(<Login />)
+  })
+
+  test('Page header should be correct', () => {
+    render(<Login />)
+    expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
+  })
+
+  test('Empty fields', () => {
+    wrapper.dive().find('form').simulate('submit')
+    expect(wrapper.dive().state('username')).toEqual('')
+  })
+
+  test('Handle click', () => {
+    wrapper.dive().find('form').childAt(3).simulate('click')
+  })
+})
+
+describe('Test Register Component', () => {
+  let wrapper
+
+  beforeEach(() => {
+    wrapper = shallow(<Register />)
+  })
+
+  test('Page header should be correct', () => {
+    render(<Register />)
+    expect(screen.getByText(/Create a new PyMarket Account/i)).toBeInTheDocument()
+  })
+
+  test('Empty fields', () => {
+    const input = wrapper.dive().find('form').childAt(0)
+    expect(input.prop('id')).toEqual('first_name')
+    expect(input.prop('value')).toBeUndefined()
+    wrapper.dive().find('form').simulate('submit')
+    expect(wrapper.dive().state('first_name')).toEqual('')
+  })
+})
+
+describe('Test Product Component', () => {
+  let wrapper
+
+  beforeEach(() => {
+    wrapper = shallow(<Product />)
+  })
+
+  test('Check initial status', () => {
+    expect(wrapper.dive().state('expanded')).toBe(false)
+  })
+})
+
+describe('Test Shop Component', () => {
+  let wrapper
+
+  beforeEach(() => {
+    wrapper = shallow(<Shop />)
+  })
+
+  test('Check initial status', () => {
+    expect(wrapper.state('inCart')).toEqual({})
+  })
+
+  test('try', () => {
+    wrapper = mount(<Shop />)
+  })
 })
