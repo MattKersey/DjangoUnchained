@@ -117,7 +117,7 @@ class StoreViewSet(viewsets.ViewSet):
         # do some authentication with user
         data = request.POST
         item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
+        store = get_object_or_404(Store.objects.all(), pk=pk)
         store.items.add(item)
         store.save()
         serializer = StoreSerializer(store)
@@ -128,7 +128,7 @@ class StoreViewSet(viewsets.ViewSet):
         # do some authentication with user
         data = request.POST
         item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
+        store = get_object_or_404(Store.objects.all(), pk=pk)
         store.items.remove(item)
         store.save()
         serializer = StoreSerializer(store)
@@ -169,19 +169,19 @@ class ItemViewSet(viewsets.ViewSet):
         data = request.data
         history = History_of_Item.objects.create()
         change_exist = False
-        if data.get("name") and data.get("name") != item.name:
+        if data.get("name", item.name) != item.name:
             history.before_name = item.name
             history.after_name = data.get("name")
             change_exist = True
-        if float(data.get("price")) and float(data.get("price")) != float(item.price):
+        if float(data.get("price", item.price)) != float(item.price):
             history.before_price = item.price
             history.after_price = data.get("price")
             change_exist = True
-        if int(data.get("stock")) and int(data.get("stock")) != int(item.stock):
+        if int(data.get("stock", item.stock)) != int(item.stock):
             history.before_stock = item.stock
             history.after_stock = data.get("stock")
             change_exist = True
-        if data.get("description") and data.get("description") != item.description:
+        if data.get("description", item.description) != item.description:
             history.before_description = item.description
             history.after_description = data.get("description")
             change_exist = True
@@ -217,7 +217,9 @@ class RegisterUserViewSet(viewsets.ViewSet):
         except IntegrityError:
             return Response(data={"status": 0}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            application = Application.objects.get(client_id=os.environ.get("CLIENT_ID"))
+            application = Application.objects.get(
+                client_id=os.getenv("CLIENT_ID", "defaultTestClientID")
+            )
             TOKEN = "".join(random.choice(string.ascii_letters) for i in range(25))
             token = AccessToken.objects.create(
                 user=user,
