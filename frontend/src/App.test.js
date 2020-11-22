@@ -32,7 +32,11 @@ describe('Test Login Component', () => {
 
   test('Empty fields', () => {
     wrapper.dive().find('form').simulate('submit')
-    expect(wrapper.dive().state('username')).toEqual('')
+    expect(wrapper.dive().state('email')).toEqual('')
+
+    const input = wrapper.dive().find('form').childAt(0)
+    input.simulate('change', { target: { name: 'email', value: 'abc@gmail.com' } })
+    //expect(wrapper.update().dive().state('email')).toEqual('email')
   })
 
   test('Handle click', () => {
@@ -54,19 +58,19 @@ describe('Test Register Component', () => {
 
   test('Submit registration', () => {
     const input1 = wrapper.dive().find('form').childAt(0)
+    const input2 = wrapper.dive().find('form').childAt(1)
+    const input3 = wrapper.dive().find('form').childAt(2)
+    const input4 = wrapper.dive().find('form').childAt(3)
     expect(input1.prop('id')).toEqual('first_name')
     expect(input1.prop('value')).toBeUndefined()
-    input1.props('onChange', { target: { name: 'first_name', value: 'A' } })
-    const input2 = wrapper.dive().find('form').childAt(1)
-    input2.props('onChange', { target: { name: 'last_name', value: 'B' } })
-    const input3 = wrapper.dive().find('form').childAt(2)
-    input3.props('onChange', { target: { name: 'email', value: 'abc@gmail.com' } })
-    const input4 = wrapper.dive().find('form').childAt(3)
-    input4.props('onChange', { target: { name: 'password', value: 'password' } })
-    /* ------------------- BUG: state does not update, cannot figure out why ---------------
-    wrapper.dive().find('form').simulate('submit')
-    expect(wrapper.update().dive().state('password')).toEqual('password')
-    */
+    input1.simulate('change', { target: { name: 'first_name', value: 'A' } })
+    input2.simulate('change', { target: { name: 'last_name', value: 'B' } })
+    input3.simulate('change', { target: { name: 'email', value: 'abc@gmail.com' } })
+    input4.simulate('change', { target: { name: 'password', value: 'password' } })
+    // ------------------- BUG: state does not update altogether, cannot figure out why ---------------
+    // At the time of the second simulation, the change made by the first one disappears
+    //wrapper.dive().find('form').simulate('submit')
+    //expect(wrapper.update().dive().state('password')).toEqual('password')
   })
 })
 

@@ -52,30 +52,30 @@ class Login extends React.Component {
     super(props)
 
     this.state = {
-      username: '',
+      email: '',
       password: '',
       error: false
     }
+  }
+
+  handleChange (e) {
+    console.log(e)
+    this.setState({ [e.target.name]: e.target.value }, function () {
+      console.log(this.state)
+    })
   }
 
   // ---------- prototype some error messages when extracting data ----------
   handleClick (event) {
     const apiBaseUrl = '#'
     const payload = {
-      username: this.state.username,
+      email: this.state.email,
       password: this.state.password
     }
 
     axios.post(apiBaseUrl + 'login', payload)
       .then(function (response) {
         console.log(response)
-        if (response.data.code === 204) {
-          console.log('Username password do not match')
-          window.alert('username password do not match')
-        } else {
-          console.log('Username does not exists')
-          window.alert('Username does not exist')
-        }
       })
   }
   // ------------------------ incomplete -------------------------
@@ -102,6 +102,7 @@ class Login extends React.Component {
               id='email'
               label='Email Address'
               name='email'
+              onChange={this.handleChange.bind(this)}
               autoComplete='email'
               autoFocus
             />
@@ -114,6 +115,7 @@ class Login extends React.Component {
               label='Password'
               type='password'
               id='password'
+              onChange={this.handleChange.bind(this)}
               autoComplete='current-password'
             />
             <FormControlLabel

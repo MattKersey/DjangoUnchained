@@ -11,7 +11,6 @@ import Typography from '@material-ui/core/Typography'
 import { withStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import PropTypes from 'prop-types'
-import { withRouter } from 'react-router-dom'
 
 function Copyright () {
   return (
