@@ -1,0 +1,16 @@
+[
+    {
+        "model": "oauth2_provider.accesstoken",
+        "pk": 1,
+        "fields": {
+            "user": 7,
+            "source_refresh_token": null,
+            "token": "t6N1X1LWWell3fTUfzPcezEZxUcEQ6",
+            "application": 1,
+            "expires": "2020-12-31T00:00:00.000Z",
+            "scope": "read write",
+            "created": "2020-11-19T07:31:33.300Z",
+            "updated": "2020-11-19T07:31:33.300Z"
+        }
+    }
+]
