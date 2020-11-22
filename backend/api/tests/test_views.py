@@ -94,7 +94,7 @@ class Test_UserView(APITestCase):
             url + str(self.userMods.pk) + "/",
             {"email": "after@example.com"},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            follow=True
+            follow=True,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, User.objects.filter(email="before@example.com").count())
@@ -198,7 +198,7 @@ class Test_StoreView(APITestCase):
             url + str(self.store2.pk) + "/",
             {"name": "Updated Name"},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            follow=True
+            follow=True,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Store.objects.filter(name="Store 2").count())
@@ -292,15 +292,17 @@ class Test_ItemView(APITestCase):
                 "name": "Updated Name",
                 "description": "Updated Description",
                 "stock": 2,
-                "price": 2.0
+                "price": 2.0,
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            follow=True
+            follow=True,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Item.objects.filter(name="Item 2").count())
         self.assertEqual(1, Item.objects.filter(name="Updated Name").count())
-        self.assertEqual(1, Item.objects.filter(description="Updated Description").count())
+        self.assertEqual(
+            1, Item.objects.filter(description="Updated Description").count()
+        )
         self.assertEqual(1, Item.objects.filter(stock=2).count())
         self.assertEqual(1, Item.objects.filter(price=2.0).count())
 
@@ -309,7 +311,7 @@ class Test_ItemView(APITestCase):
         r = self.client.put(
             url + str(self.item3.pk) + "/",
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            follow=True
+            follow=True,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(1, Item.objects.filter(name="Item 3").count())

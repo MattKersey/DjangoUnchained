@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from api.models import User, Category, Store, Item, Association, Role
+from api.models import User, UserManager, Category, Store, Item, Association, Role
 import pytest
 from datetime import datetime
 from django.core.exceptions import ValidationError
@@ -30,7 +30,13 @@ class Test_User_Model(TestCase):
         self.assertEqual(user.id, other_user.id)
         self.assertEqual(0, user.stores.count())
 
-    # @pytest.mark.django_db
+    def test_no_email(self):
+        with self.assertRaises(ValidationError):
+            user = User.objects.create(
+                password=TEST_USER_PASSWORD,
+            )
+            user.full_clean()
+
     def test_invalid_email(self):
         sample_email = f"{'abc'*100}@email.com"
         with self.assertRaises(ValidationError):
@@ -40,7 +46,6 @@ class Test_User_Model(TestCase):
             )
             user.full_clean()
 
-    # @pytest.mark.django_db
     def test_duplicate_email(self):
         _ = User.objects.create_user(
             email=TEST_USER_EMAIL,
@@ -75,6 +80,16 @@ class Test_User_Model(TestCase):
         self.assertTrue(user.is_admin)
         self.assertEqual(user.email, user.__str__())
         self.assertEqual(0, user.stores.count())
+
+
+class Test_UserManager_Model(TestCase):
+    def test_value_error(self):
+        with self.assertRaises(ValueError):
+            manager = UserManager()
+            manager.create_user(
+                email=None,
+                password=TEST_USER_PASSWORD,
+            )
 
 
 TEST_ITEM_NAME = "Item"
@@ -216,7 +231,6 @@ class Test_Store_Model(TestCase):
             address=TEST_STORE_ADDRESS,
             category=TEST_STORE_CATEGORY,
         )
-        store.save()
         self.assertEqual(store.name, TEST_STORE_NAME)
         self.assertEqual(store.__str__(), TEST_STORE_NAME)
         self.assertEqual(store.address, TEST_STORE_ADDRESS)
@@ -225,6 +239,20 @@ class Test_Store_Model(TestCase):
         sample_item = Item.objects.get(name="Item 1")
         store.items.add(sample_item)
         self.assertEqual(1, store.items.count())
+
+    @pytest.mark.django_db
+    def test_user_with_store(self):
+        store = Store.objects.create(
+            name=TEST_STORE_NAME,
+            address=TEST_STORE_ADDRESS,
+            category=TEST_STORE_CATEGORY,
+        )
+        user = User.objects.create_user(
+            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD, stores=[store]
+        )
+        user.save()
+        self.assertEqual(1, user.stores.all().count())
+        self.assertTrue(store in user.stores.all())
 
 
 TEST_ASSOCIATION_ROLE = Role.EMPLOYEE
@@ -267,3 +295,7 @@ class Test_Association_Model(TestCase):
         self.assertEqual(association.store, self.store)
         self.assertEqual(association.role, TEST_ASSOCIATION_ROLE)
         self.assertEqual(association.membership, time)
+        self.assertEqual(
+            association.__str__(),
+            f"[{association.role}] {association.user} --> {association.store.name}",
+        )
