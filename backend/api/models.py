@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator
 from django.contrib.auth.models import PermissionsMixin
+from django.core.exceptions import ValidationError
 
 
 class OrderType(models.TextChoices):
@@ -93,6 +94,15 @@ class Item(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        print("hello")
+        if self.bulkPrice > self.price:
+            raise ValidationError('Bulk Price cannot exceed Price')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(Item, self).save(*args, **kwargs)
 
 
 class Category(models.TextChoices):
