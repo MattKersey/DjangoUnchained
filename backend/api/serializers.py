@@ -23,7 +23,17 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Item
-        fields = ["image", "name", "stock", "price", "description", "history"]
+        fields = [
+            "image",
+            "name",
+            "stock",
+            "price",
+            "orderType",
+            "bulkMinimum",
+            "bulkPrice",
+            "description",
+            "history",
+        ]
 
 
 class StoreSerializer(serializers.HyperlinkedModelSerializer):

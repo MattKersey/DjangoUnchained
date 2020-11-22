@@ -4,6 +4,12 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.models import PermissionsMixin
 
 
+class OrderType(models.TextChoices):
+    INDIVIDUAL = "Individual"
+    BULK = "Bulk"
+    BOTH = "Both"
+
+
 class History_of_Item(models.Model):
     before_name = models.CharField(max_length=50, blank=True, null=True)
     after_name = models.CharField(max_length=50, blank=True, null=True)
@@ -37,6 +43,18 @@ class Item(models.Model):
     name = models.CharField(max_length=50)
     stock = models.IntegerField(validators=[MinValueValidator(limit_value=0)])
     price = models.DecimalField(
+        null=True,
+        blank=True,
+        default=0.0,
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+    )
+    orderType = models.CharField(
+        choices=OrderType.choices, max_length=10, default=OrderType.INDIVIDUAL
+    )
+    bulkMinimum = models.IntegerField(validators=[MinValueValidator(limit_value=0)], default=0)
+    bulkPrice = models.DecimalField(
         null=True,
         blank=True,
         default=0.0,
