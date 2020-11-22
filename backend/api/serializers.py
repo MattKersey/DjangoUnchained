@@ -6,6 +6,7 @@ class ItemHistorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = History_of_Item
         fields = [
+            "pk",
             "before_name",
             "after_name",
             "before_price",
@@ -30,6 +31,7 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Item
         fields = [
+            "pk",
             "image",
             "name",
             "stock",
@@ -47,7 +49,7 @@ class StoreSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Store
-        fields = ["address", "name", "category", "items"]
+        fields = ["pk", "address", "name", "category", "items"]
 
 
 class AssociationSerializer(serializers.ModelSerializer):
@@ -65,4 +67,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "active", "staff", "admin", "stores"]
+        fields = ["pk", "email", "active", "staff", "admin", "stores"]
