@@ -10,6 +10,8 @@ import Register from './Login/Register'
 import Shop from './Shop/Shop'
 
 import Container from '@material-ui/core/Container'
+import LoginButtons from './OauthLogin/LoginButtons'
+import LoginRedirect from './OauthLogin/LoginRedirect'
 
 class App extends Component {
   render () {
@@ -23,6 +25,8 @@ class App extends Component {
             <Route path='/' component={Login} exact />
             <Route path='/register' component={Register} exact />
             <Route path='/shop/:shopID' component={Shop} exact />
+            <Route path='/loginbuttons' component={LoginButtons} exact />
+            <Route path='/loginredirect' component={LoginRedirect} exact />
             <Route component={Error} />
           </Switch>
         </Container>
