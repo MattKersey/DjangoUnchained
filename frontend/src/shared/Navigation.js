@@ -23,8 +23,6 @@ const styles = makeStyles((theme) => ({
 class NavBar extends React.Component {
   constructor (props) {
     super(props)
-
-    console.log(this.props)
   }
 
   render () {
@@ -32,7 +30,7 @@ class NavBar extends React.Component {
     return (
       <div className={classes.root}>
         <AppBar position='static'>
-          <Toolbar display='flex' justifyContent='space-between'>
+          <Toolbar>
             <Typography variant='h6' noWrap>
               PyMarket
             </Typography>

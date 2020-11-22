@@ -3,3 +3,8 @@
     text-align: center;
     justify-content: center;
 }
+.cardAction{
+    display: block;
+    text-align: initial;
+    width: 100% !important
+  }

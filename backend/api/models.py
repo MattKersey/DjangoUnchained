@@ -45,7 +45,7 @@ class Item(models.Model):
         max_digits=12,
     )
     description = models.TextField()
-    history = models.ManyToManyField(History_of_Item)
+    history = models.ManyToManyField(History_of_Item, blank=True)
 
     def __str__(self):
         return self.name
@@ -63,8 +63,13 @@ class Store(models.Model):
     category = models.CharField(
         choices=Category.choices, max_length=10, default=Category.OTHER
     )
-    items = models.ManyToManyField(Item)
-
+    items = models.ManyToManyField(Item, blank=True)
+    def create_store(self,name,category,address=None):
+        if not name:
+            raise ValueError("Stores must have a name")
+        store = self.model(address,name,category)
+        store.save(using=self._db)
+        return store
     def __str__(self):
         return self.name
 

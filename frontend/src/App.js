@@ -10,6 +10,7 @@ import Error from './shared/Error'
 import NavBar from './shared/Navigation'
 import Register from './Login/Register'
 import Shop from './Shop/Shop'
+import AddShopForm from './User/AddShopForm.js'
 
 import Container from '@material-ui/core/Container'
 
@@ -52,6 +53,7 @@ class App extends Component {
             <PrivateRoute path='/' component={UserPage} exact />
             <Route path='/login' component={Login} exact />
             <PrivateRoute path='/register' component={Register} exact />
+            <PrivateRoute path='/register_shop' component={AddShopForm} exact />
             <PrivateRoute path='/shop/:shopID' component={Shop} exact />
             <Route component={Error} />
           </Switch>

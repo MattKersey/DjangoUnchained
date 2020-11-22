@@ -32,8 +32,8 @@ class UserViewSet(viewsets.ViewSet):
     API endpoint that allows users to be viewed.
     """
 
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasReadWriteScope]
+    authentication_classes = []
+    permission_classes = []
 
     def list(self, request):
         serializer = UserSerializer(User.objects.all(), many=True)
@@ -110,6 +110,14 @@ class StoreViewSet(viewsets.ViewSet):
         store.name = data.get("name", store.name)
         store.category = data.get("category", store.category)
         # items is handled in another endpoint
+        store.save()
+        serializer = StoreSerializer(store)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=["POST"])
+    def create_store(self,request):
+        data = request.Post
+        store = Store(address=data.get("store_address"),name=data.get("store_name"),category=data.get("store_category"))
         store.save()
         serializer = StoreSerializer(store)
         return Response(serializer.data)

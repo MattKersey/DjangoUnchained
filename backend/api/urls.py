@@ -9,4 +9,4 @@ router.register(r"items", views.ItemViewSet, basename="item")
 router.register(r"register", views.RegisterUserViewSet, basename="register")
 router.register(r"ping", views.PingViewSet, basename="ping")
 
-urlpatterns = router.urls + [path('current_user/', current_user),]
+urlpatterns = router.urls + [path('current_user/', current_user)]
