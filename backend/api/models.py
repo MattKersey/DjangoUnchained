@@ -87,9 +87,8 @@ class UserManager(BaseUserManager):
             is_superuser=is_superuser,
         )
         user.set_password(password)
-        if stores is None:
-            user.save(using=self._db)
-        else:
+        user.save(using=self._db)
+        if stores is not None:
             user.stores.set(stores)
             user.save()
         return user
