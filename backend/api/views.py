@@ -163,6 +163,27 @@ class ItemViewSet(viewsets.ViewSet):
         serializer = ItemSerializer(item)
         return Response(serializer.data)
 
+    def create(self, request):
+        data = request.POST
+        try:
+            item = Item.objects.create(
+                image=data.get("image"),
+                name=data.get("name"),
+                stock=data.get("stock"),
+                price=float(data.get("price", "0.0")),
+                orderType=data.get("orderType"),
+                bulkMinimum=data.get("bulkMinimum"),
+                bulkPrice=float(data.get("bulkPrice", "0.0")),
+                description=data.get("description")
+            )
+        except IntegrityError:
+            return Response(data={"Error": "Integrity Error"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                data=ItemSerializer(item).data,
+                status=status.HTTP_201_CREATED,
+            )
+
     def update(self, request, pk=None):
         item = get_object_or_404(Item.objects.all(), pk=pk)
         # item.image = ....
