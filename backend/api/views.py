@@ -147,6 +147,8 @@ class StoreViewSet(viewsets.ViewSet):
         # user = get_object_or_404(User.objects.all(), pk=data.get('user_id'))
         store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
         item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
+        for history in item.history.all():
+            history.delete()
         item.delete()
         serializer = StoreSerializer(store)
         return Response(serializer.data)
