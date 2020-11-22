@@ -83,6 +83,12 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    @action(detail=False, methods=["GET"])
+    def current_user(self, request):
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+
 
 class StoreViewSet(viewsets.ViewSet):
     """
