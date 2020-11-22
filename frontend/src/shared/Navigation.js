@@ -1,3 +1,4 @@
+/* eslint react/prop-types: 0 */
 import React from 'react'
 import './navigation.css'
 import { makeStyles, withStyles } from '@material-ui/core/styles'

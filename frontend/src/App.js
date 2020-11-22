@@ -1,6 +1,8 @@
+/* global localStorage, fetch */
+
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { BrowserRouter, Route, Switch, Redirect, useHistory } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
 import UserPage from './User/UserPage'
 import Login from './Login/Login'
