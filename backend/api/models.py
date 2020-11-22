@@ -33,6 +33,32 @@ class History_of_Item(models.Model):
     after_stock = models.IntegerField(
         validators=[MinValueValidator(limit_value=0)], blank=True, null=True
     )
+    before_orderType = models.CharField(
+        choices=OrderType.choices, max_length=10, blank=True, null=True
+    )
+    after_orderType = models.CharField(
+        choices=OrderType.choices, max_length=10, blank=True, null=True
+    )
+    before_bulkMinimum = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], blank=True, null=True
+    )
+    after_bulkMinimum = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], blank=True, null=True
+    )
+    before_bulkPrice = models.DecimalField(
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+    )
+    after_bulkPrice = models.DecimalField(
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+    )
     before_description = models.TextField(blank=True, null=True)
     after_description = models.TextField(blank=True, null=True)
     datetime = models.DateTimeField(auto_now=True)
