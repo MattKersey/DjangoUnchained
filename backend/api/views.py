@@ -23,6 +23,8 @@ import random
 import datetime
 from oauth2_provider.models import get_application_model, get_access_token_model
 
+from api.models import User, Store, Item, History_of_Item, Association
+
 Application = get_application_model()
 AccessToken = get_access_token_model()
 
@@ -65,6 +67,34 @@ class UserViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=["POST"])
+    def add_store2(self, request, pk=None):
+        data = request.POST
+        try:
+            if data.get("name") is None:
+                return Response({"message": "Please add name to store"}, status=status.HTTP_400_BAD_REQUEST)
+            if data.get("address") is None:
+                return Response({"message": "Please add address to store"}, status=status.HTTP_400_BAD_REQUEST)
+            if data.get("category") is None or data.get("category") not in ["Food", "Clothing", "Other"]:
+                return Response({"message": "Invalid category."}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(pk=pk)
+            store = Store.objects.create(
+                name=data.get('name'),
+                address=data.get('address'),
+                category=data.get('category')
+            )
+            store.save()
+            user.stores.add(store)
+            assoc = Association.objects.get(user=user, store=store)
+            assoc.role = "Manager"
+            assoc.save()
+            user.save()
+            return Response(UserSerializer(user).data)
+        except User.DoesNotExist:
+            return Response({"message": "The user does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "The store cannot be added"}, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=["POST"])
     def remove_store(self, request, pk=None):
         data = request.POST
         user = get_object_or_404(User.objects.all(), pk=pk)
@@ -91,8 +121,8 @@ class StoreViewSet(viewsets.ViewSet):
     API endpoint that allows stores to be viewed.
     """
 
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasReadWriteScope]
+    authentication_classes = []
+    permission_classes = []
 
     def list(self, request):
         serializer = StoreSerializer(Store.objects.all(), many=True)

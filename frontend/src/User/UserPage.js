@@ -29,27 +29,31 @@ class UserPage extends React.Component {
       })
   }
 
+  handleAddStore () { window.location = '/register_shop' }
+
   render () {
     return (
       <div align='center'>
-        <Box mb={4}>
-          <Typography component='h1' variant='h5' mb={2}>
+        <Box mb={4} mt={2}>
+          <Typography component='h1' variant='h5'>
             Welcome {this.state.email}!
           </Typography>
+          <Typography component='h1' variant='h5'>
+            Your Stores:
+          </Typography>
         </Box>
-        <Grid container direction='row' alignItems='baseline' spacing={10}>
-          {this.state.shops.map((shop, index) =>
-            <Grid item key={index} md={3}>
-              <StoreCard name={shop.store_name} id={shop.store_id} />
-            </Grid>
-          )}
-          <Grid item md={3}>
-            <Fab color='primary' aria-label='add' variant='extended'>
-              <AddIcon />
-              Add Store
-            </Fab>
+        <Box mt={2}>
+          <Grid container direction='row' alignItems='baseline' spacing={10}>
+            {this.state.shops.map((shop, index) =>
+              <Grid item key={index} md={3}>
+                <StoreCard name={shop.store_name} id={shop.store_id} />
+              </Grid>
+            )}
           </Grid>
-        </Grid>
+          <Fab color='primary' onClick={this.handleAddStore} aria-label='add'>
+            <AddIcon />
+          </Fab>
+        </Box>
 
       </div>
     )

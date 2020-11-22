@@ -7,6 +7,9 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Button from '@material-ui/core/Button'
 import Typography from '@material-ui/core/Typography'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
+import Link from '@material-ui/core/Link'
+import PropTypes from 'prop-types'
+
 const styles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -14,17 +17,10 @@ const styles = makeStyles((theme) => ({
   },
   menuButton: {
     marginRight: theme.spacing(2)
-  },
-  title: {
-    flexGrow: 1
   }
 }))
 
 class NavBar extends React.Component {
-  constructor (props) {
-    super(props)
-  }
-
   render () {
     const { classes } = this.props
     return (
@@ -32,7 +28,9 @@ class NavBar extends React.Component {
         <AppBar position='static'>
           <Toolbar>
             <Typography variant='h6' noWrap>
-              PyMarket
+              <Link href='/' className='title' onClick={(event) => event.preventDefault}>
+                PyMarket
+              </Link>
             </Typography>
             {this.props.isLogged ? <Button to='/' onClick={this.props.handleLogOut} color='inherit'><ExitToAppIcon /></Button> : null}
           </Toolbar>
@@ -41,5 +39,7 @@ class NavBar extends React.Component {
     )
   }
 }
-
+NavBar.propTypes = {
+  classes: PropTypes.any
+}
 export default withStyles(styles, { withTheme: true })(NavBar)

@@ -1,5 +1,4 @@
 import React from 'react'
-import axios from 'axios'
 import Avatar from '@material-ui/core/Avatar'
 import Button from '@material-ui/core/Button'
 import CssBaseline from '@material-ui/core/CssBaseline'
@@ -14,6 +13,7 @@ import InputLabel from '@material-ui/core/InputLabel'
 import MenuItem from '@material-ui/core/MenuItem'
 import FormControl from '@material-ui/core/FormControl'
 import Select from '@material-ui/core/Select'
+import axios from 'axios'
 const styles = theme => ({
   paper: {
     marginTop: theme.spacing(8),
@@ -60,7 +60,22 @@ class AddShopForm extends React.Component {
   }
 
   handleSubmit (event) {
-    console.log(this.state)
+    axios.post('http://localhost:8000/api/current_user/', {
+      headers: {
+        Authorization: `Token ${localStorage.getItem('token')}`
+      },
+      data: {
+
+      }
+    })
+      .then((res) => {
+        this.setState({ email: res.data.email, shops: res.data.stores })
+        console.log(res.data.stores)
+      })
+      .catch((error) => {
+        console.error(error)
+      })
+    event.preventDefault()
   }
 
   render () {
@@ -75,7 +90,7 @@ class AddShopForm extends React.Component {
           <Typography component='h1' variant='h5'>
             Add a new Store
           </Typography>
-          <form className={classes.form} onSubmit={this.handleSubmit.bind(this)}>
+          <form className={classes.form} onSubmit={this.handleSubmit}>
             <TextField
               variant='outlined'
               margin='normal'
@@ -83,8 +98,8 @@ class AddShopForm extends React.Component {
               fullWidth
               id='shop_name'
               label='Store Name'
-              name='shop_name'
-              autoComplete='shop_name'
+              name='store_name'
+              autoComplete='store_name'
               autoFocus
               onChange={this.handleChange}
             />
