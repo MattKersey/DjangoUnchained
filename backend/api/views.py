@@ -209,7 +209,7 @@ class RegisterUserViewSet(viewsets.ViewSet):
     permission_classes = []
 
     def create(self, request):
-        data = request.POST
+        data = request.data
         try:
             user = User.objects.create_user(
                 email=data.get("email"), password=data.get("password")
@@ -217,10 +217,17 @@ class RegisterUserViewSet(viewsets.ViewSet):
         except IntegrityError:
             return Response(data={"status": 0}, status=status.HTTP_400_BAD_REQUEST)
         else:
-            application = Application.objects.get(
-                client_id=os.getenv("CLIENT_ID", "defaultTestClientID")
+            application = Application.objects.create(
+                client_id="".join(random.choice(string.ascii_letters) for i in range(40)),
+                client_secret="".join(random.choice(string.ascii_letters) for i in range(128)),
+                authorization_grant_type=Application.GRANT_AUTHORIZATION_CODE,
+                client_type=Application.CLIENT_CONFIDENTIAL,
+                name="PyMarket-API",
+                redirect_uris="http://127.0.0.1:8000/authredirect/",
+                user=user,
             )
-            TOKEN = "".join(random.choice(string.ascii_letters) for i in range(25))
+            application.save()
+            TOKEN = "".join(random.choice(string.ascii_letters) for i in range(30))
             token = AccessToken.objects.create(
                 user=user,
                 token=TOKEN,

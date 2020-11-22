@@ -60,8 +60,11 @@ class Register extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this)
   }
 
-  handleChange (event) {
-    this.setState({ [event.target.name]: event.target.value })
+  handleChange (e) {
+    console.log(e)
+    this.setState({ [e.target.name]: e.target.value }, function () {
+      console.log(this.state)
+    })
   }
 
   handleSubmit (event) {
@@ -79,7 +82,7 @@ class Register extends React.Component {
       .catch(function (error) {
         console.log(error)
       })
-    //event.preventDefault()
+    event.preventDefault()
   }
 
   render () {
@@ -103,6 +106,7 @@ class Register extends React.Component {
               id='first_name'
               label='First Name'
               name='first_name'
+              onChange={this.handleChange.bind(this)}
               autoComplete='first_name'
               autoFocus
             />
@@ -114,6 +118,7 @@ class Register extends React.Component {
               id='last_name'
               label='Last Name'
               name='last_name'
+              onChange={this.handleChange.bind(this)}
               autoComplete='last_name'
             />
             <TextField
@@ -124,7 +129,7 @@ class Register extends React.Component {
               id='email'
               label='Email Address'
               name='email'
-              onChange={this.handleChange}
+              onChange={this.handleChange.bind(this)}
               autoComplete='email'
             />
             <TextField
@@ -136,7 +141,7 @@ class Register extends React.Component {
               label='Password'
               type='password'
               id='password'
-              onChange={this.handleChange}
+              onChange={this.handleChange.bind(this)}
               autoComplete='current-password'
             />
             <Button
