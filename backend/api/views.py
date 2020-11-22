@@ -210,18 +210,51 @@ class ItemViewSet(viewsets.ViewSet):
             history.before_name = item.name
             history.after_name = data.get("name")
             change_exist = True
+        else:
+            history.before_name = item.name
+            history.after_name = item.name
         if float(data.get("price", item.price)) != float(item.price):
             history.before_price = item.price
             history.after_price = data.get("price")
             change_exist = True
+        else:
+            history.before_price = item.price
+            history.after_price = item.price
         if int(data.get("stock", item.stock)) != int(item.stock):
             history.before_stock = item.stock
             history.after_stock = data.get("stock")
             change_exist = True
+        else:
+            history.before_stock = item.stock
+            history.after_stock = item.stock
+        if data.get("orderType", item.orderType) != item.orderType:
+            history.before_orderType = item.orderType
+            history.after_orderType = data.get("orderType")
+            change_exist = True
+        else:
+            history.before_orderType = item.orderType
+            history.after_orderType = item.orderType
+        if int(data.get("bulkMinimum", item.bulkMinimum)) != int(item.bulkMinimum):
+            history.before_bulkMinimum = item.bulkMinimum
+            history.after_bulkMinimum = data.get("bulkMinimum")
+            change_exist = True
+        else:
+            history.before_bulkMinimum = item.bulkMinimum
+            history.after_bulkMinimum = item.bulkMinimum
+        if float(data.get("bulkPrice", item.bulkPrice)) != float(item.bulkPrice):
+            history.before_bulkPrice = item.bulkPrice
+            history.after_bulkPrice = data.get("bulkPrice")
+            change_exist = True
+        else:
+            history.before_bulkPrice = item.bulkPrice
+            history.after_bulkPrice = item.bulkPrice
         if data.get("description", item.description) != item.description:
             history.before_description = item.description
             history.after_description = data.get("description")
             change_exist = True
+        else:
+            history.before_description = item.description
+            history.after_description = item.description
         if not change_exist:
             history.delete()
             return Response({"status": "no change"})
