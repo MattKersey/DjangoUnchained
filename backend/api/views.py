@@ -329,11 +329,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The item cannot be added."},
-                status=status.HTTP_406_NOT_ACCEPTABLE,
-            )
+        # Should never get this
+        # except (IntegrityError, ValidationError):
+        #     return Response(
+        #         {"message": "The item cannot be added."},
+        #         status=status.HTTP_406_NOT_ACCEPTABLE,
+        #     )
 
     @action(detail=True, methods=["POST"])
     def remove_item(self, request, pk=None):
@@ -355,11 +356,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The item cannot be added."},
-                status=status.HTTP_406_NOT_ACCEPTABLE,
-            )
+        # Should never get this
+        # except (IntegrityError, ValidationError):
+        #     return Response(
+        #         {"message": "The item cannot be added."},
+        #         status=status.HTTP_406_NOT_ACCEPTABLE,
+        #     )
 
     @action(detail=False, methods=["DELETE"])
     def delete_item(self, request):
@@ -367,6 +369,8 @@ class StoreViewSet(viewsets.ViewSet):
             data = request.POST
             item = Item.objects.get(pk=data.get("item_id"))
             store = Store.objects.get(pk=data.get("store_id"))
+            if store.items.filter(pk=data.get("item_id")).count() == 0:
+                raise ValidationError("Store not associated with item")
             store.items.remove(item)
             # Just in case we need it in the future
             # _ = History_of_Item.create(

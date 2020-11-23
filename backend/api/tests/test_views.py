@@ -439,11 +439,23 @@ class Test_StoreView(APITestCase):
             after_stock=1,
             before_price=0.5,
             after_price=1.0,
-            before_description="Item 3",
+            before_description="Item 0",
             after_description="Item 3"
+        )
+        self.history2 = History_of_Item.objects.create(
+            before_name="Item 4",
+            after_name="Item 2",
+            before_stock=1,
+            after_stock=1,
+            before_price=0.5,
+            after_price=1.0,
+            before_description="Item 4",
+            after_description="Item 2"
         )
         self.item3.history.add(self.history1)
         self.item3.save()
+        self.item2.history.add(self.history2)
+        self.item2.save()
         self.store1 = Store.objects.create(
             address="1 Main Street", name="Store 1", category=Category.FOOD
         )
@@ -452,6 +464,8 @@ class Test_StoreView(APITestCase):
         )
         self.store1.items.add(self.item2)
         self.store1.save()
+        self.store2.items.add(self.item3)
+        self.store2.save()
 
     def test_retrieve_store(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -541,6 +555,36 @@ class Test_StoreView(APITestCase):
         self.store1.items.remove(self.item1)
         self.assertEqual(1, len(self.store1.items.all()))
 
+    def test_add_item_bad_item(self):
+        url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
+        r = self.client.post(
+            url,
+            {"item_id": 100000000},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The item does not exist.", r.data["message"])
+
+    def test_add_item_bad_store(self):
+        url = "http://127.0.0.1:8000/api/stores/100000000/add_item/"
+        r = self.client.post(
+            url,
+            {"item_id": self.item1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The store does not exist.", r.data["message"])
+
+    # def test_add_item_bad_combo(self):
+    #     url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
+    #     r = self.client.post(
+    #         url,
+    #         {"item_id": self.item2.pk},
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #     )
+    #     self.assertEqual(406, r.status_code)
+    #     self.assertEqual("The item cannot be added.", r.data["message"])
+
     def test_purchase_items(self):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/purchase_items/"
         r = self.client.post(
@@ -621,15 +665,81 @@ class Test_StoreView(APITestCase):
         self.store1.items.add(self.item2)
         self.assertEqual(1, len(self.store1.items.all()))
 
+    def test_remove_item_bad_item(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/remove_item/"
+        )
+        r = self.client.post(
+            url,
+            {"item_id": 100000000},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The item does not exist.", r.data["message"])
+
+    def test_remove_item_bad_store(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/100000000/remove_item/"
+        )
+        r = self.client.post(
+            url,
+            {"item_id": self.item2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The store does not exist.", r.data["message"])
+
+    # def test_remove_item_bad_combo(self):
+    #     url = (
+    #         "http://127.0.0.1:8000/api/stores/" + str(self.store2.pk) + "/remove_item/"
+    #     )
+    #     r = self.client.post(
+    #         url,
+    #         {"item_id": self.item2.pk},
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #     )
+    #     self.assertEqual(406, r.status_code)
+    #     self.assertEqual("The item cannot be added.", r.data["message"])
+
     def test_delete_item(self):
         url = "http://127.0.0.1:8000/api/stores/delete_item/"
         r = self.client.delete(
             url,
-            {"item_id": self.item3.pk, "store_id": self.store1.pk},
+            {"item_id": self.item3.pk, "store_id": self.store2.pk},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Item.objects.filter(name="Item 3").count())
+
+    def test_delete_item_bad_item(self):
+        url = "http://127.0.0.1:8000/api/stores/delete_item/"
+        r = self.client.delete(
+            url,
+            {"item_id": 100000000, "store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The item does not exist.", r.data["message"])
+
+    def test_delete_item_bad_store(self):
+        url = "http://127.0.0.1:8000/api/stores/delete_item/"
+        r = self.client.delete(
+            url,
+            {"item_id": self.item3.pk, "store_id": 100000000},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The store does not exist.", r.data["message"])
+
+    def test_delete_item_bad_combo(self):
+        url = "http://127.0.0.1:8000/api/stores/delete_item/"
+        r = self.client.delete(
+            url,
+            {"item_id": self.item2.pk, "store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(406, r.status_code)
+        self.assertEqual("The item cannot be deleted.", r.data["message"])
 
 
 class Test_ItemView(APITestCase):
