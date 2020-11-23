@@ -51,7 +51,8 @@ class AddShopForm extends React.Component {
       name: '',
       address: '',
       category: '',
-      user_id: -1
+      user_id: -1,
+      madeReq: false
     }
 
     this.handleChange = this.handleChange.bind(this)
@@ -64,7 +65,7 @@ class AddShopForm extends React.Component {
 
   handleSubmit (event) {
     const myHeaders = new Headers()
-    myHeaders.append('Authorization', 'Bearer NE5Yxh9CoZYAnoMoCt1p26P0jtS1pe')
+    myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
     myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
 
     const urlencoded = new URLSearchParams()
@@ -80,8 +81,8 @@ class AddShopForm extends React.Component {
     }
 
     fetch('http://127.0.0.1:8000/api/users/' + localStorage.getItem('user_id') + '/add_store2/', requestOptions)
-      .then(response => response.text())
-      .then(result => console.log(result))
+      .then(response => response.json())
+      .then(result => { window.location = '/shop/' + result.id })
       .catch(error => console.log('error', error))
     event.preventDefault()
   }

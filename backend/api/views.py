@@ -84,7 +84,7 @@ class UserViewSet(viewsets.ViewSet):
             assoc.role = "Manager"
             assoc.save()
             user.save()
-            return Response(UserSerializer(user).data)
+            return Response(StoreSerializer(store).data)
         except User.DoesNotExist:
             return Response({"message": "The user does not exist"}, status=status.HTTP_400_BAD_REQUEST)
         else:
