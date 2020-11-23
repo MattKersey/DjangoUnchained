@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
-from api.models import User, Store, Category, Item
+from api.models import User, Store, Category, Item, Association
 import datetime
 import requests_mock
 import os
@@ -106,13 +106,15 @@ class Test_UserView(APITestCase):
         )
         r = self.client.post(
             url,
-            {"store_id": self.store3.pk},
+            {
+                "name": self.store3.pk,
+                "category": self.store3.category,
+                "address": self.store3.address,
+            },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(2, len(self.userExists.stores.all()))
-        self.userExists.stores.remove(self.store3)
-        self.assertEqual(1, len(self.userExists.stores.all()))
 
     def test_remove_store(self):
         url = (
@@ -131,14 +133,25 @@ class Test_UserView(APITestCase):
         self.assertEqual(1, len(self.userExists.stores.all()))
 
     def test_delete_store(self):
-        url = "http://127.0.0.1:8000/api/users/delete_store/"
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userExists.pk)
+            + "/delete_store/"
+        )
+        store_id = self.store2.pk
         r = self.client.delete(
             url,
-            {"user_id": self.userExists.pk, "store_id": self.store1.pk},
+            {"user_id": self.userExists.pk, "store_id": self.store2.pk},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(200, r.status_code)
-        self.assertEqual(0, Store.objects.filter(name="Store 1").count())
+        self.assertEqual(0, self.userExists.stores.all().count())
+        self.assertFalse(Store.objects.filter(pk=store_id).exists())
+        self.assertFalse(
+            Association.objects.filter(
+                user=self.userExists, store__pk=store_id
+            ).exists()
+        )
 
 
 class Test_StoreView(APITestCase):
