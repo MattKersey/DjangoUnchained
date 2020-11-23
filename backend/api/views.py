@@ -1,5 +1,13 @@
 import os
-from api.models import User, Store, Item, History_of_Item, Association, Role
+from api.models import (
+    User,
+    Store,
+    Item,
+    History_of_Item,
+    Association,
+    Role,
+    History_Category,
+)
 from rest_framework import viewsets
 from rest_framework.response import Response
 from api.serializers import (
@@ -236,6 +244,45 @@ class StoreViewSet(viewsets.ViewSet):
             )
 
     @action(detail=True, methods=["POST"])
+    def purchase_items(self, request, pk=None):
+        try:
+            data = request.data
+            store = Store.objects.get(pk=pk)
+            for purchase_item in data.get("items"):
+                # to confirm that the item exists
+                item = Item.objects.get(pk=purchase_item.get("id"))
+                # to confirm that puchase can be made
+                # before saving any change of quantity
+                if item.stock < purchase_item.get("quantity"):
+                    return Response(
+                        {
+                            "message": f"The purchase quantity for '{item.name}' exceeds minimum."
+                        },
+                        status=status.HTTP_406_NOT_ACCEPTABLE,
+                    )
+            for purchase_item in data.get("items"):
+                item = Item.objects.get(pk=purchase_item.get("id"))
+                _ = History_of_Item.create(
+                    before_stock=item.stock,
+                    after_stock=item.stock - purchase_item.get("quantity"),
+                    category=History_Category.PURCHASE,
+                )
+                item.stock -= purchase_item.get("quantity")
+                item.save()
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Item.DoesNotExist:
+            return Response(
+                {"message": "At least one of the items does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    @action(detail=True, methods=["POST"])
     def add_item(self, request, pk=None):
         try:
             data = request.POST
@@ -293,6 +340,19 @@ class StoreViewSet(viewsets.ViewSet):
             data = request.POST
             item = Item.objects.get(pk=data.get("item_id"))
             store = Store.objects.get(pk=data.get("store_id"))
+            store.items.remove(item)
+            # Just in case we need it in the future
+            # _ = History_of_Item.create(
+            #     category=History_Category.REMOVAL,
+            #     before_bulkMinimum=item.bulkMinimum,
+            #     before_bulkPrice=item.bulkPrice,
+            #     before_description=item.description,
+            #     before_image=item.image,
+            #     before_name=item.name,
+            #     before_orderType=item.orderType,
+            #     before_price=item.price,
+            #     before_stock=item.stock,
+            # )
             for history in item.history.all():
                 history.delete()
             item.delete()
@@ -361,6 +421,7 @@ class ItemViewSet(viewsets.ViewSet):
                 after_bulkMinimum=data.get("bulkMinimum"),
                 after_bulkPrice=data.get("bulkPrice", "0.0"),
                 after_description=data.get("description"),
+                category=History_Category.ADDITION,
             )
             item.history.add(item_history)
             store.items.add(item)
@@ -386,7 +447,9 @@ class ItemViewSet(viewsets.ViewSet):
         try:
             item = Item.objects.get(pk=pk)
             data = request.data
-            history = History_of_Item.objects.create()
+            history = History_of_Item.objects.create(
+                category=History_Category.UPDATE,
+            )
             change_exist = False
             if data.get("image", item.image) != item.image:
                 history.before_image = item.image
