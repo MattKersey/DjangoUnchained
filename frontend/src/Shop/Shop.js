@@ -1,4 +1,4 @@
-/* global localStorage, fetch */
+/* global localStorage, fetch, Headers, alert */
 /* istanbul ignore file */
 /* eslint react/prop-types: 0 */
 
@@ -25,6 +25,12 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import AddItemForm from './AddItemForm.js'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
 
+function subTotal (items) {
+  return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
+}
+function ccyFormat (num) {
+  return `${num.toFixed(2)}`
+}
 class Shop extends React.Component {
   constructor (props) {
     super(props)
@@ -34,23 +40,25 @@ class Shop extends React.Component {
       inCart: {},
       storeName: '',
       open: false,
-      store_id: -1
+      store_id: -1,
+      total: 0
     }
   }
 
   onAddToCart (event, data) {
     if (data.pk in this.state.inCart) {
-      const newProd = { quantity: this.state.inCart[data.pk].quantity + 1, productName: data.name, product: data, price: data.price }
+      const newProd = { quantity: this.state.inCart[data.pk].quantity + 1, productName: data.name, price: data.price, id: data.pk }
       const oldCart = this.state.inCart
       oldCart[data.pk] = newProd
       this.setState({ inCart: oldCart })
     } else {
-      const newProd = { quantity: 1, productName: data.name, product_meta: data, price: data.price }
+      const newProd = { quantity: 1, productName: data.name, price: data.price, id: data.pk }
       const oldCart = this.state.inCart
       oldCart[data.pk] = newProd
       this.setState({ inCart: oldCart })
       // TODO: UPDATE PRODUCTS STATE SO IT SUBTRRACTS FROM THE VIEW
     }
+    this.setState({ total: ccyFormat(subTotal(Object.values(this.state.inCart))) })
   }
 
   componentDidMount () {
@@ -77,6 +85,26 @@ class Shop extends React.Component {
 
   handleClose () {
     this.setState({ open: false })
+  }
+
+  handleCheckout (event) {
+    const myHeaders = new Headers()
+    myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
+    myHeaders.append('Content-Type', 'application/json')
+
+    const raw = JSON.stringify({ items: Object.values(this.state.inCart) })
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: raw,
+      redirect: 'follow'
+    }
+
+    fetch('http://127.0.0.1:8000/api/stores/' + this.state.store_id + '/purchase_items/', requestOptions)
+      .then(response => response.json())
+      .then(result => { window.location.reload() })
+      .catch(error => alert(error))
+    event.preventDefault()
   }
 
   render () {
@@ -118,8 +146,20 @@ class Shop extends React.Component {
                   <TableCell align='right'>{this.state.inCart[product].price}</TableCell>
                 </TableRow>
               ))}
+              <TableRow>
+                <TableCell component='th' scope='row' />
+                <TableCell align='right' />
+                <TableCell align='right'>
+                  <strong>Total: </strong> {this.state.total}
+                </TableCell>
+              </TableRow>
             </TableBody>
           </Table>
+          <Box align='right'>
+            <Button onClick={this.handleCheckout.bind(this)} color='primary'>
+              Checkout
+            </Button>
+          </Box>
         </TableContainer>
         <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
           <DialogTitle id='form-dialog-title'>Add an Item</DialogTitle>

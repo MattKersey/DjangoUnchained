@@ -83,7 +83,8 @@ class Product extends React.Component {
           >
             <ExpandMoreIcon />
           </IconButton>
-          <Typography paragraph>Quantity: {this.props.stock} </Typography>
+          <Typography paragraph><strong>Quantity: </strong>{this.props.stock} </Typography>
+          <Typography paragraph><strong>Price: </strong> ${this.props.price} </Typography>
           <IconButton onClick={this.props.handleAddToCart} aria-label='share'>
             <AddShoppingCartIcon />
           </IconButton>
