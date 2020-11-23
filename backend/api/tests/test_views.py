@@ -6,6 +6,7 @@ from api.models import User, Store, Category, Item, Association, Role, History_o
 import datetime
 import requests_mock
 import os
+import json
 from oauth2_provider.models import get_application_model, get_access_token_model
 
 Application = get_application_model()
@@ -589,10 +590,11 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/purchase_items/"
         r = self.client.post(
             url,
-            {"items": [
+            json.dumps({"items": [
                 {"id": self.item2.pk, "quantity": 1},
-            ]},
+            ]}),
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type='application/json',
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Item.objects.get(name=self.item2.name).stock)
@@ -601,10 +603,11 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"
         r = self.client.post(
             url,
-            {"items": [
+            json.dumps({"items": [
                 {"id": self.item2.pk, "quantity": 1},
-            ]},
+            ]}),
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type='application/json',
         )
         self.assertEqual(404, r.status_code)
         self.assertEqual("The store does not exist.", r.data["message"])
@@ -613,10 +616,11 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/purchase_items/"
         r = self.client.post(
             url,
-            {"items": [
+            json.dumps({"items": [
                 {"id": 100000000, "quantity": 1},
-            ]},
+            ]}),
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type='application/json',
         )
         self.assertEqual(404, r.status_code)
         self.assertEqual("At least one of the items does not exist.", r.data["message"])
@@ -625,10 +629,11 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/purchase_items/"
         r = self.client.post(
             url,
-            {"items": [
+            json.dumps({"items": [
                 {"id": self.item2.pk, "quantity": 100000000},
-            ]},
+            ]}),
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type='application/json',
         )
         self.assertEqual(406, r.status_code)
         self.assertEqual(
@@ -640,10 +645,11 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store2.pk) + "/purchase_items/"
         r = self.client.post(
             url,
-            {"items": [
+            json.dumps({"items": [
                 {"id": self.item2.pk, "quantity": 1},
-            ]},
+            ]}),
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type='application/json',
         )
         self.assertEqual(406, r.status_code)
         self.assertEqual(
