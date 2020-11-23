@@ -14,6 +14,7 @@ from api.serializers import (
     UserSerializer,
     StoreSerializer,
     ItemSerializer,
+    ItemHistorySerializer
 )
 from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import (
@@ -213,9 +214,14 @@ class StoreViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         try:
-            store = get_object_or_404(Store.objects.all(), pk=pk)
-            serializer = StoreSerializer(store)
-            return Response(serializer.data)
+            store = Store.objects.get(pk=pk)
+            data = {"store_pk": store.pk, "history": []}
+            for item in store.items.all():
+                h_data = []
+                for history in item.history.all():
+                    h_data.append(ItemHistorySerializer(history).data)
+                data["history"].append({"item_pk": item.pk, "item_history": h_data})
+            return Response(data)
         except Store.DoesNotExist:
             return Response(
                 {"message": "The store does not exist."},

@@ -6,7 +6,6 @@ class ItemHistorySerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = History_of_Item
         fields = [
-            "pk",
             "category",
             "before_image",
             "after_image",
