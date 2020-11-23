@@ -75,7 +75,7 @@ class Shop extends React.Component {
         for (let i = 0; i < json.items.length; i++) {
           productElements[json.items[i].pk] = <Grid item key={json.items[i].pk} md={3}><Product className='product' handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
         }
-        this.setState({ products: productElements, storeName: "Carlos' Magcal Emporium", store_id: storeID })
+        this.setState({ products: productElements, storeName: json.name, store_id: storeID })
       })
   }
 
