@@ -179,19 +179,19 @@ class ItemViewSet(viewsets.ViewSet):
                 image=data.get("image"),
                 name=data.get("name"),
                 stock=data.get("stock"),
-                price=float(data.get("price", "0.0")),
+                price=data.get("price", "0.0"),
                 orderType=data.get("orderType"),
                 bulkMinimum=data.get("bulkMinimum"),
-                bulkPrice=float(data.get("bulkPrice", "0.0")),
+                bulkPrice=data.get("bulkPrice", "0.0"),
                 description=data.get("description"),
             )
             item_history = History_of_Item.objects.create(
                 after_name=data.get("name"),
                 after_stock=data.get("stock"),
-                after_price=float(data.get("price", "0.0")),
+                after_price=data.get("price", "0.0"),
                 after_orderType=data.get("orderType"),
                 after_bulkMinimum=data.get("bulkMinimum"),
-                after_bulkPrice=float(data.get("bulkPrice", "0.0")),
+                after_bulkPrice=data.get("bulkPrice", "0.0"),
                 after_description=data.get("description"),
             )
             item.history.add(item_history)
