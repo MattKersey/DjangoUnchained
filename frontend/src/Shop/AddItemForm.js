@@ -165,7 +165,7 @@ class AddShopForm extends React.Component {
             color='primary'
             className={classes.submit}
           >
-            Create Store
+            Add Item
           </Button>
         </form>
       </div>
