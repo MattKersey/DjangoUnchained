@@ -66,23 +66,7 @@ class LoginRedirect extends React.Component {
   }
 
   render () {
-    const { classes } = this.props
-    return (
-      <Container component='main' maxWidth='xs'>
-        <CssBaseline />
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component='h1' variant='h5'>
-            Your token is {this.state.token}
-          </Typography>
-        </div>
-        <Box mt={8}>
-          <Copyright />
-        </Box>
-      </Container>
-    )
+    return null
   }
 }
 
