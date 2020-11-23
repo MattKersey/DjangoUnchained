@@ -175,6 +175,8 @@ class StoreViewSet(viewsets.ViewSet):
         # user = get_object_or_404(User.objects.all(), pk=data.get('user_id'))
         store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
         item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
+        for history in item.history.all():
+            history.delete()
         item.delete()
         serializer = StoreSerializer(store)
         return Response(serializer.data)
@@ -197,28 +199,97 @@ class ItemViewSet(viewsets.ViewSet):
         serializer = ItemSerializer(item)
         return Response(serializer.data)
 
+    def create(self, request):
+        data = request.POST
+        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
+        try:
+            item = Item.objects.create(
+                image=data.get("image"),
+                name=data.get("name"),
+                stock=data.get("stock"),
+                price=data.get("price", "0.0"),
+                orderType=data.get("orderType"),
+                bulkMinimum=data.get("bulkMinimum"),
+                bulkPrice=data.get("bulkPrice", "0.0"),
+                description=data.get("description"),
+            )
+            item_history = History_of_Item.objects.create(
+                after_name=data.get("name"),
+                after_stock=data.get("stock"),
+                after_price=data.get("price", "0.0"),
+                after_orderType=data.get("orderType"),
+                after_bulkMinimum=data.get("bulkMinimum"),
+                after_bulkPrice=data.get("bulkPrice", "0.0"),
+                after_description=data.get("description"),
+            )
+            item.history.add(item_history)
+            store.items.add(item)
+            store.save()
+        except IntegrityError:
+            return Response(data={"Error": "Integrity Error"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(
+                data=ItemSerializer(item).data,
+                status=status.HTTP_201_CREATED,
+            )
+
     def update(self, request, pk=None):
         item = get_object_or_404(Item.objects.all(), pk=pk)
+        print("hi")
         # item.image = ....
         data = request.data
+        print(data)
         history = History_of_Item.objects.create()
         change_exist = False
         if data.get("name", item.name) != item.name:
             history.before_name = item.name
             history.after_name = data.get("name")
             change_exist = True
+        else:
+            history.before_name = item.name
+            history.after_name = item.name
         if float(data.get("price", item.price)) != float(item.price):
             history.before_price = item.price
             history.after_price = data.get("price")
             change_exist = True
+        else:
+            history.before_price = item.price
+            history.after_price = item.price
         if int(data.get("stock", item.stock)) != int(item.stock):
             history.before_stock = item.stock
             history.after_stock = data.get("stock")
             change_exist = True
+        else:
+            history.before_stock = item.stock
+            history.after_stock = item.stock
+        if data.get("orderType", item.orderType) != item.orderType:
+            history.before_orderType = item.orderType
+            history.after_orderType = data.get("orderType")
+            change_exist = True
+        else:
+            history.before_orderType = item.orderType
+            history.after_orderType = item.orderType
+        if int(data.get("bulkMinimum", item.bulkMinimum)) != int(item.bulkMinimum):
+            history.before_bulkMinimum = item.bulkMinimum
+            history.after_bulkMinimum = data.get("bulkMinimum")
+            change_exist = True
+        else:
+            history.before_bulkMinimum = item.bulkMinimum
+            history.after_bulkMinimum = item.bulkMinimum
+        if float(data.get("bulkPrice", item.bulkPrice)) != float(item.bulkPrice):
+            history.before_bulkPrice = item.bulkPrice
+            history.after_bulkPrice = data.get("bulkPrice")
+            change_exist = True
+        else:
+            history.before_bulkPrice = item.bulkPrice
+            history.after_bulkPrice = item.bulkPrice
         if data.get("description", item.description) != item.description:
             history.before_description = item.description
             history.after_description = data.get("description")
             change_exist = True
+        else:
+            history.before_description = item.description
+            history.after_description = item.description
         if not change_exist:
             history.delete()
             return Response({"status": "no change"})
@@ -229,6 +300,9 @@ class ItemViewSet(viewsets.ViewSet):
             item.description = data.get("description", item.description)
             item.stock = data.get("stock", item.stock)
             item.price = data.get("price", item.price)
+            item.orderType = data.get("orderType", item.orderType)
+            item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
+            item.bulkPrice = data.get("bulkPrice", item.bulkPrice)
             item.save()
             serializer = ItemSerializer(item)
             return Response(serializer.data)

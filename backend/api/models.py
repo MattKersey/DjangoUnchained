@@ -2,6 +2,13 @@ from django.db import models
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.validators import MinValueValidator
 from django.contrib.auth.models import PermissionsMixin
+from django.core.exceptions import ValidationError
+
+
+class OrderType(models.TextChoices):
+    INDIVIDUAL = "Individual"
+    BULK = "Bulk"
+    BOTH = "Both"
 
 
 class History_of_Item(models.Model):
@@ -27,6 +34,32 @@ class History_of_Item(models.Model):
     after_stock = models.IntegerField(
         validators=[MinValueValidator(limit_value=0)], blank=True, null=True
     )
+    before_orderType = models.CharField(
+        choices=OrderType.choices, max_length=10, blank=True, null=True
+    )
+    after_orderType = models.CharField(
+        choices=OrderType.choices, max_length=10, blank=True, null=True
+    )
+    before_bulkMinimum = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], blank=True, null=True
+    )
+    after_bulkMinimum = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], blank=True, null=True
+    )
+    before_bulkPrice = models.DecimalField(
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+    )
+    after_bulkPrice = models.DecimalField(
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+        blank=True,
+        null=True,
+    )
     before_description = models.TextField(blank=True, null=True)
     after_description = models.TextField(blank=True, null=True)
     datetime = models.DateTimeField(auto_now=True)
@@ -44,11 +77,32 @@ class Item(models.Model):
         decimal_places=2,
         max_digits=12,
     )
+    orderType = models.CharField(
+        choices=OrderType.choices, max_length=10, default=OrderType.INDIVIDUAL
+    )
+    bulkMinimum = models.IntegerField(validators=[MinValueValidator(limit_value=0)], default=0)
+    bulkPrice = models.DecimalField(
+        null=True,
+        blank=True,
+        default=0.0,
+        validators=[MinValueValidator(limit_value=0.0)],
+        decimal_places=2,
+        max_digits=12,
+    )
     description = models.TextField()
     history = models.ManyToManyField(History_of_Item)
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        print("hello")
+        if self.bulkPrice > self.price:
+            raise ValidationError('Bulk Price cannot exceed Price')
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(Item, self).save(*args, **kwargs)
 
 
 class Category(models.TextChoices):

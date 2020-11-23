@@ -6,6 +6,7 @@ coverage_html_report
 htmlcov
 .pytest_cache
 items
+migrations
 
 # Files
 db.sqlite3
