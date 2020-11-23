@@ -1,5 +1,5 @@
 import os
-from api.models import User, Store, Item, History_of_Item
+from api.models import User, Store, Item, History_of_Item, Association
 from rest_framework import viewsets
 from rest_framework.response import Response
 from api.serializers import (
@@ -61,6 +61,34 @@ class UserViewSet(viewsets.ViewSet):
         user.save()
         serializer = UserSerializer(User.objects.get(pk=user.id))
         return Response(serializer.data)
+
+    @action(detail=True, methods=["POST"])
+    def add_store2(self, request, pk=None):
+        data = request.POST
+        try:
+            if data.get("name") is None:
+                return Response({"message": "Please add name to store"}, status=status.HTTP_400_BAD_REQUEST)
+            if data.get("address") is None:
+                return Response({"message": "Please add address to store"}, status=status.HTTP_400_BAD_REQUEST)
+            if data.get("category") is None or data.get("category") not in ["Food", "Clothing", "Other"]:
+                return Response({"message": "Invalid category."}, status=status.HTTP_400_BAD_REQUEST)
+            user = User.objects.get(pk=pk)
+            store = Store.objects.create(
+                name=data.get('name'),
+                address=data.get('address'),
+                category=data.get('category')
+            )
+            store.save()
+            user.stores.add(store)
+            assoc = Association.objects.get(user=user, store=store)
+            assoc.role = "Manager"
+            assoc.save()
+            user.save()
+            return Response(UserSerializer(user).data)
+        except User.DoesNotExist:
+            return Response({"message": "The user does not exist"}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"message": "The store cannot be added"}, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=["POST"])
     def remove_store(self, request, pk=None):

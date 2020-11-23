@@ -49,4 +49,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "active", "staff", "admin", "stores"]
+        fields = ["email", "active", "staff", "admin", "stores","id"] #Need ID on the front end, if thats ok :D

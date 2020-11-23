@@ -1,0 +1,14 @@
+.form{
+    display:flex;
+    text-align: center;
+    justify-content: center;
+}
+.cardAction{
+    display: block;
+    text-align: initial;
+    width: 100% !important
+  }
+
+.shopContainer{
+    min-height: 100px;
+}
