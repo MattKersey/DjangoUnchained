@@ -251,6 +251,13 @@ class StoreViewSet(viewsets.ViewSet):
             for purchase_item in data.get("items"):
                 # to confirm that the item exists
                 item = Item.objects.get(pk=purchase_item.get("id"))
+                if item not in store.items.all():
+                    return Response(
+                        {
+                            "message": f"The item '{item.name}' doesn't belong to store."
+                        },
+                        status=status.HTTP_406_NOT_ACCEPTABLE,
+                    )
                 # to confirm that puchase can be made
                 # before saving any change of quantity
                 if item.stock < purchase_item.get("quantity"):
@@ -262,11 +269,12 @@ class StoreViewSet(viewsets.ViewSet):
                     )
             for purchase_item in data.get("items"):
                 item = Item.objects.get(pk=purchase_item.get("id"))
-                _ = History_of_Item.create(
+                history = History_of_Item.objects.create(
                     before_stock=item.stock,
                     after_stock=item.stock - purchase_item.get("quantity"),
                     category=History_Category.PURCHASE,
                 )
+                item.history.add(history)
                 item.stock -= purchase_item.get("quantity")
                 item.save()
             serializer = StoreSerializer(store)
