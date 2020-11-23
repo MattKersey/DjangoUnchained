@@ -207,8 +207,10 @@ class ItemViewSet(viewsets.ViewSet):
 
     def update(self, request, pk=None):
         item = get_object_or_404(Item.objects.all(), pk=pk)
+        print("hi")
         # item.image = ....
         data = request.data
+        print(data)
         history = History_of_Item.objects.create()
         change_exist = False
         if data.get("name", item.name) != item.name:
@@ -270,6 +272,9 @@ class ItemViewSet(viewsets.ViewSet):
             item.description = data.get("description", item.description)
             item.stock = data.get("stock", item.stock)
             item.price = data.get("price", item.price)
+            item.orderType = data.get("orderType", item.orderType)
+            item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
+            item.bulkPrice = data.get("bulkPrice")
             item.save()
             serializer = ItemSerializer(item)
             return Response(serializer.data)
