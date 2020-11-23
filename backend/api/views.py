@@ -571,12 +571,13 @@ class ItemViewSet(viewsets.ViewSet):
                 {"message": "The item does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (ValidationError, IntegrityError) as e:
-            print(e)
-            return Response(
-                data={"Error": "Validation or Integrity Error"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Seems redundant
+        # except (ValidationError, IntegrityError) as e:
+        #     print(e)
+        #     return Response(
+        #         data={"Error": "Validation or Integrity Error"},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
 
 
 class RegisterUserViewSet(viewsets.ViewSet):

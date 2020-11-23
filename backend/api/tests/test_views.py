@@ -769,6 +769,9 @@ class Test_ItemView(APITestCase):
                 price=1.0,
                 description="Item 2",
             )
+        self.store1 = Store.objects.create(
+            address="1 Main Street", name="Store 1", category=Category.FOOD
+        )
 
     def test_retrieve_item(self):
         url = "http://127.0.0.1:8000/api/items/"
@@ -779,6 +782,65 @@ class Test_ItemView(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertEqual("Item 1", r.data["name"])
 
+    def test_retrieve_item_bad(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.get(
+            url + "100000000/",
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The item does not exist.", r.data["message"])
+
+    def test_create_item(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "name": "food",
+                "stock": 3,
+                "price": 0.1,
+                "orderType": "Individual",
+                "bulkMinimum": 0,
+                "description": "food",
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(201, r.status_code)
+        self.assertEqual(1, self.store1.items.count())
+
+    def test_create_item_bad_store(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": 100000000,
+                "name": "food",
+                "stock": 3,
+                "price": 0.1,
+                "orderType": "Individual",
+                "bulkMinimum": 0,
+                "description": "food",
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The store does not exist.", r.data["message"])
+
+    def test_create_item_bad_item(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "name": "food",
+                "description": "food",
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Validation or Integrity Error", r.data["Error"])
+
     def test_list_item(self):
         url = "http://127.0.0.1:8000/api/items/"
         r = self.client.get(url, HTTP_AUTHORIZATION="Bearer " + self.token.token)
@@ -787,13 +849,20 @@ class Test_ItemView(APITestCase):
 
     def test_update_item(self):
         url = "http://127.0.0.1:8000/api/items/"
+        fp = settings.BASE_DIR / "api/fixtures/other.png"
+        infile = open(file=fp, mode="rb")
+        file = SimpleUploadedFile(self.file_path, infile.read())
         r = self.client.put(
             url + str(self.item2.pk) + "/",
             {
+                "image": file,
                 "name": "Updated Name",
                 "description": "Updated Description",
                 "stock": 2,
                 "price": 2.0,
+                "orderType": "Both",
+                "bulkMinimum": 1,
+                "bulkPrice": 1.5,
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             follow=True,
@@ -816,6 +885,43 @@ class Test_ItemView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(1, Item.objects.filter(name="Item 3").count())
+
+    def test_update_item_invalid_prices(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.put(
+            url + str(self.item2.pk) + "/",
+            {
+                "price": 2.0,
+                "bulkPrice": 2.5,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Validation or Integrity Error", r.data["Error"])
+
+    def test_update_item_bad_item(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        fp = settings.BASE_DIR / "api/fixtures/other.png"
+        infile = open(file=fp, mode="rb")
+        file = SimpleUploadedFile(self.file_path, infile.read())
+        r = self.client.put(
+            url + "100000000/",
+            {
+                "image": file,
+                "name": "Updated Name",
+                "description": "Updated Description",
+                "stock": 2,
+                "price": 2.0,
+                "orderType": "Both",
+                "bulkMinimum": 1,
+                "bulkPrice": 1.5,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The item does not exist.", r.data["message"])
 
 
 class Test_OAuth(APITestCase):
