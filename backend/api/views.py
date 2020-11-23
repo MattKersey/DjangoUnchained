@@ -274,7 +274,7 @@ class ItemViewSet(viewsets.ViewSet):
             item.price = data.get("price", item.price)
             item.orderType = data.get("orderType", item.orderType)
             item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
-            item.bulkPrice = data.get("bulkPrice")
+            item.bulkPrice = data.get("bulkPrice", item.bulkPrice)
             item.save()
             serializer = ItemSerializer(item)
             return Response(serializer.data)
