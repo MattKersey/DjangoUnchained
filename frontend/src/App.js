@@ -1,4 +1,6 @@
 /* global localStorage, fetch */
+/* eslint react/prop-types: 0 */
+
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'

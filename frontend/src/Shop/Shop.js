@@ -1,5 +1,6 @@
 /* global localStorage, fetch */
 /* istanbul ignore file */
+/* eslint react/prop-types: 0 */
 
 import React from 'react'
 import Product from './Product'
