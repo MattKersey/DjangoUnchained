@@ -122,7 +122,7 @@ class Shop extends React.Component {
           </IconButton>
         </Typography>
 
-        <Box align='center'>
+        <Box align='center' mt={8}>
           <Grid container direction='row' justify='flex-start' alignItems='baseline' spacing={10}>
             {Object.values(this.state.products)}
           </Grid>
