@@ -28,6 +28,7 @@ from django.utils import timezone
 import string
 import random
 import datetime
+import json
 from oauth2_provider.models import get_application_model, get_access_token_model
 
 Application = get_application_model()
@@ -264,9 +265,10 @@ class StoreViewSet(viewsets.ViewSet):
     @action(detail=True, methods=["POST"])
     def purchase_items(self, request, pk=None):
         try:
-            data = request.data
+            items = request.POST.getlist('items')
             store = Store.objects.get(pk=pk)
-            for purchase_item in data.get("items"):
+            for purchase_item_str in items:
+                purchase_item = json.loads(purchase_item_str.replace("\'", "\""))
                 # to confirm that the item exists
                 item = Item.objects.get(pk=purchase_item.get("id"))
                 if item not in store.items.all():
@@ -283,7 +285,8 @@ class StoreViewSet(viewsets.ViewSet):
                         },
                         status=status.HTTP_406_NOT_ACCEPTABLE,
                     )
-            for purchase_item in data.get("items"):
+            for purchase_item_str in items:
+                purchase_item = json.loads(purchase_item_str.replace("\'", "\""))
                 item = Item.objects.get(pk=purchase_item.get("id"))
                 history = History_of_Item.objects.create(
                     before_stock=item.stock,
