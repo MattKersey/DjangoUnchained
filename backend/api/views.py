@@ -188,15 +188,16 @@ class UserViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["GET"])
     def current_user(self, request):
-        try:
-            user = request.user
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            return Response(
-                {"message": "The user does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Since this is based on oauth token, there will never be a User.DoesNotExist
+        # try:
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+        # except User.DoesNotExist:
+        #     return Response(
+        #         {"message": "The user does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
 
 
 class StoreViewSet(viewsets.ViewSet):

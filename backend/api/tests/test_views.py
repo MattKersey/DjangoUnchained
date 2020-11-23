@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
-from api.models import User, Store, Category, Item, Association
+from api.models import User, Store, Category, Item, Association, Role
 import datetime
 import requests_mock
 import os
@@ -57,6 +57,10 @@ class Test_UserView(APITestCase):
         self.userMods = User.objects.create_user(
             email="before@example.com", password="password"
         )
+        self.userMods.stores.add(self.store3)
+        self.association1 = Association.objects.get(user=self.userMods, store=self.store3)
+        self.association1.role = Role.EMPLOYEE
+        self.association1.save()
         setupOAuth(self)
 
     def test_register_good(self):
@@ -82,6 +86,15 @@ class Test_UserView(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertEqual("exists@example.com", r.data["email"])
 
+    def test_retrieve_user_does_not_exist(self):
+        url = "http://127.0.0.1:8000/api/users/"
+        r = self.client.get(
+            url + "10000000/",
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The user does not exist.", r.data["message"])
+
     def test_list_user(self):
         url = "http://127.0.0.1:8000/api/users/"
         r = self.client.get(url, HTTP_AUTHORIZATION="Bearer " + self.token.token)
@@ -100,6 +113,28 @@ class Test_UserView(APITestCase):
         self.assertEqual(0, User.objects.filter(email="before@example.com").count())
         self.assertEqual(1, User.objects.filter(email="after@example.com").count())
 
+    def test_update_user_does_not_exist(self):
+        url = "http://127.0.0.1:8000/api/users/"
+        r = self.client.put(
+            url + "100000000/",
+            {"email": "after@example.com"},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The user does not exist.", r.data["message"])
+
+    def test_update_user_email_already_used(self):
+        url = "http://127.0.0.1:8000/api/users/"
+        r = self.client.put(
+            url + str(self.userExists.pk) + "/",
+            {"email": "superuserOAuth@email.com"},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            follow=True,
+        )
+        self.assertEqual(304, r.status_code)
+        self.assertEqual("A user with that email already exist.", r.data["message"])
+
     def test_add_store(self):
         url = (
             "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
@@ -107,7 +142,7 @@ class Test_UserView(APITestCase):
         r = self.client.post(
             url,
             {
-                "name": self.store3.pk,
+                "name": self.store3.name,
                 "category": self.store3.category,
                 "address": self.store3.address,
             },
@@ -115,6 +150,105 @@ class Test_UserView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(2, len(self.userExists.stores.all()))
+        self.userExists.stores.remove(self.store3)
+
+    def test_add_store_bad_user(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/100000000/add_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "name": self.store3.name,
+                "category": self.store3.category,
+                "address": self.store3.address,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("The user does not exist", r.data["message"])
+
+    def test_add_store_too_long_name(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "name": "123456789012345678901234567890123456789012345678901234567890",
+                "category": self.store3.category,
+                "address": self.store3.address,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(406, r.status_code)
+        self.assertEqual("The store cannot be added.", r.data["message"])
+        self.assertEqual(1, len(self.userExists.stores.all()))
+
+    def test_add_store_no_name(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "category": self.store3.category,
+                "address": self.store3.address,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Please add name to store", r.data["message"])
+        self.assertEqual(1, len(self.userExists.stores.all()))
+
+    def test_add_store_no_address(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "name": self.store3.name,
+                "category": self.store3.category,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Please add address to store", r.data["message"])
+        self.assertEqual(1, len(self.userExists.stores.all()))
+
+    def test_add_store_no_category(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "name": self.store3.name,
+                "address": self.store3.address,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Invalid category.", r.data["message"])
+        self.assertEqual(1, len(self.userExists.stores.all()))
+
+    def test_add_store_bad_category(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/" + str(self.userExists.pk) + "/add_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "name": self.store3.name,
+                "category": "brick",
+                "address": self.store3.address,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Invalid category.", r.data["message"])
+        self.assertEqual(1, len(self.userExists.stores.all()))
 
     def test_remove_store(self):
         url = (
@@ -131,6 +265,60 @@ class Test_UserView(APITestCase):
         self.assertEqual(0, len(self.userExists.stores.all()))
         self.userExists.stores.add(self.store2)
         self.assertEqual(1, len(self.userExists.stores.all()))
+
+    def test_remove_store_bad_user(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/100000000/remove_store/"
+        )
+        r = self.client.post(
+            url,
+            {"store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The user does not exist.", r.data["message"])
+
+    def test_remove_store_bad_store(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userExists.pk)
+            + "/remove_store/"
+        )
+        r = self.client.post(
+            url,
+            {"store_id": 100000000},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The store does not exist.", r.data["message"])
+
+    def test_remove_store_bad_association(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userExists.pk)
+            + "/remove_store/"
+        )
+        r = self.client.post(
+            url,
+            {"store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The association does not exist.", r.data["message"])
+
+    def test_remove_store_bad_role(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userMods.pk)
+            + "/remove_store/"
+        )
+        r = self.client.post(
+            url,
+            {"store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(503, r.status_code)
+        self.assertEqual("You don't have the permission to add an item", r.data["message"])
 
     def test_delete_store(self):
         url = (
@@ -152,6 +340,69 @@ class Test_UserView(APITestCase):
                 user=self.userExists, store__pk=store_id
             ).exists()
         )
+
+    def test_delete_store_bad_user(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/100000000/delete_store/"
+        )
+        r = self.client.delete(
+            url,
+            {"user_id": 100000000, "store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The user does not exist.", r.data["message"])
+
+    def test_delete_store_bad_store(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userMods.pk)
+            + "/delete_store/"
+        )
+        r = self.client.delete(
+            url,
+            {"user_id": self.userMods.pk, "store_id": 100000000},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The store does not exist.", r.data["message"])
+
+    def test_delete_store_bad_association(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userMods.pk)
+            + "/delete_store/"
+        )
+        r = self.client.delete(
+            url,
+            {"user_id": self.userMods.pk, "store_id": self.store1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The association does not exist.", r.data["message"])
+
+    def test_delete_store_bad_role(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.userMods.pk)
+            + "/delete_store/"
+        )
+        r = self.client.delete(
+            url,
+            {"user_id": self.userMods.pk, "store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(503, r.status_code)
+        self.assertEqual("You don't have the permission to add an item", r.data["message"])
+
+    def test_current_user(self):
+        url = "http://127.0.0.1:8000/api/users/current_user/"
+        r = self.client.get(
+            url,
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual("superuserOAuth@email.com", r.data["email"])
 
 
 class Test_StoreView(APITestCase):
