@@ -4,7 +4,17 @@ from django.core.validators import MinValueValidator
 from django.contrib.auth.models import PermissionsMixin
 
 
+class History_Category(models.TextChoices):
+    UPDATE = "Update"
+    PURCHASE = "Purchase"
+    REMOVAL = "Removal"
+    ADDITION = "Addition"
+
+
 class History_of_Item(models.Model):
+    category = models.CharField(
+        choices=History_Category.choices, max_length=10, default=History_Category.UPDATE
+    )
     before_name = models.CharField(max_length=50, blank=True, null=True)
     after_name = models.CharField(max_length=50, blank=True, null=True)
     before_price = models.DecimalField(

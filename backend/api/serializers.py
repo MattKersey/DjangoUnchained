@@ -23,7 +23,7 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Item
-        fields = ["image", "name", "stock", "price", "description", "history"]
+        fields = ["pk", "image", "name", "stock", "price", "description", "history"]
 
 
 class StoreSerializer(serializers.HyperlinkedModelSerializer):
@@ -31,17 +31,25 @@ class StoreSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Store
-        fields = ["address", "name", "category", "items"]
+        fields = ["pk", "address", "name", "category", "items"]
 
 
 class AssociationSerializer(serializers.ModelSerializer):
+    store_pk = serializers.ReadOnlyField(source="store.pk")
     store_address = serializers.ReadOnlyField(source="store.address")
     store_name = serializers.ReadOnlyField(source="store.name")
     store_category = serializers.ReadOnlyField(source="store.category")
 
     class Meta:
         model = Association
-        fields = ["store_address", "store_name", "store_category", "membership", "role"]
+        fields = [
+            "store_pk",
+            "store_address",
+            "store_name",
+            "store_category",
+            "membership",
+            "role",
+        ]
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
