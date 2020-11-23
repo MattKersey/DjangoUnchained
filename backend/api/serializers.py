@@ -31,7 +31,7 @@ class StoreSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Store
-        fields = ["address", "name", "category", "items"]
+        fields = ["address", "name", "category", "items", "id"]
 
 
 class AssociationSerializer(serializers.ModelSerializer):
@@ -49,4 +49,4 @@ class UserSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "active", "staff", "admin", "stores"]
+        fields = ["email", "active", "staff", "admin", "stores","id"] #Need ID on the front end, if thats ok :D

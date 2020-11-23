@@ -1,4 +1,9 @@
+  
 .navBar{
     display:flex;
     width:1000px;
+}
+
+.title{
+    color: white !important;
 }

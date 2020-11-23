@@ -1,28 +1,64 @@
+/* global localStorage, fetch */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
-import Home from './Home/Home'
-import Login from './Login/Login'
+import UserPage from './User/UserPage'
 import Error from './shared/Error'
 import NavBar from './shared/Navigation'
 import Register from './Login/Register'
 import Shop from './Shop/Shop'
+import AddShopForm from './User/AddShopForm.js'
 
 import Container from '@material-ui/core/Container'
+import LoginButtons from './OauthLogin/LoginButtons'
+import LoginRedirect from './OauthLogin/LoginRedirect'
 
 class App extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      logged_in: !!localStorage.getItem('token'),
+      email: ''
+    }
+  }
+
+  componentDidMount () {
+    if (this.state.logged_in) {
+      fetch('http://127.0.0.1:8000/api/users/current_user/', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      })
+        .then(res => res.json())
+        .then(json => {
+          localStorage.setItem('user_id', json.id)
+          localStorage.setItem('email', json.email)
+        })
+    }
+  }
+
+  logOut (event) {
+    localStorage.removeItem('token')
+    localStorage.removeItem('email')
+    localStorage.removeItem('user_id')
+    this.setState({ logged_in: false, email: '' })
+  }
+
   render () {
+    const PrivateRoute = ({ ...props }) => this.state.logged_in ? <Route {...props} /> : <Redirect to='/login' />
     return (
       <BrowserRouter>
-        <NavBar />
+        <NavBar isLogged={this.state.logged_in} handleLogOut={(event) => this.logOut(event)} />
 
         <Container fixed>
           <Switch>
-            <Route path='/dummy' component={Home} exact />
-            <Route path='/' component={Login} exact />
-            <Route path='/register' component={Register} exact />
-            <Route path='/shop/:shopID' component={Shop} exact />
+            <PrivateRoute path='/' component={UserPage} exact />
+            <PrivateRoute path='/register' component={Register} exact />
+            <PrivateRoute path='/shop/:shopID' component={Shop} exact />
+            <PrivateRoute path='/register_shop' component={AddShopForm} exact />
+            <Route path='/login' component={LoginButtons} exact />
+            <Route path='/loginredirect' component={LoginRedirect} exact />
             <Route component={Error} />
           </Switch>
         </Container>
