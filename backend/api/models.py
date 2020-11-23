@@ -135,6 +135,10 @@ class Store(models.Model):
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        return super(Store, self).save(*args, **kwargs)
+
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password=None, is_superuser=False, stores=None):
