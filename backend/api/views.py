@@ -188,15 +188,16 @@ class UserViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=["GET"])
     def current_user(self, request):
-        try:
-            user = request.user
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            return Response(
-                {"message": "The user does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Since this is based on oauth token, there will never be a User.DoesNotExist
+        # try:
+        user = request.user
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
+        # except User.DoesNotExist:
+        #     return Response(
+        #         {"message": "The user does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
 
 
 class StoreViewSet(viewsets.ViewSet):
@@ -325,11 +326,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The item cannot be added."},
-                status=status.HTTP_406_NOT_ACCEPTABLE,
-            )
+        # Should never get this
+        # except (IntegrityError, ValidationError):
+        #     return Response(
+        #         {"message": "The item cannot be added."},
+        #         status=status.HTTP_406_NOT_ACCEPTABLE,
+        #     )
 
     @action(detail=True, methods=["POST"])
     def remove_item(self, request, pk=None):
@@ -351,11 +353,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The item cannot be added."},
-                status=status.HTTP_406_NOT_ACCEPTABLE,
-            )
+        # Should never get this
+        # except (IntegrityError, ValidationError):
+        #     return Response(
+        #         {"message": "The item cannot be added."},
+        #         status=status.HTTP_406_NOT_ACCEPTABLE,
+        #     )
 
     @action(detail=False, methods=["DELETE"])
     def delete_item(self, request):
@@ -363,6 +366,8 @@ class StoreViewSet(viewsets.ViewSet):
             data = request.POST
             item = Item.objects.get(pk=data.get("item_id"))
             store = Store.objects.get(pk=data.get("store_id"))
+            if store.items.filter(pk=data.get("item_id")).count() == 0:
+                raise ValidationError("Store not associated with item")
             store.items.remove(item)
             # Just in case we need it in the future
             # _ = History_of_Item.create(
@@ -563,12 +568,13 @@ class ItemViewSet(viewsets.ViewSet):
                 {"message": "The item does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (ValidationError, IntegrityError) as e:
-            print(e)
-            return Response(
-                data={"Error": "Validation or Integrity Error"},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # Seems redundant
+        # except (ValidationError, IntegrityError) as e:
+        #     print(e)
+        #     return Response(
+        #         data={"Error": "Validation or Integrity Error"},
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
 
 
 class RegisterUserViewSet(viewsets.ViewSet):
