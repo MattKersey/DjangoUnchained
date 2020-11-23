@@ -173,6 +173,7 @@ class ItemViewSet(viewsets.ViewSet):
 
     def create(self, request):
         data = request.POST
+        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
         try:
             item = Item.objects.create(
                 image=data.get("image"),
@@ -194,6 +195,8 @@ class ItemViewSet(viewsets.ViewSet):
                 after_description=data.get("description"),
             )
             item.history.add(item_history)
+            store.items.add(item)
+            store.save()
         except IntegrityError:
             return Response(data={"Error": "Integrity Error"}, status=status.HTTP_400_BAD_REQUEST)
         else:
