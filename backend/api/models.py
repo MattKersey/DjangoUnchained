@@ -11,7 +11,19 @@ class OrderType(models.TextChoices):
     BOTH = "Both"
 
 
+class History_Category(models.TextChoices):
+    UPDATE = "Update"
+    PURCHASE = "Purchase"
+    REMOVAL = "Removal"
+    ADDITION = "Addition"
+
+
 class History_of_Item(models.Model):
+    category = models.CharField(
+        choices=History_Category.choices, max_length=10, default=History_Category.UPDATE
+    )
+    before_image = models.TextField(null=True, blank=True)
+    after_image = models.TextField(null=True, blank=True)
     before_name = models.CharField(max_length=50, blank=True, null=True)
     after_name = models.CharField(max_length=50, blank=True, null=True)
     before_price = models.DecimalField(
@@ -66,7 +78,7 @@ class History_of_Item(models.Model):
 
 
 class Item(models.Model):
-    image = models.ImageField(null=True, blank=True, upload_to="items")
+    image = models.TextField(null=True, blank=True)
     name = models.CharField(max_length=50)
     stock = models.IntegerField(validators=[MinValueValidator(limit_value=0)])
     price = models.DecimalField(
@@ -80,7 +92,9 @@ class Item(models.Model):
     orderType = models.CharField(
         choices=OrderType.choices, max_length=10, default=OrderType.INDIVIDUAL
     )
-    bulkMinimum = models.IntegerField(validators=[MinValueValidator(limit_value=0)], default=0)
+    bulkMinimum = models.IntegerField(
+        validators=[MinValueValidator(limit_value=0)], default=0
+    )
     bulkPrice = models.DecimalField(
         null=True,
         blank=True,
@@ -96,9 +110,8 @@ class Item(models.Model):
         return self.name
 
     def clean(self):
-        print("hello")
         if self.bulkPrice > self.price:
-            raise ValidationError('Bulk Price cannot exceed Price')
+            raise ValidationError("Bulk Price cannot exceed Price")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -225,7 +238,7 @@ class Association(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     membership = models.DateField(auto_now=True)
-    role = models.CharField(choices=Role.choices, max_length=10, default=Role.EMPLOYEE)
+    role = models.CharField(choices=Role.choices, max_length=10, default=Role.MANAGER)
 
     def __str__(self):
         return f"[{self.role}] {self.user} --> {self.store.name}"

@@ -18,7 +18,7 @@ class Test_User_Model(TestCase):
             password=TEST_USER_PASSWORD,
             stores=None,
         )
-        print(user.is_active)
+        # print(user.is_active)
         self.assertTrue(user.is_active)
         self.assertTrue(user.has_perm(perm=""))
         self.assertTrue(user.has_perm(perm="", obj=""))

@@ -7,6 +7,8 @@ class ItemHistorySerializer(serializers.HyperlinkedModelSerializer):
         model = History_of_Item
         fields = [
             "pk",
+            "before_image",
+            "after_image",
             "before_name",
             "after_name",
             "before_price",

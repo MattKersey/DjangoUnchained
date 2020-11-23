@@ -1,5 +1,5 @@
 import os
-from api.models import User, Store, Item, History_of_Item, Association
+from api.models import User, Store, Item, History_of_Item, Association, Role
 from rest_framework import viewsets
 from rest_framework.response import Response
 from api.serializers import (
@@ -15,6 +15,7 @@ from oauth2_provider.contrib.rest_framework import (
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.db import IntegrityError
+from django.core.validators import ValidationError
 from django.utils import timezone
 import string
 import random
@@ -38,84 +39,156 @@ class UserViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        try:
+            user = User.objects.get(pk=pk)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response(
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     def update(self, request, pk=None):
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        data = request.data
-        user.email = data.get("email", user.email)
-        user.set_password(data.get("password", user.password))
-        # stores is handled in another endpoint
-        user.save()
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        try:
+            user = User.objects.get(pk=pk)
+            data = request.data
+            user.email = data.get("email", user.email)
+            user.set_password(data.get("password", user.password))
+            user.save()
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "A user with that email already exist."},
+                status=status.HTTP_304_NOT_MODIFIED,
+            )
 
     @action(detail=True, methods=["POST"])
     def add_store(self, request, pk=None):
         data = request.POST
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
-        user.stores.add(store)
-        user.save()
-        serializer = UserSerializer(User.objects.get(pk=user.id))
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["POST"])
-    def add_store2(self, request, pk=None):
-        data = request.POST
         try:
             if data.get("name") is None:
-                return Response({"message": "Please add name to store"}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"message": "Please add name to store"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
             if data.get("address") is None:
-                return Response({"message": "Please add address to store"}, status=status.HTTP_400_BAD_REQUEST)
-            if data.get("category") is None or data.get("category") not in ["Food", "Clothing", "Other"]:
-                return Response({"message": "Invalid category."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response(
+                    {"message": "Please add address to store"},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            if data.get("category") is None or data.get("category") not in [
+                "Food",
+                "Clothing",
+                "Other",
+            ]:
+                return Response(
+                    {"message": "Invalid category."}, status=status.HTTP_400_BAD_REQUEST
+                )
             user = User.objects.get(pk=pk)
             store = Store.objects.create(
-                name=data.get('name'),
-                address=data.get('address'),
-                category=data.get('category')
+                name=data.get("name"),
+                address=data.get("address"),
+                category=data.get("category"),
             )
             store.save()
-            user.stores.add(store)
-            assoc = Association.objects.get(user=user, store=store)
-            assoc.role = "Manager"
-            assoc.save()
-            user.save()
+            Association.objects.create(user=user, store=store)
             return Response(StoreSerializer(store).data)
         except User.DoesNotExist:
-            return Response({"message": "The user does not exist"}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            return Response({"message": "The store cannot be added"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"message": "The user does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "The store cannot be added."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
     @action(detail=True, methods=["POST"])
     def remove_store(self, request, pk=None):
-        data = request.POST
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
-        user.stores.remove(store)
-        user.save()
-        serializer = UserSerializer(User.objects.get(pk=user.id))
-        return Response(serializer.data)
+        try:
+            data = request.POST
+            user = User.objects.get(pk=pk)
+            store = Store.objects.get(pk=data.get("store_id"))
+            if Association.objects.get(user=user, store=store).role not in [
+                Role.MANAGER,
+                Role.VENDOR,
+            ]:
+                return Response(
+                    {"message": "You don't have the permission to add an item"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+            user.stores.remove(store)
+            user.save()
+            serializer = UserSerializer(User.objects.get(pk=user.id))
+            return Response(serializer.data)
+        except Association.DoesNotExist:
+            return Response(
+                {"message": "The association does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
-    @action(detail=False, methods=["DELETE"])
-    def delete_store(self, request):
-        # do some authentication with user
-        data = request.POST
-        # user = get_object_or_404(User.objects.all(), pk=data.get('user_id'))
-        user = get_object_or_404(User.objects.all(), pk=data.get("user_id"))
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
-        store.delete()
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+    @action(detail=True, methods=["DELETE"])
+    def delete_store(self, request, pk=None):
+        try:
+            data = request.POST
+            user = User.objects.get(pk=pk)
+            store = Store.objects.get(pk=data.get("store_id"))
+            if Association.objects.get(user=user, store=store).role not in [
+                Role.MANAGER,
+                Role.VENDOR,
+            ]:
+                return Response(
+                    {"message": "You don't have the permission to add an item"},
+                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
+                )
+            user.stores.remove(store)
+            store.delete()
+            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        except Association.DoesNotExist:
+            return Response(
+                {"message": "The association does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except User.DoesNotExist:
+            return Response(
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     @action(detail=False, methods=["GET"])
     def current_user(self, request):
-        user = request.user
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        try:
+            user = request.user
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response(
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
 
 class StoreViewSet(viewsets.ViewSet):
@@ -131,55 +204,115 @@ class StoreViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        store = get_object_or_404(Store.objects.all(), pk=pk)
-        serializer = StoreSerializer(store)
-        return Response(serializer.data)
+        try:
+            store = get_object_or_404(Store.objects.all(), pk=pk)
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     def update(self, request, pk=None):
-        store = get_object_or_404(Store.objects.all(), pk=pk)
-        data = request.data
-        store.address = data.get("address", store.address)
-        store.name = data.get("name", store.name)
-        store.category = data.get("category", store.category)
-        # items is handled in another endpoint
-        store.save()
-        serializer = StoreSerializer(store)
-        return Response(serializer.data)
+        try:
+            store = Store.objects.get(pk=pk)
+            data = request.data
+            store.address = data.get("address", store.address)
+            store.name = data.get("name", store.name)
+            store.category = data.get("category", store.category)
+            store.save()
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "The store cannot be updated."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
     @action(detail=True, methods=["POST"])
     def add_item(self, request, pk=None):
-        # do some authentication with user
-        data = request.POST
-        item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        store = get_object_or_404(Store.objects.all(), pk=pk)
-        store.items.add(item)
-        store.save()
-        serializer = StoreSerializer(store)
-        return Response(serializer.data)
+        try:
+            data = request.POST
+            item = Item.objects.get(pk=data.get("item_id"))
+            store = Store.objects.get(pk=pk)
+            store.items.add(item)
+            store.save()
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
+        except Item.DoesNotExist:
+            return Response(
+                {"message": "The item does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "The item cannot be added."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
     @action(detail=True, methods=["POST"])
     def remove_item(self, request, pk=None):
-        # do some authentication with user
-        data = request.POST
-        item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        store = get_object_or_404(Store.objects.all(), pk=pk)
-        store.items.remove(item)
-        store.save()
-        serializer = StoreSerializer(store)
-        return Response(serializer.data)
+        try:
+            data = request.POST
+            item = Item.objects.get(pk=data.get("item_id"))
+            store = Store.objects.get(pk=pk)
+            store.items.remove(item)
+            store.save()
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
+        except Item.DoesNotExist:
+            return Response(
+                {"message": "The item does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "The item cannot be added."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
     @action(detail=False, methods=["DELETE"])
     def delete_item(self, request):
-        # do some authentication with user
-        data = request.POST
-        # user = get_object_or_404(User.objects.all(), pk=data.get('user_id'))
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
-        item = get_object_or_404(Item.objects.all(), pk=data.get("item_id"))
-        for history in item.history.all():
-            history.delete()
-        item.delete()
-        serializer = StoreSerializer(store)
-        return Response(serializer.data)
+        try:
+            data = request.POST
+            item = Item.objects.get(pk=data.get("item_id"))
+            store = Store.objects.get(pk=data.get("store_id"))
+            for history in item.history.all():
+                history.delete()
+            item.delete()
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
+        except Item.DoesNotExist:
+            return Response(
+                {"message": "The item does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "The item cannot be deleted."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
 
 class ItemViewSet(viewsets.ViewSet):
@@ -195,14 +328,20 @@ class ItemViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        item = get_object_or_404(Item.objects.all(), pk=pk)
-        serializer = ItemSerializer(item)
-        return Response(serializer.data)
+        try:
+            item = Item.objects.get(pk=pk)
+            serializer = ItemSerializer(item)
+            return Response(serializer.data)
+        except Item.DoesNotExist:
+            return Response(
+                {"message": "The item does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
 
     def create(self, request):
-        data = request.POST
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
         try:
+            data = request.POST
+            store = Store.objects.get(pk=data.get("store_id"))
             item = Item.objects.create(
                 image=data.get("image"),
                 name=data.get("name"),
@@ -214,6 +353,7 @@ class ItemViewSet(viewsets.ViewSet):
                 description=data.get("description"),
             )
             item_history = History_of_Item.objects.create(
+                after_image=data.get("image"),
                 after_name=data.get("name"),
                 after_stock=data.get("stock"),
                 after_price=data.get("price", "0.0"),
@@ -225,8 +365,17 @@ class ItemViewSet(viewsets.ViewSet):
             item.history.add(item_history)
             store.items.add(item)
             store.save()
-        except IntegrityError:
-            return Response(data={"Error": "Integrity Error"}, status=status.HTTP_400_BAD_REQUEST)
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (ValidationError, IntegrityError) as e:
+            print(e)
+            return Response(
+                data={"Error": "Validation or Integrity Error"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
         else:
             return Response(
                 data=ItemSerializer(item).data,
@@ -234,78 +383,94 @@ class ItemViewSet(viewsets.ViewSet):
             )
 
     def update(self, request, pk=None):
-        item = get_object_or_404(Item.objects.all(), pk=pk)
-        print("hi")
-        # item.image = ....
-        data = request.data
-        print(data)
-        history = History_of_Item.objects.create()
-        change_exist = False
-        if data.get("name", item.name) != item.name:
-            history.before_name = item.name
-            history.after_name = data.get("name")
-            change_exist = True
-        else:
-            history.before_name = item.name
-            history.after_name = item.name
-        if float(data.get("price", item.price)) != float(item.price):
-            history.before_price = item.price
-            history.after_price = data.get("price")
-            change_exist = True
-        else:
-            history.before_price = item.price
-            history.after_price = item.price
-        if int(data.get("stock", item.stock)) != int(item.stock):
-            history.before_stock = item.stock
-            history.after_stock = data.get("stock")
-            change_exist = True
-        else:
-            history.before_stock = item.stock
-            history.after_stock = item.stock
-        if data.get("orderType", item.orderType) != item.orderType:
-            history.before_orderType = item.orderType
-            history.after_orderType = data.get("orderType")
-            change_exist = True
-        else:
-            history.before_orderType = item.orderType
-            history.after_orderType = item.orderType
-        if int(data.get("bulkMinimum", item.bulkMinimum)) != int(item.bulkMinimum):
-            history.before_bulkMinimum = item.bulkMinimum
-            history.after_bulkMinimum = data.get("bulkMinimum")
-            change_exist = True
-        else:
-            history.before_bulkMinimum = item.bulkMinimum
-            history.after_bulkMinimum = item.bulkMinimum
-        if float(data.get("bulkPrice", item.bulkPrice)) != float(item.bulkPrice):
-            history.before_bulkPrice = item.bulkPrice
-            history.after_bulkPrice = data.get("bulkPrice")
-            change_exist = True
-        else:
-            history.before_bulkPrice = item.bulkPrice
-            history.after_bulkPrice = item.bulkPrice
-        if data.get("description", item.description) != item.description:
-            history.before_description = item.description
-            history.after_description = data.get("description")
-            change_exist = True
-        else:
-            history.before_description = item.description
-            history.after_description = item.description
-        if not change_exist:
-            history.delete()
-            return Response({"status": "no change"})
-        else:
-            history.save()
-            item.history.add(history)
-            item.name = data.get("name", item.name)
-            item.description = data.get("description", item.description)
-            item.stock = data.get("stock", item.stock)
-            item.price = data.get("price", item.price)
-            item.orderType = data.get("orderType", item.orderType)
-            item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
-            item.bulkPrice = data.get("bulkPrice", item.bulkPrice)
-            item.save()
-            serializer = ItemSerializer(item)
-            return Response(serializer.data)
+        try:
+            item = Item.objects.get(pk=pk)
+            data = request.data
+            history = History_of_Item.objects.create()
+            change_exist = False
+            if data.get("image", item.image) != item.image:
+                history.before_image = item.image
+                history.after_image = data.get("image")
+                change_exist = True
+            else:
+                history.before_image = item.image
+                history.after_image = item.image
+            if data.get("name", item.name) != item.name:
+                history.before_name = item.name
+                history.after_name = data.get("name")
+                change_exist = True
+            else:
+                history.before_name = item.name
+                history.after_name = item.name
+            if float(data.get("price", item.price)) != float(item.price):
+                history.before_price = item.price
+                history.after_price = data.get("price")
+                change_exist = True
+            else:
+                history.before_price = item.price
+                history.after_price = item.price
+            if int(data.get("stock", item.stock)) != int(item.stock):
+                history.before_stock = item.stock
+                history.after_stock = data.get("stock")
+                change_exist = True
+            else:
+                history.before_stock = item.stock
+                history.after_stock = item.stock
+            if data.get("orderType", item.orderType) != item.orderType:
+                history.before_orderType = item.orderType
+                history.after_orderType = data.get("orderType")
+                change_exist = True
+            else:
+                history.before_orderType = item.orderType
+                history.after_orderType = item.orderType
+            if int(data.get("bulkMinimum", item.bulkMinimum)) != int(item.bulkMinimum):
+                history.before_bulkMinimum = item.bulkMinimum
+                history.after_bulkMinimum = data.get("bulkMinimum")
+                change_exist = True
+            else:
+                history.before_bulkMinimum = item.bulkMinimum
+                history.after_bulkMinimum = item.bulkMinimum
+            if float(data.get("bulkPrice", item.bulkPrice)) != float(item.bulkPrice):
+                history.before_bulkPrice = item.bulkPrice
+                history.after_bulkPrice = data.get("bulkPrice")
+                change_exist = True
+            else:
+                history.before_bulkPrice = item.bulkPrice
+                history.after_bulkPrice = item.bulkPrice
+            if data.get("description", item.description) != item.description:
+                history.before_description = item.description
+                history.after_description = data.get("description")
+                change_exist = True
+            else:
+                history.before_description = item.description
+                history.after_description = item.description
+            if not change_exist:
+                history.delete()
+                return Response({"status": "no change"})
+            else:
+                history.save()
+                item.history.add(history)
+                item.name = data.get("name", item.name)
+                item.description = data.get("description", item.description)
+                item.stock = data.get("stock", item.stock)
+                item.price = data.get("price", item.price)
+                item.orderType = data.get("orderType", item.orderType)
+                item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
+                item.bulkPrice = data.get("bulkPrice", item.bulkPrice)
+                item.save()
+                serializer = ItemSerializer(item)
+                return Response(serializer.data)
+        except Item.DoesNotExist:
+            return Response(
+                {"message": "The item does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (ValidationError, IntegrityError) as e:
+            print(e)
+            return Response(
+                data={"Error": "Validation or Integrity Error"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
 
 class RegisterUserViewSet(viewsets.ViewSet):
