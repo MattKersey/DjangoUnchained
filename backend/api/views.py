@@ -14,14 +14,13 @@ from api.serializers import (
     UserSerializer,
     StoreSerializer,
     ItemSerializer,
-    ItemHistorySerializer
+    ItemHistorySerializer,
 )
 from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import (
     OAuth2Authentication,
     TokenHasReadWriteScope,
 )
-from django.shortcuts import get_object_or_404
 from rest_framework import status
 from django.db import IntegrityError
 from django.core.validators import ValidationError
@@ -212,7 +211,8 @@ class StoreViewSet(viewsets.ViewSet):
         serializer = StoreSerializer(Store.objects.all(), many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk=None):
+    @action(detail=True, methods=["GET"])
+    def my_retrieve(self, request, pk=None):
         try:
             store = Store.objects.get(pk=pk)
             data = {"store_pk": store.pk, "history": []}
@@ -222,6 +222,17 @@ class StoreViewSet(viewsets.ViewSet):
                     h_data.append(ItemHistorySerializer(history).data)
                 data["history"].append({"item_pk": item.pk, "item_history": h_data})
             return Response(data)
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+    def retrieve(self, request, pk=None):
+        try:
+            store = Store.objects.get(pk=pk)
+            serializer = StoreSerializer(store)
+            return Response(serializer.data)
         except Store.DoesNotExist:
             return Response(
                 {"message": "The store does not exist."},
@@ -259,9 +270,7 @@ class StoreViewSet(viewsets.ViewSet):
                 item = Item.objects.get(pk=purchase_item.get("id"))
                 if item not in store.items.all():
                     return Response(
-                        {
-                            "message": f"The item '{item.name}' doesn't belong to store."
-                        },
+                        {"message": f"The item '{item.name}' doesn't belong to store."},
                         status=status.HTTP_406_NOT_ACCEPTABLE,
                     )
                 # to confirm that puchase can be made
@@ -525,18 +534,30 @@ class ItemViewSet(viewsets.ViewSet):
                 history.delete()
                 return Response({"status": "no change"})
             else:
-                history.save()
-                item.history.add(history)
-                item.name = data.get("name", item.name)
-                item.description = data.get("description", item.description)
-                item.stock = data.get("stock", item.stock)
-                item.price = data.get("price", item.price)
-                item.orderType = data.get("orderType", item.orderType)
-                item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
-                item.bulkPrice = data.get("bulkPrice", item.bulkPrice)
-                item.save()
-                serializer = ItemSerializer(item)
-                return Response(serializer.data)
+                try:
+                    item.name = data.get("name", item.name)
+                    item.description = data.get("description", item.description)
+                    item.stock = data.get("stock", item.stock)
+                    item.price = data.get("price", item.price)
+                    item.orderType = data.get("orderType", item.orderType)
+                    item.bulkMinimum = data.get("bulkMinimum", item.bulkMinimum)
+                    item.bulkPrice = data.get("bulkPrice", item.bulkPrice)
+                    item.save()
+                except (ValidationError, IntegrityError) as e:
+                    # if when we save, we encounter an error, we have to
+                    # delete the history obj
+                    history.delete()
+                    print(e)
+                    return Response(
+                        data={"Error": "Validation or Integrity Error"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+                else:
+                    history.save()
+                    item.history.add(history)
+                    item.save()
+                    serializer = ItemSerializer(item)
+                    return Response(serializer.data)
         except Item.DoesNotExist:
             return Response(
                 {"message": "The item does not exist."},
