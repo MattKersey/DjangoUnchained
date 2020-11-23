@@ -43,10 +43,9 @@ class UserViewSet(viewsets.ViewSet):
     authentication_classes = [OAuth2Authentication]
     permission_classes = [TokenHasReadWriteScope]
 
-    @action(detail=False, methods=["GET"])
-    def current_user(self, request):
+    def retrieve(self, request, pk=None):
         try:
-            user = request.user
+            user = User.objects.get(pk=pk)
             return Response(UserSerializer(user).data)
         except User.DoesNotExist:
             return Response(
@@ -54,10 +53,9 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-    @action(detail=False, methods=["PUT"])
-    def update_user(self, request):
+    def update(self, request, pk=None):
         try:
-            user = request.user
+            user = User.objects.get(pk=pk)
             data = request.data
             user.email = data.get("email", user.email)
             user.set_password(data.get("password", user.password))
@@ -75,89 +73,19 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_304_NOT_MODIFIED,
             )
 
-    # IGNORE THE ONES BELOW FOR NOW
-
-    def list(self, request):
-        serializer = UserSerializer(User.objects.all(), many=True)
-        return Response(serializer.data)
-
     @action(detail=True, methods=["POST"])
     def add_store(self, request, pk=None):
-        data = request.POST
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
-        user.stores.add(store)
-        user.save()
-        serializer = UserSerializer(User.objects.get(pk=user.id))
-        return Response(serializer.data)
-
-    @action(detail=True, methods=["POST"])
-    def remove_store(self, request, pk=None):
-        data = request.POST
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        store = get_object_or_404(Store.objects.all(), pk=data.get("store_id"))
-        user.stores.remove(store)
-        user.save()
-        serializer = UserSerializer(User.objects.get(pk=user.id))
-        return Response(serializer.data)
-
-    def update(self, request, pk=None):
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        data = request.data
-        user.email = data.get("email", user.email)
-        user.set_password(data.get("password", user.password))
-        user.save()
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk=None):
-        user = get_object_or_404(User.objects.all(), pk=pk)
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
-
-
-class StoreViewSet(viewsets.ViewSet):
-    """
-    API endpoint that allows stores to be viewed.
-    """
-
-    authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasReadWriteScope]
-
-    @action(detail=False, methods=["DELETE"])
-    def delete_store(self, request):
         try:
             data = request.POST
-            user = request.user
-            store = Store.objects.get(pk=data.get("store_id"))
-            user.stores.remove(store)
-            user.save()
-            store.delete()
-            return Response(UserSerializer(user).data)
-        except User.DoesNotExist:
-            return Response(
-                {"message": "The user does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
-
-    @action(detail=False, methods=["POST"])
-    def add_store(self, request):
-        try:
-            data = request.POST
-            user = request.user
+            user = User.objects.get(pk=pk)
             store = Store.objects.create(
                 category=data.get("category"),
                 name=data.get("name"),
-                address=data.get("name"),
+                address=data.get("address"),
             )
             store.save()
-            user.stores.add(store)
-            return Response(UserSerializer(user), status=status.HTTP_201_CREATED)
+            Association.objects.create(user=user, store=store)
+            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         except User.DoesNotExist:
             return Response(
                 {"message": "The user does not exist."},
@@ -169,11 +97,11 @@ class StoreViewSet(viewsets.ViewSet):
                 status=status.HTTP_406_NOT_ACCEPTABLE,
             )
 
-    @action(detail=False, methods=["POST"])
-    def add_item_to_store(self, request):
+    @action(detail=True, methods=["DELETE"])
+    def delete_store(self, request, pk=None):
         try:
             data = request.POST
-            user = request.user
+            user = User.objects.get(pk=pk)
             store = Store.objects.get(pk=data.get("store_id"))
             if Association.objects.get(user=user, store=store).role not in [
                 Role.MANAGER,
@@ -183,145 +111,83 @@ class StoreViewSet(viewsets.ViewSet):
                     {"message": "You don't have the permission to add an item"},
                     status=status.HTTP_503_SERVICE_UNAVAILABLE,
                 )
-            item = Item.objects.create(
-                name=data.get("name"),
-                stock=data.get("stock"),
-                price=data.get("price"),
-                description=data.get("description"),
+            user.stores.remove(store)
+            store.delete()
+            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        except Association.DoesNotExist:
+            return Response(
+                {"message": "The association does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
             )
-            history = History_of_Item.objects.create(
-                before_name=None,
-                after_name=item.name,
-                before_price=None,
-                after_price=item.price,
-                before_stock=None,
-                after_stock=item.stock,
-                before_description=None,
-                after_description=item.description,
-                category=History_Category.ADDITION,
-            )
-            item.history.add(history)
-            item.save()
-            store.items.add(item)
-            store.save()
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
         except User.DoesNotExist:
             return Response(
-                {"message": "The user does not exist"}, status=status.HTTP_404_NOT_FOUND
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
             )
         except Store.DoesNotExist:
             return Response(
-                {"message": "The store does not exist"},
+                {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The item cannot be added"},
-                status=status.HTTP_304_NOT_MODIFIED,
-            )
 
-    @action(detail=False, methods=["POST"])
-    def delete_item_from_store(self, request):
+    @action(detail=True, methods=["POST"])
+    def remove_store(self, request, pk=None):
         try:
             data = request.POST
-            user = request.user
+            user = User.objects.get(pk=pk)
             store = Store.objects.get(pk=data.get("store_id"))
             if Association.objects.get(user=user, store=store).role not in [
                 Role.MANAGER,
                 Role.VENDOR,
             ]:
                 return Response(
-                    {"message": "You don't have the permission to delete the item"},
+                    {"message": "You don't have the permission to add an item"},
                     status=status.HTTP_503_SERVICE_UNAVAILABLE,
                 )
-            item = Item.objects.get(pk=data.get("item_id"))
-            history = History_of_Item.objects.create(
-                before_name=item.name,
-                after_name=None,
-                before_price=item.price,
-                after_price=None,
-                before_stock=item.stock,
-                after_stock=None,
-                before_description=item.description,
-                after_description=None,
-                category=History_Category.REMOVAL,
-            )
-            item.history.add(history)
-            item.save()
-            store.items.remove(item)
-            store.save()
-            return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
-        except User.DoesNotExist:
-            return Response(
-                {"message": "The user does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+            user.stores.remove(store)
+            user.save()
+            serializer = UserSerializer(User.objects.get(pk=user.id))
+            return Response(serializer.data)
         except Association.DoesNotExist:
             return Response(
-                {"message": "The store is not associated with the user"},
+                {"message": "The association does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Item.DoesNotExist:
-            return Response(
-                {"message": "The item does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The item cannot be deleted"},
-                status=status.HTTP_304_NOT_MODIFIED,
-            )
-
-    @action(detail=False, methods=["PUT"])
-    def update_store(self, request):
-        try:
-            data = request.POST
-            user = request.user
-            store = Store.objects.get(pk=data.get("store_id"))
-            if Association.objects.get(user=user, store=store).role not in [
-                Role.MANAGER,
-                Role.VENDOR,
-            ]:
-                return Response(
-                    {"message": "You don't have the permission to edit the item"},
-                    status=status.HTTP_503_SERVICE_UNAVAILABLE,
-                )
-            if (
-                data.get("category") is not None
-                and data.get("category") not in Category
-            ):
-                return Response(
-                    {"message": "Invalid Category"}, status=status.HTTP_304_NOT_MODIFIED
-                )
-            store.name = data.get("name", store.name)
-            store.address = data.get("address", store.address)
-            store.category = data.get("category", store.category)
-            store.save()
-            return Response(UserSerializer(user).data, status=status.HTTP_202_ACCEPTED)
         except User.DoesNotExist:
             return Response(
-                {"message": "The user does not exist"}, status=status.HTTP_404_NOT_FOUND
-            )
-        except Association.DoesNotExist:
-            return Response(
-                {"message": "The store is not associated with the user"},
+                {"message": "The user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
         except Store.DoesNotExist:
             return Response(
-                {"message": "The store does not exist"},
+                {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
-            )
-        except (IntegrityError, ValidationError):
-            return Response(
-                {"message": "The store cannot be updated"},
-                status=status.HTTP_304_NOT_MODIFIED,
             )
 
     # IGNORE THE ONES BELOW FOR NOW
+
+    def list(self, request):
+        serializer = UserSerializer(User.objects.all(), many=True)
+        return Response(serializer.data)
+
+
+class StoreViewSet(viewsets.ViewSet):
+    """
+    API endpoint that allows stores to be viewed.
+    """
+
+    authentication_classes = [OAuth2Authentication]
+    permission_classes = [TokenHasReadWriteScope]
+
+    def update(self, request, pk=None):
+        store = get_object_or_404(Store.objects.all(), pk=pk)
+        data = request.data
+        store.address = data.get("address", store.address)
+        store.name = data.get("name", store.name)
+        store.category = data.get("category", store.category)
+        store.save()
+        serializer = StoreSerializer(store)
+        return Response(serializer.data)
 
     def list(self, request):
         serializer = StoreSerializer(Store.objects.all(), many=True)

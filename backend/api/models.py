@@ -181,7 +181,7 @@ class Association(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     store = models.ForeignKey(Store, on_delete=models.CASCADE)
     membership = models.DateField(auto_now=True)
-    role = models.CharField(choices=Role.choices, max_length=10, default=Role.EMPLOYEE)
+    role = models.CharField(choices=Role.choices, max_length=10, default=Role.MANAGER)
 
     def __str__(self):
         return f"[{self.role}] {self.user} --> {self.store.name}"
