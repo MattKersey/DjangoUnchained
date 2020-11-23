@@ -82,18 +82,14 @@ class Product extends React.Component {
           >
             <ExpandMoreIcon />
           </IconButton>
-
+          <Typography paragraph>Quantity: {this.props.stock} </Typography>
           <IconButton onClick={this.props.handleAddToCart} aria-label='share'>
             <AddShoppingCartIcon />
           </IconButton>
         </CardActions>
         <Collapse in={this.state.expanded} timeout='auto' unmountOnExit>
           <CardContent>
-            <Typography paragraph>Inventory: 10</Typography>
-            <Typography paragraph>SKU: 1293238</Typography>
-            <Typography paragraph>Category: Food</Typography>
-
-            <Typography />
+            <Typography paragraph>Description: {this.props.description} </Typography>
           </CardContent>
         </Collapse>
       </Card>

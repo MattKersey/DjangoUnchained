@@ -56,10 +56,11 @@ class AssociationSerializer(serializers.ModelSerializer):
     store_address = serializers.ReadOnlyField(source="store.address")
     store_name = serializers.ReadOnlyField(source="store.name")
     store_category = serializers.ReadOnlyField(source="store.category")
+    store_id = serializers.ReadOnlyField(source="store.pk")
 
     class Meta:
         model = Association
-        fields = ["store_address", "store_name", "store_category", "membership", "role"]
+        fields = ["store_address", "store_name", "store_category", "membership", "role", "store_id"]
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

@@ -8,7 +8,6 @@ import Error from './shared/Error'
 import NavBar from './shared/Navigation'
 import Register from './Login/Register'
 import Shop from './Shop/Shop'
-import AddShopForm from './User/AddShopForm.js'
 
 import Container from '@material-ui/core/Container'
 import LoginButtons from './OauthLogin/LoginButtons'
@@ -32,7 +31,7 @@ class App extends Component {
       })
         .then(res => res.json())
         .then(json => {
-          localStorage.setItem('user_id', json.id)
+          localStorage.setItem('user_id', json.pk)
           localStorage.setItem('email', json.email)
         })
     }
@@ -56,7 +55,6 @@ class App extends Component {
             <PrivateRoute path='/' component={UserPage} exact />
             <PrivateRoute path='/register' component={Register} exact />
             <PrivateRoute path='/shop/:shopID' component={Shop} exact />
-            <PrivateRoute path='/register_shop' component={AddShopForm} exact />
             <Route path='/login' component={LoginButtons} exact />
             <Route path='/loginredirect' component={LoginRedirect} exact />
             <Route component={Error} />

@@ -1,3 +1,5 @@
+/* global localStorage, fetch */
+
 import React from 'react'
 import Product from './Product'
 import Grid from '@material-ui/core/Grid'
@@ -9,46 +11,70 @@ import TableContainer from '@material-ui/core/TableContainer'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
+import Fab from '@material-ui/core/Fab'
+import AddIcon from '@material-ui/icons/Add'
+import Box from '@material-ui/core/Box'
+import Button from '@material-ui/core/Button'
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import AddItemForm from './AddItemForm.js'
+import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
+
 class Shop extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
-      products: [],
+      products: {},
       inCart: {},
-      storeName: ''
+      storeName: '',
+      open: false,
+      store_id: -1
     }
   }
 
   onAddToCart (event, data) {
-    if (data.SKU in this.state.inCart) {
-      const newProd = { quantity: this.state.inCart[data.SKU].quantity + 1, productName: data.productName, product: data, price: data.productPrice }
+    if (data.pk in this.state.inCart) {
+      const newProd = { quantity: this.state.inCart[data.pk].quantity + 1, productName: data.name, product: data, price: data.price }
       const oldCart = this.state.inCart
-      oldCart[data.SKU] = newProd
+      oldCart[data.pk] = newProd
       this.setState({ inCart: oldCart })
     } else {
-      const newProd = { quantity: 1, productName: data.productName, product_meta: data, price: data.productPrice }
+      const newProd = { quantity: 1, productName: data.name, product_meta: data, price: data.price }
       const oldCart = this.state.inCart
-      oldCart[data.SKU] = newProd
+      oldCart[data.pk] = newProd
       this.setState({ inCart: oldCart })
+      // TODO: UPDATE PRODUCTS STATE SO IT SUBTRRACTS FROM THE VIEW
     }
   }
 
   componentDidMount () {
-    const fakeData = [{ productName: 'Test1', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 123 },
-      { productName: 'Test2', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 132 },
-      { productName: 'Test3', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 1234 },
-      { productName: 'Test4', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 123424 },
-      { productName: 'Test5', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 12343354 },
-      { productName: 'Test6', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 12345435 },
-      { productName: 'Test7', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 12345545 },
-      { productName: 'Test8', productPrice: 3.99, imageURL: 'https://picsum.photos/200/300', SKU: 1234545454 }]
-    // Fetch Data HERE
-    const productElements = []
-    for (let i = 0; i < fakeData.length; i++) {
-      productElements.push(<Grid item key={fakeData[i].SKU} md={3}><Product className='product' handleAddToCart={(event) => this.onAddToCart(event, fakeData[i])} productName={fakeData[i].productName} price={fakeData[i].productPrice} imageURL={fakeData[i].imageURL} /></Grid>)
-    }
-    this.setState({ products: productElements, storeName: "Carlos' Magcal Emporium" })
+    const storeID = this.props.match.params.shopID
+    fetch('http://127.0.0.1:8000/api/stores/' + storeID + '/', {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token')}`
+      }
+    })
+      .then(res => res.json())
+      .then(json => {
+        console.log(json.items)
+        const productElements = {}
+        for (let i = 0; i < json.items.length; i++) {
+          productElements[json.items[i].pk] = <Grid item key={json.items[i].pk} md={3}><Product className='product' handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
+        }
+        this.setState({ products: productElements, storeName: "Carlos' Magcal Emporium", store_id: storeID })
+      })
+  }
+
+  handleOpen () {
+    this.setState({ open: true })
+  }
+
+  handleClose () {
+    this.setState({ open: false })
   }
 
   render () {
@@ -57,10 +83,20 @@ class Shop extends React.Component {
         <Typography component='h1' variant='h5'>
           {this.state.storeName}
         </Typography>
-        <Grid container direction='row' justify='space-evenly' alignItems='baseline' spacing={10}>
-          {this.state.products}
-        </Grid>
+        <Box align='center'>
+          <Grid container direction='row' justify='space-between' alignItems='baseline' spacing={10}>
+            {Object.values(this.state.products)}
+          </Grid>
+          <br />
+          <Fab color='primary' onClick={this.handleOpen.bind(this)} aria-label='add' variant='extended'>
+            <AddIcon />
+            Add an Item
+          </Fab>
+        </Box>
         <br />
+        <Typography component='h1' variant='h5'>
+          Cart <ShoppingCartIcon />
+        </Typography>
         <TableContainer component={Paper}>
           <Table aria-label='simple table'>
             <TableHead>
@@ -83,6 +119,20 @@ class Shop extends React.Component {
             </TableBody>
           </Table>
         </TableContainer>
+        <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
+          <DialogTitle id='form-dialog-title'>Add an Item</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Fill out the following form to create an item
+            </DialogContentText>
+            <AddItemForm />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose.bind(this)} color='primary'>
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
       </div>
     )
   }
