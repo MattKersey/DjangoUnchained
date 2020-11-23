@@ -24,7 +24,8 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import AddItemForm from './AddItemForm.js'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
-
+import IconButton from '@material-ui/core/IconButton'
+import QueryBuilderIcon from '@material-ui/icons/QueryBuilder'
 function subTotal (items) {
   return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
 }
@@ -107,12 +108,20 @@ class Shop extends React.Component {
     event.preventDefault()
   }
 
+  handleHistory () {
+    window.location = window.location + '/history'
+  }
+
   render () {
     return (
       <div>
         <Typography component='h1' variant='h5'>
           {this.state.storeName}
+          <IconButton color='primary' onClick={this.handleHistory} aria-label='upload picture' component='span'>
+            <QueryBuilderIcon />
+          </IconButton>
         </Typography>
+
         <Box align='center'>
           <Grid container direction='row' justify='flex-start' alignItems='baseline' spacing={10}>
             {Object.values(this.state.products)}
@@ -142,8 +151,8 @@ class Shop extends React.Component {
                   <TableCell component='th' scope='row'>
                     {this.state.inCart[product].productName}
                   </TableCell>
-                  <TableCell align='right'>{this.state.inCart[product].quantity}</TableCell>
-                  <TableCell align='right'>{this.state.inCart[product].price}</TableCell>
+                  <TableCell style={{ width: '40px' }} align='right'>{this.state.inCart[product].quantity}</TableCell>
+                  <TableCell style={{ width: '40px' }} align='right'>{this.state.inCart[product].price}</TableCell>
                 </TableRow>
               ))}
               <TableRow>

@@ -13,7 +13,7 @@ import IconButton from '@material-ui/core/IconButton'
 import Typography from '@material-ui/core/Typography'
 import { red } from '@material-ui/core/colors'
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore'
-import MoreVertIcon from '@material-ui/icons/MoreVert'
+import CreateIcon from '@material-ui/icons/Create'
 import AddShoppingCartIcon from '@material-ui/icons/AddShoppingCart'
 const styles = makeStyles((theme) => ({
   root: {
@@ -61,7 +61,7 @@ class Product extends React.Component {
         <CardHeader
           action={
             <IconButton aria-label='settings'>
-              <MoreVertIcon />
+              <CreateIcon />
             </IconButton>
         }
           title={this.props.productName}
