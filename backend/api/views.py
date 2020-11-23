@@ -299,7 +299,8 @@ class PingViewSet(viewsets.ViewSet):
     def list(self, request):
         return Response(data={"ping": "pong"})
 
-@api_view(['GET'])
+
+@api_view(["GET"])
 def current_user(request):
     """
     Determine the current user by their token, and return their data

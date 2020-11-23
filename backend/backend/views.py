@@ -29,5 +29,6 @@ class OAuthCallbackViewSet(viewsets.ViewSet):
         r = requests.post(url, data=payload, headers=headers)
         return Response(data=json.loads(r.text))
 
+
 class GoogleLogin(SocialLoginView):
     adapter_class = GoogleOAuth2Adapter
