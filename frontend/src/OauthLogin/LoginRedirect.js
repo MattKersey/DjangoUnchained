@@ -1,3 +1,4 @@
+/* global localStorage */
 import React from 'react'
 import axios from 'axios'
 import Avatar from '@material-ui/core/Avatar'
@@ -59,6 +60,8 @@ class LoginRedirect extends React.Component {
         const newToken = response.data.access_token
         console.log(newToken)
         this.setState({ token: newToken })
+        localStorage.setItem('token', newToken)
+        window.location = '/'
       })
   }
 

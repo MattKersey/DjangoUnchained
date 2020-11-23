@@ -1,6 +1,7 @@
+/* global localStorage */
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
-import { BrowserRouter, Route, Switch } from 'react-router-dom'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
 import Home from './Home/Home'
 import Login from './Login/Login'
@@ -14,18 +15,26 @@ import LoginButtons from './OauthLogin/LoginButtons'
 import LoginRedirect from './OauthLogin/LoginRedirect'
 
 class App extends Component {
+  constructor (props) {
+    super(props)
+    this.state = {
+      logged_in: !!localStorage.getItem('token'),
+      email: ''
+    }
+  }
+
   render () {
+    const PrivateRoute = ({ ...props }) => this.state.logged_in ? <Route {...props} /> : <Redirect to='/login' />
     return (
       <BrowserRouter>
         <NavBar />
 
         <Container fixed>
           <Switch>
-            <Route path='/dummy' component={Home} exact />
-            <Route path='/' component={Login} exact />
-            <Route path='/register' component={Register} exact />
-            <Route path='/shop/:shopID' component={Shop} exact />
-            <Route path='/loginbuttons' component={LoginButtons} exact />
+            <PrivateRoute path='/dummy' component={Home} exact />
+            <PrivateRoute path='/register' component={Register} exact />
+            <PrivateRoute path='/shop/:shopID' component={Shop} exact />
+            <Route path='/' component={LoginButtons} exact />
             <Route path='/loginredirect' component={LoginRedirect} exact />
             <Route component={Error} />
           </Switch>
