@@ -1,4 +1,5 @@
 /* global localStorage, fetch */
+/* istanbul ignore file */
 
 import React from 'react'
 import Product from './Product'
@@ -84,7 +85,7 @@ class Shop extends React.Component {
           {this.state.storeName}
         </Typography>
         <Box align='center'>
-          <Grid container direction='row' justify='space-between' alignItems='baseline' spacing={10}>
+          <Grid container direction='row' justify='flex-start' alignItems='baseline' spacing={10}>
             {Object.values(this.state.products)}
           </Grid>
           <br />

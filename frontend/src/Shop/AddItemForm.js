@@ -1,5 +1,5 @@
-/* global localStorage, fetch, Headers */
-
+/* global localStorage, fetch, Headers, alert */
+/* istanbul ignore file */
 import React from 'react'
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
@@ -70,7 +70,7 @@ class AddShopForm extends React.Component {
     urlencoded.append('name', this.state.item_name)
     urlencoded.append('stock', parseInt(this.state.stock))
     urlencoded.append('price', parseFloat(this.state.price))
-    urlencoded.append('ordertype', this.state.type)
+    urlencoded.append('orderType', this.state.type)
     urlencoded.append('bulkMinimum', parseInt(this.state.bulkMin))
     urlencoded.append('bulkPrice', parseFloat(this.state.bulkPrice))
     urlencoded.append('description', this.state.description)
@@ -82,10 +82,10 @@ class AddShopForm extends React.Component {
       redirect: 'follow'
     }
 
-    fetch('http://127.0.0.1:8000/api/usssers/' + localStorage.getItem('user_id') + '/add_store2/', requestOptions)
+    fetch('http://127.0.0.1:8000/api/items/', requestOptions)
       .then(response => response.json())
-      .then(result => { window.location = '/shop/' + result.pk })
-      .catch(error => console.log('error', error))
+      .then(result => { window.location.reload() })
+      .catch(error => alert(error))
     event.preventDefault()
   }
 
