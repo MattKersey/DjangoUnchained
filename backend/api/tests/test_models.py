@@ -1,6 +1,15 @@
 from django.test import TestCase
 from django.core.files.uploadedfile import SimpleUploadedFile
-from api.models import User, UserManager, Category, Store, Item, Association, Role
+from api.models import (
+    User,
+    UserManager,
+    Category,
+    Store,
+    Item,
+    Association,
+    Role,
+    OrderType,
+)
 import pytest
 from datetime import datetime
 from django.core.exceptions import ValidationError
@@ -156,6 +165,52 @@ class Test_Item_Model(TestCase):
                 )
                 item.full_clean()
 
+    def test_no_price(self):
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    stock=TEST_ITEM_STOCK,
+                    price=None,
+                    description=TEST_ITEM_DESCRIPTION,
+                    orderType=OrderType.INDIVIDUAL,
+                )
+                item.full_clean()
+                print(item.price)
+
+    def test_no_bulk_attributes(self):
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    stock=TEST_ITEM_STOCK,
+                    description=TEST_ITEM_DESCRIPTION,
+                    orderType=OrderType.BULK,
+                    bulkMinimum=None,
+                    bulkPrice=None,
+                )
+                item.full_clean()
+
+    def test_bulk_price_higer_than_price(self):
+        with self.assertRaises(ValidationError):
+            with open(file=self.file_path, mode="rb") as infile:
+                file = SimpleUploadedFile(self.file_path, infile.read())
+                item = Item.objects.create(
+                    image=file,
+                    name=TEST_ITEM_NAME,
+                    price=1.0,
+                    bulkMinimum=1.0,
+                    bulkPrice=1.1,
+                    stock=TEST_ITEM_STOCK,
+                    description=TEST_ITEM_DESCRIPTION,
+                    orderType=OrderType.BOTH,
+                )
+                item.full_clean()
+
     def test_invalid_price(self):
         sample_price = -1.0
         with self.assertRaises(ValidationError):
@@ -208,7 +263,7 @@ class Test_Store_Model(TestCase):
         file = None
         with open(file=file_path, mode="rb") as infile:
             file = SimpleUploadedFile(file_path, infile.read())
-        _ = Item.objects.create(
+        self.item1 = Item.objects.create(
             image=file,
             name="Item 1",
             stock=1,
@@ -216,7 +271,7 @@ class Test_Store_Model(TestCase):
             description="Item Description 1",
         )
 
-        _ = Item.objects.create(
+        self.item2 = Item.objects.create(
             image=file,
             name="Item 2",
             stock=2,
@@ -236,8 +291,7 @@ class Test_Store_Model(TestCase):
         self.assertEqual(store.address, TEST_STORE_ADDRESS)
         self.assertEqual(store.category, TEST_STORE_CATEGORY)
         self.assertEqual(2, Item.objects.all().count())
-        sample_item = Item.objects.get(name="Item 1")
-        store.items.add(sample_item)
+        store.validate_and_add_item(self.item1)
         self.assertEqual(1, store.items.count())
 
     @pytest.mark.django_db
@@ -253,6 +307,33 @@ class Test_Store_Model(TestCase):
         user.save()
         self.assertEqual(1, user.stores.all().count())
         self.assertTrue(store in user.stores.all())
+
+    def test_invalid_item_to_store(self):
+        store = Store.objects.create(
+            name=TEST_STORE_NAME,
+            address=TEST_STORE_ADDRESS,
+            category=TEST_STORE_CATEGORY,
+        )
+        store.validate_and_add_item(self.item1)
+        with self.assertRaises(ValidationError):
+            store.validate_and_add_item(self.item1)
+
+    def test_non_other_cateogry(self):
+        with self.assertRaises(ValidationError):
+            _ = Store.objects.create(
+                name=TEST_STORE_NAME,
+                address=TEST_STORE_ADDRESS,
+                category=TEST_STORE_CATEGORY,
+                other_category="Example",
+            )
+
+    def test_no_other_category(self):
+        with self.assertRaises(ValidationError):
+            _ = Store.objects.create(
+                name=TEST_STORE_NAME,
+                address=TEST_STORE_ADDRESS,
+                category=Category.OTHER,
+            )
 
 
 TEST_ASSOCIATION_ROLE = Role.EMPLOYEE

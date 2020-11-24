@@ -110,8 +110,21 @@ class Item(models.Model):
         return self.name
 
     def clean(self):
-        if self.bulkPrice > self.price:
-            raise ValidationError("Bulk Price cannot exceed Price")
+        if self.orderType in [OrderType.INDIVIDUAL, OrderType.BOTH]:
+            if self.price is None:
+                raise ValidationError("Missing (Regular) Price for Item")
+
+        if self.orderType == OrderType.INDIVIDUAL:
+            if self.bulkPrice or self.bulkMinimum:
+                raise ValidationError("Included Bulk attributes for Item")
+
+        if self.orderType in [OrderType.BULK, OrderType.BOTH]:
+            if self.bulkPrice is None or self.bulkMinimum is None:
+                raise ValidationError("Missing Bulk attributes for Item")
+
+        if self.orderType == OrderType.BOTH:
+            if self.bulkPrice > self.price:
+                raise ValidationError("Bulk Price cannot exceed (Regular) Price")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -128,16 +141,32 @@ class Store(models.Model):
     address = models.TextField()
     name = models.CharField(max_length=50)
     category = models.CharField(
-        choices=Category.choices, max_length=10, default=Category.OTHER
+        choices=Category.choices, max_length=20, default=Category.OTHER
     )
     items = models.ManyToManyField(Item)
+    other_category = models.CharField(max_length=50, blank=True, null=True)
 
     def __str__(self):
         return self.name
 
+    def clean(self):
+        if self.category != Category.OTHER and self.other_category:
+            raise ValidationError("Cannot have other_cateogry for non-other category")
+        if self.category == Category.OTHER and self.other_category is None:
+            raise ValidationError("Must define a category")
+
     def save(self, *args, **kwargs):
         self.full_clean()
         return super(Store, self).save(*args, **kwargs)
+
+    def validate_and_add_item(self, item):
+        if item.name in self.items.values_list("name", flat=True):
+            raise ValidationError(
+                f"Item with same name '{item.name}' already part of store"
+            )
+        else:
+            self.items.add(item)
+            self.save()
 
 
 class UserManager(BaseUserManager):
