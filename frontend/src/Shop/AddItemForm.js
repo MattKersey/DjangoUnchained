@@ -1,4 +1,5 @@
-/* global localStorage, fetch, Headers */
+/* global localStorage, fetch, Headers, alert */
+/* istanbul ignore file */
 /* eslint react/prop-types: 0 */
 
 import React from 'react'
@@ -44,11 +45,13 @@ class AddShopForm extends React.Component {
     super(props)
 
     this.state = {
-      name: '',
-      address: '',
-      category: '',
-      user_id: -1,
-      madeReq: false
+      item_name: '',
+      stock: 0,
+      price: 0,
+      type: '',
+      bulkMin: 0,
+      bulkPrice: 0.0,
+      description: ''
     }
 
     this.handleChange = this.handleChange.bind(this)
@@ -65,9 +68,14 @@ class AddShopForm extends React.Component {
     myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
 
     const urlencoded = new URLSearchParams()
-    urlencoded.append('name', this.state.name)
-    urlencoded.append('address', this.state.address)
-    urlencoded.append('category', this.state.category)
+    urlencoded.append('store_id', parseInt(this.props.match.params.shopID))
+    urlencoded.append('name', this.state.item_name)
+    urlencoded.append('stock', parseInt(this.state.stock))
+    urlencoded.append('price', parseFloat(this.state.price))
+    urlencoded.append('orderType', this.state.type)
+    urlencoded.append('bulkMinimum', parseInt(this.state.bulkMin))
+    urlencoded.append('bulkPrice', parseFloat(this.state.bulkPrice))
+    urlencoded.append('description', this.state.description)
 
     const requestOptions = {
       method: 'POST',
@@ -76,12 +84,11 @@ class AddShopForm extends React.Component {
       redirect: 'follow'
     }
 
-    fetch('http://127.0.0.1:8000/api/users/' + localStorage.getItem('user_id') + '/add_store/', requestOptions)
+    fetch('http://127.0.0.1:8000/api/items/', requestOptions)
       .then(response => response.json())
-      .then(result => { window.location = '/shop/' + result.pk })
-      .catch(error => console.log('error', error))
+      .then(result => { window.location.reload() })
+      .catch(error => alert(error))
     event.preventDefault()
-    this.props.onSub()
   }
 
   render () {
@@ -95,9 +102,9 @@ class AddShopForm extends React.Component {
             required
             fullWidth
             id='shop_name'
-            label='Store Name'
-            name='name'
-            autoComplete='store_name'
+            label='Item Name'
+            name='item_name'
+            autoComplete='item_name'
             autoFocus
             onChange={this.handleChange}
           />
@@ -105,27 +112,52 @@ class AddShopForm extends React.Component {
             variant='outlined'
             margin='normal'
             required
+            id='description'
+            label='Description'
+            name='description'
             fullWidth
-            id='address'
-            label='Address'
-            name='address'
-            autoComplete='last_name'
+            autoComplete='description'
+            onChange={this.handleChange}
+          />
+
+          <TextField
+            variant='outlined'
+            margin='normal'
+            required
+            id='stock'
+            label='Stock'
+            name='stock'
+            autoComplete='stock'
+            autoFocus
+            onChange={this.handleChange}
+          />
+
+          <TextField
+            variant='outlined'
+            margin='normal'
+            required
+            id='stock'
+            label='Price'
+            name='price'
+            autoComplete='price'
             onChange={this.handleChange}
           />
           <FormControl className={classes.formControl}>
-            <InputLabel id='demo-simple-select-label'>Category</InputLabel>
+            <InputLabel id='demo-simple-select-label'>Type</InputLabel>
             <Select
               labelId='demo-simple-select-label'
               id='demo-simple-select'
-              name='category'
-              value={this.state.category}
+              name='type'
+              value={this.state.type}
               onChange={this.handleChange}
             >
-              <MenuItem value='Food'>Food</MenuItem>
-              <MenuItem value='Clothing'>Clothing</MenuItem>
-              <MenuItem value='Other'>Other</MenuItem>
+              <MenuItem value='Individual'>Individual</MenuItem>
+              <MenuItem value='Bulk'>Bulk</MenuItem>
+              <MenuItem value='Both'>Both</MenuItem>
             </Select>
           </FormControl>
+          {((this.state.type === 'Bulk') || (this.state.type === 'Both')) ? <div><TextField variant='outlined' margin='normal' required id='bulkMin' label='Bulk Min.' name='bulkMin' autoComplete='Bulk Min' onChange={this.handleChange} /> <TextField variant='outlined' margin='normal' required id='Bulk Price' label='Bulk Price' name='bulkPrice' autoComplete='Bulk Min' onChange={this.handleChange} /> </div> : null}
+
           <Button
             type='submit'
             fullWidth
@@ -133,7 +165,7 @@ class AddShopForm extends React.Component {
             color='primary'
             className={classes.submit}
           >
-            Create Store (will redirect)
+            Add Item
           </Button>
         </form>
       </div>

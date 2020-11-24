@@ -12,6 +12,7 @@ class LoginRedirect extends React.Component {
     console.log(search)
     axios.get('http://127.0.0.1:8000/authredirect/' + search)
       .then((response) => {
+        console.log(response)
         const newToken = response.data.access_token
         localStorage.setItem('token', newToken)
         window.location = '/'

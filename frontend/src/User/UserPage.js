@@ -8,11 +8,23 @@ import AddIcon from '@material-ui/icons/Add'
 import Typography from '@material-ui/core/Typography'
 import axios from 'axios'
 import Box from '@material-ui/core/Box'
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import Button from '@material-ui/core/Button'
+import AddShopForm from './AddShopForm.js'
+
 import './home.css'
 class UserPage extends React.Component {
   constructor (props) {
     super(props)
-    this.state = { email: '', shops: [] }
+    this.state = {
+      email: '',
+      shops: [],
+      open: false
+    }
   }
 
   componentDidMount () {
@@ -30,7 +42,17 @@ class UserPage extends React.Component {
       })
   }
 
-  handleAddStore () { window.location = '/register_shop' }
+  handleOpen () {
+    this.setState({ open: true })
+  }
+
+  handleClose () {
+    this.setState({ open: false })
+  }
+
+  handleSub (event) {
+    this.setState({ open: false })
+  }
 
   render () {
     return (
@@ -53,10 +75,24 @@ class UserPage extends React.Component {
           </Grid>
         </Box>
         <Box>
-          <Fab color='primary' onClick={this.handleAddStore} aria-label='add'>
+          <Fab color='primary' onClick={this.handleOpen.bind(this)} aria-label='add'>
             <AddIcon />
           </Fab>
         </Box>
+        <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
+          <DialogTitle id='form-dialog-title'>Create a Store</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Fill out the following form to create an item
+            </DialogContentText>
+            <AddShopForm onSub={(event) => this.handleSub(event)} />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={this.handleClose.bind(this)} color='primary'>
+              Cancel
+            </Button>
+          </DialogActions>
+        </Dialog>
 
       </div>
     )
