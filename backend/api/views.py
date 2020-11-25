@@ -312,8 +312,7 @@ class StoreViewSet(viewsets.ViewSet):
             data = request.POST
             item = Item.objects.get(pk=data.get("item_id"))
             store = Store.objects.get(pk=pk)
-            store.items.add(item)
-            store.save()
+            store.validate_and_add_item(item)
             serializer = StoreSerializer(store)
             return Response(serializer.data)
         except Item.DoesNotExist:
@@ -452,8 +451,7 @@ class ItemViewSet(viewsets.ViewSet):
                 category=History_Category.ADDITION,
             )
             item.history.add(item_history)
-            store.items.add(item)
-            store.save()
+            store.validate_and_add_item(item)
         except Store.DoesNotExist:
             return Response(
                 {"message": "The store does not exist."},
