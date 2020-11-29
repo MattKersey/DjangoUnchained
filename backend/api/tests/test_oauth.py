@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django.test import TestCase
 from rest_framework.test import APITestCase
-from api.models import User, Store, Category
+from api.models import User, Store, Category, Association, Role
 from backend.scopes import CustomScopes
 import datetime
 
@@ -23,6 +23,13 @@ class Test_OAuth(APITestCase):
             address="1 Main Street", name="Test Store", category=Category.FOOD
         )
         self.user.stores.add(self.store)
+        time = datetime.now().date()
+        self.association = Association.objects.create(
+            user=self.user,
+            store=self.store,
+            membership=time,
+            role=Role.VENDOR,
+        )
         self.user.save()
         self.application = Application.objects.create(
             client_id=CLIENT_ID,
