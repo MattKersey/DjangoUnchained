@@ -23,7 +23,7 @@ class Test_OAuth(APITestCase):
             address="1 Main Street", name="Test Store", category=Category.FOOD
         )
         self.user.stores.add(self.store)
-        time = datetime.now().date()
+        time = datetime.datetime.now().date()
         self.association = Association.objects.create(
             user=self.user,
             store=self.store,
