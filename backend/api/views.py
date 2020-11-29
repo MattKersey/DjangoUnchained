@@ -57,18 +57,10 @@ class UserViewSet(viewsets.ViewSet):
         return [permission() for permission in permission_classes]
 
     def list(self, request):
-        print(request.auth)
-        print(request.query_params)
         serializer = UserSerializer(User.objects.all(), many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        print(request.auth)
-        print(request.data)
-        print(request.path)
-        print(request.data.get("store_id"))
-        if request.data.get("store_id"):
-            print("say hi")
         try:
             user = User.objects.get(pk=pk)
             serializer = UserSerializer(user)
@@ -169,11 +161,12 @@ class UserViewSet(viewsets.ViewSet):
                 {"message": "The user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
 
     @action(detail=True, methods=["DELETE"])
     def delete_store(self, request, pk=None):
@@ -203,11 +196,12 @@ class UserViewSet(viewsets.ViewSet):
                 {"message": "The user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
 
     @action(detail=False, methods=["GET"])
     def current_user(self, request):
@@ -261,15 +255,16 @@ class StoreViewSet(viewsets.ViewSet):
             )
 
     def retrieve(self, request, pk=None):
-        try:
-            store = Store.objects.get(pk=pk)
-            serializer = StoreSerializer(store)
-            return Response(serializer.data)
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # try:
+        store = Store.objects.get(pk=pk)
+        serializer = StoreSerializer(store)
+        return Response(serializer.data)
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
 
     def update(self, request, pk=None):
         try:
@@ -281,11 +276,12 @@ class StoreViewSet(viewsets.ViewSet):
             store.save()
             serializer = StoreSerializer(store)
             return Response(serializer.data)
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
         except (IntegrityError, ValidationError):
             return Response(
                 {"message": "The store cannot be updated."},
@@ -326,11 +322,12 @@ class StoreViewSet(viewsets.ViewSet):
                 item.save()
             serializer = StoreSerializer(store)
             return Response(serializer.data)
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
         except Item.DoesNotExist:
             return Response(
                 {"message": "At least one of the items does not exist."},
@@ -351,11 +348,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The item does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
         # Should never get this
         # except (IntegrityError, ValidationError):
         #     return Response(
@@ -378,11 +376,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The item does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
         # Should never get this
         # except (IntegrityError, ValidationError):
         #     return Response(
@@ -421,11 +420,12 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The item does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
         except (IntegrityError, ValidationError):
             return Response(
                 {"message": "The item cannot be deleted."},
@@ -439,7 +439,15 @@ class ItemViewSet(viewsets.ViewSet):
     """
 
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasReadWriteScope]
+    # permission_classes = [TokenHasReadWriteScope]
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action in ['list', 'retrieve']:
+            permission_classes = [TokenHasStoreEmployeeScope]
+        elif self.action in ['create', 'update']:
+            permission_classes = [TokenHasStoreVendorScope]
+        return [permission() for permission in permission_classes]
 
     def list(self, request):
         serializer = ItemSerializer(Item.objects.all(), many=True)
@@ -483,11 +491,12 @@ class ItemViewSet(viewsets.ViewSet):
             )
             item.history.add(item_history)
             store.validate_and_add_item(item)
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
         except (ValidationError, IntegrityError) as e:
             print(e)
             return Response(

@@ -861,8 +861,7 @@ class Test_ItemView(APITestCase):
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_create_item_bad_item(self):
         url = "http://127.0.0.1:8000/api/items/"
