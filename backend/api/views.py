@@ -29,6 +29,7 @@ import string
 import random
 import datetime
 from oauth2_provider.models import get_application_model, get_access_token_model
+from backend.scopes import TokenHasStoreScope
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
@@ -40,7 +41,7 @@ class UserViewSet(viewsets.ViewSet):
     """
 
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasReadWriteScope]
+    permission_classes = [TokenHasStoreScope]
 
     def list(self, request):
         print(request.auth)
@@ -214,7 +215,7 @@ class StoreViewSet(viewsets.ViewSet):
     """
 
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasReadWriteScope]
+    permission_classes = [TokenHasStoreScope]
 
     def list(self, request):
         serializer = StoreSerializer(Store.objects.all(), many=True)

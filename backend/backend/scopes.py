@@ -4,6 +4,15 @@ from oauth2_provider.contrib.rest_framework import TokenHasScope
 from api.models import Store
 
 
+def getPK(path):
+    elements = path.split("/")
+    for i in range(len(elements)):
+        if elements[i].upper() == "STORES":
+            if i + 1 < len(elements) and elements[i+1].isdigit():
+                return elements[i+1]
+    return ""
+
+
 class CustomScopes(BaseScopes):
     def get_all_scopes(self):
         scopes = {"read": "custom reading scope", "write": "custom writing scope"}
@@ -28,27 +37,21 @@ class CustomScopes(BaseScopes):
 
 
 class TokenHasStoreScope(TokenHasScope):
-    def getPK(path):
-        elements = path.split("/")
-        for i in range(len(elements)):
-            if elements[i].upper() == "STORES":
-                if i + 1 < len(elements) and elements[i+1].isdigit():
-                    return elements[i+1]
-        return ""
-
     def get_scopes(self, request, view):
         print(view)
         try:
             required_scopes = super().get_scopes(request, view)
         except ImproperlyConfigured:
             required_scopes = []
+        print(request.path)
         pk = ""
         if request.data.get("store_id"):
             pk = str(request.data.get("store_id"))
-        elif self.getPK(request.path) != "":
-            pk = self.getPK(request.path)
+        elif getPK(request.path) != "":
+            pk = getPK(request.path)
         else:
             return required_scopes
         # TODO: Add in method switches
         required_scopes.append("store_" + pk + ":read")
         required_scopes.append("store_" + pk + ":write")
+        return required_scopes
