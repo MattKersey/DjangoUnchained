@@ -5,7 +5,7 @@
         "fields": {
             "client_id": "naKKnrr5KL3QISISbdM2XPYlou0HkiVJucMCMyKI",
             "user": 7,
-            "redirect_uris": "http://localhost:1234/loginredirect",
+            "redirect_uris": "http://localhost:1234/loginredirect http://127.0.0.1:8000/authredirect",
             "client_type": "confidential",
             "authorization_grant_type": "authorization-code",
             "client_secret": "SHejvjYgLWs6JprFJdJ1eYouQbZuuzpeREX2EuM4OwUyz4fUoB5rpIdA7798VCTMMVZ1tj3qE1NBeVk5fo6mz3SXQoD3veJaKcIsyKqjhUNZit1yL9p3ts1k7bcjV7RU",

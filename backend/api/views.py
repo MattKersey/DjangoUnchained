@@ -43,10 +43,15 @@ class UserViewSet(viewsets.ViewSet):
     permission_classes = [TokenHasReadWriteScope]
 
     def list(self, request):
+        print(request.auth)
+        print(request.query_params)
         serializer = UserSerializer(User.objects.all(), many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
+        print(request.auth)
+        print(request.data)
+        print(request.META)
         try:
             user = User.objects.get(pk=pk)
             serializer = UserSerializer(user)
