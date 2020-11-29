@@ -51,7 +51,10 @@ class UserViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         print(request.auth)
         print(request.data)
-        print(request.META)
+        print(request.path)
+        print(request.data.get("store_id"))
+        if request.data.get("store_id"):
+            print("say hi")
         try:
             user = User.objects.get(pk=pk)
             serializer = UserSerializer(user)
