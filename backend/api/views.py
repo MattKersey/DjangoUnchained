@@ -29,8 +29,11 @@ import string
 import random
 import datetime
 from oauth2_provider.models import get_application_model, get_access_token_model
-from backend.scopes import TokenHasStoreScope
-
+from backend.scopes import (
+    TokenHasStoreEmployeeScope,
+    TokenHasStoreManagerScope,
+    TokenHasStoreVendorScope,
+)
 Application = get_application_model()
 AccessToken = get_access_token_model()
 
@@ -41,7 +44,17 @@ class UserViewSet(viewsets.ViewSet):
     """
 
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasStoreScope]
+    # permission_classes = []
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action in ['list', 'retrieve', 'update', 'add_store', 'current_user']:
+            permission_classes = [TokenHasStoreEmployeeScope]
+        elif self.action == 'remove_store':
+            permission_classes = [TokenHasStoreManagerScope]
+        elif self.action == 'delete_store':
+            permission_classes = [TokenHasStoreVendorScope]
+        return [permission() for permission in permission_classes]
 
     def list(self, request):
         print(request.auth)
@@ -164,6 +177,7 @@ class UserViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["DELETE"])
     def delete_store(self, request, pk=None):
+        print("Hello")
         try:
             data = request.POST
             user = User.objects.get(pk=pk)
@@ -215,7 +229,15 @@ class StoreViewSet(viewsets.ViewSet):
     """
 
     authentication_classes = [OAuth2Authentication]
-    permission_classes = [TokenHasStoreScope]
+    # permission_classes = []
+
+    def get_permissions(self):
+        permission_classes = []
+        if self.action in ['list', 'retrieve', 'purchase_items']:
+            permission_classes = [TokenHasStoreEmployeeScope]
+        elif self.action in ['update', 'add_item', 'remove_item', 'delete_item']:
+            permission_classes = [TokenHasStoreVendorScope]
+        return [permission() for permission in permission_classes]
 
     def list(self, request):
         serializer = StoreSerializer(Store.objects.all(), many=True)

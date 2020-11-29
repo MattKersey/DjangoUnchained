@@ -39,14 +39,12 @@ class CustomScopes(BaseScopes):
         return scopes
 
 
-class TokenHasStoreScope(TokenHasScope):
+class TokenHasStoreEmployeeScope(TokenHasScope):
     def get_scopes(self, request, view):
-        print(view)
         try:
             required_scopes = super().get_scopes(request, view)
         except ImproperlyConfigured:
             required_scopes = []
-        print(request.path)
         pk = ""
         if request.data.get("store_id"):
             pk = str(request.data.get("store_id"))
@@ -56,4 +54,40 @@ class TokenHasStoreScope(TokenHasScope):
             return required_scopes
         # TODO: Add in method switches
         required_scopes.append("store_" + pk + ":employee")
+        return required_scopes
+
+
+class TokenHasStoreManagerScope(TokenHasScope):
+    def get_scopes(self, request, view):
+        try:
+            required_scopes = super().get_scopes(request, view)
+        except ImproperlyConfigured:
+            required_scopes = []
+        pk = ""
+        if request.data.get("store_id"):
+            pk = str(request.data.get("store_id"))
+        elif getPK(request.path) != "":
+            pk = getPK(request.path)
+        else:
+            return required_scopes
+        # TODO: Add in method switches
+        required_scopes.append("store_" + pk + ":manager")
+        return required_scopes
+
+
+class TokenHasStoreVendorScope(TokenHasScope):
+    def get_scopes(self, request, view):
+        try:
+            required_scopes = super().get_scopes(request, view)
+        except ImproperlyConfigured:
+            required_scopes = []
+        pk = ""
+        if request.data.get("store_id"):
+            pk = str(request.data.get("store_id"))
+        elif getPK(request.path) != "":
+            pk = getPK(request.path)
+        else:
+            return required_scopes
+        # TODO: Add in method switches
+        required_scopes.append("store_" + pk + ":vendor")
         return required_scopes
