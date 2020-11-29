@@ -13,7 +13,7 @@ Application = get_application_model()
 AccessToken = get_access_token_model()
 
 
-def setupOAuth(self):
+def setupOAuth(self, stores=[]):
     CLIENT_ID = os.getenv("CLIENT_ID", "defaultTestClientID")
     CLIENT_SECRET = os.getenv("CLIENT_SECRET", "defaultTestClientSecret")
     self.user = User.objects.create_superuser(
@@ -29,12 +29,17 @@ def setupOAuth(self):
         skip_authorization=True,
     )
     self.application.save()
+    scope = "read write"
+    for pk in stores:
+        scope += " store_" + str(pk) + ":vendor"
+        scope += " store_" + str(pk) + ":manager"
+        scope += " store_" + str(pk) + ":employee"
     self.token = AccessToken.objects.create(
         user=self.user,
         token="adfslkfjavsdfeslfkjgh",
         application=self.application,
         expires=timezone.now() + datetime.timedelta(days=1),
-        scope="read write",
+        scope=scope,
     )
     self.token.save()
 
@@ -64,7 +69,7 @@ class Test_UserView(APITestCase):
         )
         self.association1.role = Role.EMPLOYEE
         self.association1.save()
-        setupOAuth(self)
+        setupOAuth(self, stores=[self.store1.pk, self.store2.pk, self.store3.pk])
 
     def test_register_good(self):
         url = "http://127.0.0.1:8000/api/register/"
@@ -288,8 +293,7 @@ class Test_UserView(APITestCase):
             {"store_id": 100000000},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_remove_store_bad_association(self):
         url = (
@@ -363,8 +367,7 @@ class Test_UserView(APITestCase):
             {"user_id": self.userMods.pk, "store_id": 100000000},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_delete_store_bad_association(self):
         url = (
@@ -408,7 +411,6 @@ class Test_UserView(APITestCase):
 
 class Test_StoreView(APITestCase):
     def setUp(self):
-        setupOAuth(self)
         self.file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
         with open(file=self.file_path, mode="rb") as infile:
             file = SimpleUploadedFile(self.file_path, infile.read())
@@ -467,6 +469,7 @@ class Test_StoreView(APITestCase):
         self.store1.save()
         self.store2.items.add(self.item3)
         self.store2.save()
+        setupOAuth(self, stores=[self.store1.pk, self.store2.pk])
 
     def test_retrieve_store(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -483,8 +486,7 @@ class Test_StoreView(APITestCase):
             url + "100000000/",
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_my_retrieve_store(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -530,8 +532,7 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             follow=True,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_update_store_too_long_name(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -573,8 +574,7 @@ class Test_StoreView(APITestCase):
             {"item_id": self.item1.pk},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     # def test_add_item_bad_combo(self):
     #     url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
@@ -621,8 +621,7 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             content_type="application/json",
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_purchase_items_bad_item(self):
         url = (
@@ -726,8 +725,7 @@ class Test_StoreView(APITestCase):
             {"item_id": self.item2.pk},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     # def test_remove_item_bad_combo(self):
     #     url = (
@@ -768,8 +766,7 @@ class Test_StoreView(APITestCase):
             {"item_id": self.item3.pk, "store_id": 100000000},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_delete_item_bad_combo(self):
         url = "http://127.0.0.1:8000/api/stores/delete_item/"
@@ -784,7 +781,6 @@ class Test_StoreView(APITestCase):
 
 class Test_ItemView(APITestCase):
     def setUp(self):
-        setupOAuth(self)
         self.file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
         with open(file=self.file_path, mode="rb") as infile:
             file = SimpleUploadedFile(self.file_path, infile.read())
@@ -812,6 +808,7 @@ class Test_ItemView(APITestCase):
         self.store1 = Store.objects.create(
             address="1 Main Street", name="Store 1", category=Category.FOOD
         )
+        setupOAuth(self, stores=[self.store1.pk])
 
     def test_retrieve_item(self):
         url = "http://127.0.0.1:8000/api/items/"
