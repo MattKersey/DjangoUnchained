@@ -963,6 +963,18 @@ class Test_ItemView(APITestCase):
 class Test_OAuth(APITestCase):
     def setUp(self):
         setupOAuth(self)
+        self.store = Store.objects.create(
+            address="1 Main Street", name="Test Store", category=Category.FOOD
+        )
+        self.user.stores.add(self.store)
+        time = datetime.datetime.now().date()
+        self.association = Association.objects.create(
+            user=self.user,
+            store=self.store,
+            membership=time,
+            role=Role.VENDOR,
+        )
+        self.user.save()
 
     def test_bad_access(self):
         url = "http://127.0.0.1:8000/api/ping/"
