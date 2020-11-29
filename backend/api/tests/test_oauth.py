@@ -19,6 +19,11 @@ class Test_OAuth(APITestCase):
         self.user = User.objects.create_superuser(
             email="superuserOAuth@email.com", password="superuser"
         )
+        self.store = Store.objects.create(
+            address="1 Main Street", name="Test Store", category=Category.FOOD
+        )
+        self.user.stores.add(self.store)
+        self.user.save()
         self.application = Application.objects.create(
             client_id=CLIENT_ID,
             client_secret=CLIENT_SECRET,
@@ -71,13 +76,13 @@ class Test_CustomScopes(TestCase):
         self.assertTrue('store_1:vendor' in scopes.keys())
 
     def test_get_available_scopes(self):
-        scopes = self.customScopes.get_all_scopes()
+        scopes = self.customScopes.get_available_scopes()
         self.assertTrue('store_1:employee' in scopes)
         self.assertTrue('store_1:manager' in scopes)
         self.assertTrue('store_1:vendor' in scopes)
 
     def test_get_default_scopes(self):
-        scopes = self.customScopes.get_all_scopes()
+        scopes = self.customScopes.get_default_scopes()
         self.assertTrue('store_1:employee' in scopes)
         self.assertTrue('store_1:manager' in scopes)
         self.assertTrue('store_1:vendor' in scopes)
