@@ -6,7 +6,7 @@ from oauth2_provider.models import get_access_token_model, get_application_model
 from oauth2_provider.settings import oauth2_settings
 from rest_framework import viewsets
 from rest_framework.response import Response
-from api.models import User
+from api.models import Association, Role, User
 import requests
 import json
 import os
@@ -48,9 +48,15 @@ class StoreAuthorizationView(AuthorizationView):
             return self.error_response(error, application=None)
         scopes = []
         user = User.objects.filter(email=request.user).first()
-        for store in user.stores.all():
-            scopes.append("store_" + str(store.pk) + ":read")
-            scopes.append("store_" + str(store.pk) + ":write")
+        associations = Association.objects.filter(user=user)
+        for association in associations.all():
+            print(association.role)
+            if association.role in [Role.EMPLOYEE, Role.MANAGER, Role.VENDOR]:
+                scopes.append("store_" + str(association.store.pk) + ":employee")
+            if association.role in [Role.MANAGER, Role.VENDOR]:
+                scopes.append("store_" + str(association.store.pk) + ":manager")
+            if association.role == Role.VENDOR:
+                scopes.append("store_" + str(association.store.pk) + ":vendor")
 
         all_scopes = get_scopes_backend().get_all_scopes()
         kwargs["scopes_descriptions"] = [all_scopes[scope] for scope in scopes]

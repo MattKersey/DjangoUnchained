@@ -17,22 +17,25 @@ class CustomScopes(BaseScopes):
     def get_all_scopes(self):
         scopes = {"read": "custom reading scope", "write": "custom writing scope"}
         for store in Store.objects.all():
-            scopes["store_" + str(store.pk) + ":read"] = "Reading scope for " + store.name
-            scopes["store_" + str(store.pk) + ":write"] = "Writing scope for " + store.name
+            scopes["store_" + str(store.pk) + ":employee"] = "Employee scope for " + store.name
+            scopes["store_" + str(store.pk) + ":manager"] = "Manager scope for " + store.name
+            scopes["store_" + str(store.pk) + ":vendor"] = "Vendor scope for " + store.name
         return scopes
 
     def get_available_scopes(self, application=None, request=None, *args, **kwargs):
         scopes = ["read", "write"]
         for store in Store.objects.all():
-            scopes.append("store_" + str(store.pk) + ":read")
-            scopes.append("store_" + str(store.pk) + ":write")
+            scopes.append("store_" + str(store.pk) + ":employee")
+            scopes.append("store_" + str(store.pk) + ":manager")
+            scopes.append("store_" + str(store.pk) + ":vendor")
         return scopes
 
     def get_default_scopes(self, application=None, request=None, *args, **kwargs):
         scopes = ["read", "write"]
         for store in Store.objects.all():
-            scopes.append("store_" + str(store.pk) + ":read")
-            scopes.append("store_" + str(store.pk) + ":write")
+            scopes.append("store_" + str(store.pk) + ":employee")
+            scopes.append("store_" + str(store.pk) + ":manager")
+            scopes.append("store_" + str(store.pk) + ":vendor")
         return scopes
 
 
@@ -52,6 +55,5 @@ class TokenHasStoreScope(TokenHasScope):
         else:
             return required_scopes
         # TODO: Add in method switches
-        required_scopes.append("store_" + pk + ":read")
-        required_scopes.append("store_" + pk + ":write")
+        required_scopes.append("store_" + pk + ":employee")
         return required_scopes
