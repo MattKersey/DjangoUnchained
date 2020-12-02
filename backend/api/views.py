@@ -33,7 +33,8 @@ from oauth2_provider.models import get_application_model, get_access_token_model
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
-stripe.api_key='sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv'
+stripe.api_key = "sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv"
+
 
 class UserViewSet(viewsets.ViewSet):
     """
@@ -295,27 +296,27 @@ class StoreViewSet(viewsets.ViewSet):
                 item.history.add(history)
                 item.stock -= purchase_item.get("quantity")
                 item.save()
-                #Build Stripe Payload
+                # Build Stripe Payload
                 a = {
-                        'price_data': {
-                            'currency': 'usd',
-                            'product_data': {
-                            'name': item.name,
-                            },
-                            'unit_amount_decimal': item.price * 100,
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": item.name,
                         },
-                        'quantity': purchase_item.get("quantity"),
-                        }
+                        "unit_amount_decimal": item.price * 100,
+                    },
+                    "quantity": purchase_item.get("quantity"),
+                }
                 to_send_stripe.append(a)
             serializer = StoreSerializer(store)
-            
+
             session = stripe.checkout.Session.create(
-                            payment_method_types=['card'],
-                            line_items=to_send_stripe,
-                                mode='payment',
-                                success_url='http://localhost:1234/shop/' + str(store.id),
-                                cancel_url='http://localhost:1234/shop/' + str(store.id),
-                            )
+                payment_method_types=["card"],
+                line_items=to_send_stripe,
+                mode="payment",
+                success_url="http://localhost:1234/shop/" + str(store.id),
+                cancel_url="http://localhost:1234/shop/" + str(store.id),
+            )
             return Response(session.id)
         except Store.DoesNotExist:
             return Response(
