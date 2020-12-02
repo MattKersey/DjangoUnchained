@@ -24,6 +24,7 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import AddItemForm from './AddItemForm.js'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
+import { loadStripe } from '@stripe/stripe-js'
 
 function subTotal (items) {
   return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
@@ -88,6 +89,7 @@ class Shop extends React.Component {
   }
 
   handleCheckout (event) {
+    const stripe = Stripe('pk_test_51Hu2LSG8eUBzuEBEesc0XBxkWzW7RyHcK7ckx9DqgHL710Mh3BF0NRyowXw82xTUa8vBVIdamkyzkllOzHepdfPc00MoyUNiR6')
     const myHeaders = new Headers()
     myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
     myHeaders.append('Content-Type', 'application/json')
@@ -102,7 +104,7 @@ class Shop extends React.Component {
 
     fetch('http://127.0.0.1:8000/api/stores/' + this.state.store_id + '/purchase_items/', requestOptions)
       .then(response => response.json())
-      .then(result => { window.location.reload() })
+      .then(result => { stripe.redirectToCheckout({ sessionId: result }) })
       .catch(error => alert(error))
     event.preventDefault()
   }
@@ -156,7 +158,7 @@ class Shop extends React.Component {
             </TableBody>
           </Table>
           <Box align='right'>
-            <Button onClick={this.handleCheckout.bind(this)} color='primary'>
+            <Button onClick={this.handleCheckout.bind(this)} role='link' color='primary'>
               Checkout
             </Button>
           </Box>

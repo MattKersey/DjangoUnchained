@@ -28,11 +28,12 @@ from django.utils import timezone
 import string
 import random
 import datetime
+import stripe
 from oauth2_provider.models import get_application_model, get_access_token_model
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
-
+stripe.api_key='sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv'
 
 class UserViewSet(viewsets.ViewSet):
     """
@@ -283,6 +284,7 @@ class StoreViewSet(viewsets.ViewSet):
                         },
                         status=status.HTTP_406_NOT_ACCEPTABLE,
                     )
+            to_send_stripe = []
             for purchase_item in data.get("items"):
                 item = Item.objects.get(pk=purchase_item.get("id"))
                 history = History_of_Item.objects.create(
@@ -293,8 +295,28 @@ class StoreViewSet(viewsets.ViewSet):
                 item.history.add(history)
                 item.stock -= purchase_item.get("quantity")
                 item.save()
+                #Build Stripe Payload
+                a = {
+                        'price_data': {
+                            'currency': 'usd',
+                            'product_data': {
+                            'name': item.name,
+                            },
+                            'unit_amount_decimal': item.price * 100,
+                        },
+                        'quantity': purchase_item.get("quantity"),
+                        }
+                to_send_stripe.append(a)
             serializer = StoreSerializer(store)
-            return Response(serializer.data)
+            
+            session = stripe.checkout.Session.create(
+                            payment_method_types=['card'],
+                            line_items=to_send_stripe,
+                                mode='payment',
+                                success_url='http://localhost:1234/shop/' + str(store.id),
+                                cancel_url='http://localhost:1234/shop/' + str(store.id),
+                            )
+            return Response(session.id)
         except Store.DoesNotExist:
             return Response(
                 {"message": "The store does not exist."},
@@ -400,6 +422,25 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The item cannot be deleted."},
                 status=status.HTTP_406_NOT_ACCEPTABLE,
             )
+    @action(detail=True, methods=["POST"])
+    def create_checkout_session():
+        session = stripe.checkout.Session.create(
+            payment_method_types=['card'],
+            line_items=[{
+            'price_data': {
+                'currency': 'usd',
+                'product_data': {
+                'name': 'T-shirt',
+                },
+                'unit_amount': 2000,
+            },
+            'quantity': 1,
+            }],
+            mode='payment',
+            success_url='https://example.com/success',
+            cancel_url='https://example.com/cancel',
+        )
+        return Response(data={'id': session.id})
 
 
 class ItemViewSet(viewsets.ViewSet):
