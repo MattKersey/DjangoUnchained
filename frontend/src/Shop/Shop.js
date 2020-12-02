@@ -1,4 +1,4 @@
-/* global localStorage, fetch, Headers, alert */
+/* global localStorage, fetch, Headers, alert, Stripe */
 /* istanbul ignore file */
 /* eslint react/prop-types: 0 */
 
@@ -24,7 +24,6 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import AddItemForm from './AddItemForm.js'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
-import { loadStripe } from '@stripe/stripe-js'
 
 function subTotal (items) {
   return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
