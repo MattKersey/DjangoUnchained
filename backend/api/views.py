@@ -289,11 +289,6 @@ class StoreViewSet(viewsets.ViewSet):
                 {"message": "The store does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Item.DoesNotExist:
-            return Response(
-                {"message": "At least one of the items does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
 
     @action(detail=True, methods=["POST"])
     def create_checkout_session(self, request, pk=None):
