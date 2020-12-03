@@ -6,6 +6,8 @@ import PropTypes from 'prop-types'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
 import UserPage from './User/UserPage'
+/* istanbul ignore file */
+
 import Error from './shared/Error'
 import NavBar from './shared/Navigation'
 import Register from './Login/Register'
