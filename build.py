@@ -3,6 +3,7 @@
 from pynt import task
 import subprocess
 import shutil
+import sys
 import os
 
 CUR_DIR = os.getcwd()
@@ -36,7 +37,7 @@ def clean():
 def install_backend():
     """Installs Backend Dependencies"""
     subprocess.run(
-        args=["python3", "-m", "pip", "install", "--upgrade", "pip"], cwd=BACKEND_DIR
+        args=[sys.executable, "-m", "pip", "install", "--upgrade", "pip"], cwd=BACKEND_DIR
     )
     subprocess.run(args=["pip3", "install", "-r", "requirements.txt"], cwd=BACKEND_DIR)
 
@@ -59,10 +60,10 @@ def create_db_tables():
     print("Start: Building Backend")
     print(">>> Running Make Migrations")
     subprocess.run(
-        args=["python3", "manage.py", "makemigrations", "api"], cwd=BACKEND_DIR
+        args=[sys.executable, "manage.py", "makemigrations", "api"], cwd=BACKEND_DIR
     )
     print(">>> Running Migrate")
-    subprocess.run(args=["python3", "manage.py", "migrate"], cwd=BACKEND_DIR)
+    subprocess.run(args=[sys.executable, "manage.py", "migrate"], cwd=BACKEND_DIR)
     print("Finish: Building Backend")
 
 
@@ -92,7 +93,7 @@ def add_data_to_db():
     models = ["item", "store", "user", "association", "oauth_application", "oauth_accesstoken"]
     for model in models:
         subprocess.run(
-            args=["python3", "manage.py", "loaddata", f"api/fixtures/{model}.json"],
+            args=[sys.executable, "manage.py", "loaddata", f"api/fixtures/{model}.json"],
             cwd=BACKEND_DIR,
         )
     print("Finish: Add Data to DB")
@@ -129,7 +130,7 @@ def test_frontend():
 @task()
 def start_backend():
     """Runs Backend App"""
-    subprocess.run(args=["python3", "manage.py", "runserver", "8000"], cwd=BACKEND_DIR)
+    subprocess.run(args=[sys.executable, "manage.py", "runserver", "8000"], cwd=BACKEND_DIR)
 
 
 @task()

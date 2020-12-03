@@ -75,7 +75,7 @@ class UserPage extends React.Component {
           </Grid>
         </Box>
         <Box>
-          <Fab color='primary' onClick={this.handleOpen.bind(this)} aria-label='add'>
+          <Fab color='primary' data-testid='openModal' onClick={this.handleOpen.bind(this)} aria-label='add'>
             <AddIcon />
           </Fab>
         </Box>
