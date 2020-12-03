@@ -25,8 +25,6 @@ from rest_framework import status
 from django.db import IntegrityError
 from django.core.validators import ValidationError
 from django.utils import timezone
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
 
 import string
 import random
@@ -321,28 +319,29 @@ class StoreViewSet(viewsets.ViewSet):
                     )
             to_send_stripe = []
             for purchase_item in data.get("items"):
-                #Build Stripe Payload
+                # Build Stripe Payload
                 item = Item.objects.get(pk=purchase_item.get("id"))
                 a = {
                         'price_data': {
                             'currency': 'usd',
                             'product_data': {
-                            'name': item.name,
-                            'metadata': {'item_id': item.id}
-                            },
+                                'name': item.name,
+                                'metadata': {
+                                    'item_id': item.id
+                                    }
+                                },
                             'unit_amount_decimal': item.price * 100,
                         },
                         'quantity': purchase_item.get("quantity"),
                         }
                 to_send_stripe.append(a)    
             print(to_send_stripe)        
-            session = stripe.checkout.Session.create(
-                            payment_method_types=['card'],
-                            line_items=to_send_stripe,
-                                mode='payment',
-                                success_url='http://localhost:1234/shop/' + str(store.id) + '/success?session_id={CHECKOUT_SESSION_ID}',
-                                cancel_url='http://localhost:1234/shop/' + str(store.id) ,
-                            )
+            session = stripe.checkout.Session.create(payment_method_types=['card'],
+                                                     line_items=to_send_stripe,
+                                                     mode='payment',
+                                                     success_url='http://localhost:1234/shop/' + str(store.id) + '/success?session_id={CHECKOUT_SESSION_ID}',
+                                                     cancel_url='http://localhost:1234/shop/' + str(store.id) ,
+                                                    )
             return Response(session.id)
         except Store.DoesNotExist:
             return Response(
