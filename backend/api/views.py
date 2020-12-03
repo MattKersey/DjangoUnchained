@@ -321,7 +321,6 @@ class StoreViewSet(viewsets.ViewSet):
                     )
             to_send_stripe = []
             for purchase_item in data.get("items"):
-<<<<<<< HEAD
                 #Build Stripe Payload
                 item = Item.objects.get(pk=purchase_item.get("id"))
                 a = {
@@ -344,38 +343,6 @@ class StoreViewSet(viewsets.ViewSet):
                                 success_url='http://localhost:1234/shop/' + str(store.id) + '/success?session_id={CHECKOUT_SESSION_ID}',
                                 cancel_url='http://localhost:1234/shop/' + str(store.id) ,
                             )
-=======
-                item = Item.objects.get(pk=purchase_item.get("id"))
-                history = History_of_Item.objects.create(
-                    before_stock=item.stock,
-                    after_stock=item.stock - purchase_item.get("quantity"),
-                    category=History_Category.PURCHASE,
-                )
-                item.history.add(history)
-                item.stock -= purchase_item.get("quantity")
-                item.save()
-                # Build Stripe Payload
-                a = {
-                    "price_data": {
-                        "currency": "usd",
-                        "product_data": {
-                            "name": item.name,
-                        },
-                        "unit_amount_decimal": item.price * 100,
-                    },
-                    "quantity": purchase_item.get("quantity"),
-                }
-                to_send_stripe.append(a)
-            serializer = StoreSerializer(store)
-
-            session = stripe.checkout.Session.create(
-                payment_method_types=["card"],
-                line_items=to_send_stripe,
-                mode="payment",
-                success_url="http://localhost:1234/shop/" + str(store.id),
-                cancel_url="http://localhost:1234/shop/" + str(store.id),
-            )
->>>>>>> df4294023592ef67af657f08796470d4084a501c
             return Response(session.id)
         except Store.DoesNotExist:
             return Response(
