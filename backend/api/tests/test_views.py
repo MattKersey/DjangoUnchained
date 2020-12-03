@@ -19,6 +19,12 @@ def setupOAuth(self, stores=[]):
     self.user = User.objects.create_superuser(
         email="superuserOAuth@email.com", password="superuser"
     )
+    self.employeeUser = User.objects.create_user(
+        email="employeeOAuth@email.com", password="password"
+    )
+    self.managerUser = User.objects.create_user(
+        email="managerOAuth@email.com", password="password"
+    )
     self.application = Application.objects.create(
         client_id=CLIENT_ID,
         client_secret=CLIENT_SECRET,
@@ -31,9 +37,29 @@ def setupOAuth(self, stores=[]):
     self.application.save()
     scope = "read write"
     for pk in stores:
-        scope += " store_" + str(pk) + ":vendor"
-        scope += " store_" + str(pk) + ":manager"
         scope += " store_" + str(pk) + ":employee"
+    self.empToken = AccessToken.objects.create(
+        user=self.employeeUser,
+        token="asdfhffgdhjfdjgdsfgjh",
+        application=self.application,
+        expires=timezone.now() + datetime.timedelta(days=1),
+        scope=scope,
+    )
+    self.empToken.save()
+
+    for pk in stores:
+        scope += " store_" + str(pk) + ":manager"
+    self.manToken = AccessToken.objects.create(
+        user=self.managerUser,
+        token="dfslkghjewrkjkhh",
+        application=self.application,
+        expires=timezone.now() + datetime.timedelta(days=1),
+        scope=scope,
+    )
+    self.manToken.save()
+
+    for pk in stores:
+        scope += " store_" + str(pk) + ":vendor"
     self.token = AccessToken.objects.create(
         user=self.user,
         token="adfslkfjavsdfeslfkjgh",
@@ -272,6 +298,19 @@ class Test_UserView(APITestCase):
         self.userExists.stores.add(self.store2)
         self.assertEqual(1, len(self.userExists.stores.all()))
 
+    def test_remove_store_employee_auth(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.employeeUser.pk)
+            + "/remove_store/"
+        )
+        r = self.client.post(
+            url,
+            {"store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
     def test_remove_store_bad_user(self):
         url = "http://127.0.0.1:8000/api/users/100000000/remove_store/"
         r = self.client.post(
@@ -355,6 +394,32 @@ class Test_UserView(APITestCase):
         )
         self.assertEqual(404, r.status_code)
         self.assertEqual("The user does not exist.", r.data["message"])
+
+    def test_delete_store_employee_auth(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.employeeUser.pk)
+            + "/delete_store/"
+        )
+        r = self.client.delete(
+            url,
+            {"user_id": self.employeeUser.pk, "store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_delete_store_manager_auth(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/"
+            + str(self.managerUser.pk)
+            + "/delete_store/"
+        )
+        r = self.client.delete(
+            url,
+            {"user_id": self.managerUser.pk, "store_id": self.store3.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
+        )
+        self.assertEqual(403, r.status_code)
 
     def test_delete_store_bad_store(self):
         url = (
@@ -534,6 +599,26 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(403, r.status_code)
 
+    def test_update_store_employee_auth(self):
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.put(
+            url + str(self.store2.pk) + "/",
+            {"name": "Updated Name"},
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+            follow=True,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_update_store_manager_auth(self):
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.put(
+            url + str(self.store2.pk) + "/",
+            {"name": "Updated Name"},
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
+            follow=True,
+        )
+        self.assertEqual(403, r.status_code)
+
     def test_update_store_too_long_name(self):
         url = "http://127.0.0.1:8000/api/stores/"
         r = self.client.put(
@@ -576,15 +661,23 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(403, r.status_code)
 
-    # def test_add_item_bad_combo(self):
-    #     url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
-    #     r = self.client.post(
-    #         url,
-    #         {"item_id": self.item2.pk},
-    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
-    #     )
-    #     self.assertEqual(406, r.status_code)
-    #     self.assertEqual("The item cannot be added.", r.data["message"])
+    def test_add_item_employee_auth(self):
+        url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
+        r = self.client.post(
+            url,
+            {"item_id": self.item1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_add_item_manager_auth(self):
+        url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
+        r = self.client.post(
+            url,
+            {"item_id": self.item1.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
+        )
+        self.assertEqual(403, r.status_code)
 
     def test_purchase_items(self):
         url = (
@@ -727,6 +820,28 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(403, r.status_code)
 
+    def test_remove_item_employee_auth(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/remove_item/"
+        )
+        r = self.client.post(
+            url,
+            {"item_id": self.item2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_remove_item_manager_auth(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/remove_item/"
+        )
+        r = self.client.post(
+            url,
+            {"item_id": self.item2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
     # def test_remove_item_bad_combo(self):
     #     url = (
     #         "http://127.0.0.1:8000/api/stores/" + str(self.store2.pk) + "/remove_item/"
@@ -765,6 +880,24 @@ class Test_StoreView(APITestCase):
             url,
             {"item_id": self.item3.pk, "store_id": 100000000},
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_delete_item_employee_auth(self):
+        url = "http://127.0.0.1:8000/api/stores/delete_item/"
+        r = self.client.delete(
+            url,
+            {"item_id": self.item3.pk, "store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_delete_item_manager_auth(self):
+        url = "http://127.0.0.1:8000/api/stores/delete_item/"
+        r = self.client.delete(
+            url,
+            {"item_id": self.item3.pk, "store_id": self.store2.pk},
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
         )
         self.assertEqual(403, r.status_code)
 
@@ -860,6 +993,40 @@ class Test_ItemView(APITestCase):
                 "description": "food",
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_create_item_employee_auth(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "name": "food",
+                "stock": 3,
+                "price": 0.1,
+                "orderType": "Individual",
+                "bulkMinimum": 0,
+                "description": "food",
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_create_item_manager_auth(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "name": "food",
+                "stock": 3,
+                "price": 0.1,
+                "orderType": "Individual",
+                "bulkMinimum": 0,
+                "description": "food",
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
         )
         self.assertEqual(403, r.status_code)
 

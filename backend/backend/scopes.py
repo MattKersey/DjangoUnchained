@@ -14,7 +14,7 @@ def getPK(path):
 
 
 class CustomScopes(BaseScopes):
-    def get_all_scopes(self):
+    def get_common_scopes(self):
         scopes = {"read": "custom reading scope", "write": "custom writing scope"}
         for store in Store.objects.all():
             scopes["store_" + str(store.pk) + ":employee"] = "Employee scope for " + store.name
@@ -22,25 +22,18 @@ class CustomScopes(BaseScopes):
             scopes["store_" + str(store.pk) + ":vendor"] = "Vendor scope for " + store.name
         return scopes
 
+    def get_all_scopes(self):
+        return self.get_common_scopes()
+
     def get_available_scopes(self, application=None, request=None, *args, **kwargs):
-        scopes = ["read", "write"]
-        for store in Store.objects.all():
-            scopes.append("store_" + str(store.pk) + ":employee")
-            scopes.append("store_" + str(store.pk) + ":manager")
-            scopes.append("store_" + str(store.pk) + ":vendor")
-        return scopes
+        return list(self.get_common_scopes().keys())
 
     def get_default_scopes(self, application=None, request=None, *args, **kwargs):
-        scopes = ["read", "write"]
-        for store in Store.objects.all():
-            scopes.append("store_" + str(store.pk) + ":employee")
-            scopes.append("store_" + str(store.pk) + ":manager")
-            scopes.append("store_" + str(store.pk) + ":vendor")
-        return scopes
+        return list(self.get_common_scopes().keys())
 
 
-class TokenHasStoreEmployeeScope(TokenHasScope):
-    def get_scopes(self, request, view):
+class TokenHasStoreScope(TokenHasScope):
+    def get_scopes(self, request, view, type):
         try:
             required_scopes = super().get_scopes(request, view)
         except ImproperlyConfigured:
@@ -52,42 +45,20 @@ class TokenHasStoreEmployeeScope(TokenHasScope):
             pk = getPK(request.path)
         else:
             return required_scopes
-        # TODO: Add in method switches
-        required_scopes.append("store_" + pk + ":employee")
+        required_scopes.append("store_" + pk + ":" + type)
         return required_scopes
 
 
-class TokenHasStoreManagerScope(TokenHasScope):
+class TokenHasStoreEmployeeScope(TokenHasStoreScope):
     def get_scopes(self, request, view):
-        try:
-            required_scopes = super().get_scopes(request, view)
-        except ImproperlyConfigured:
-            required_scopes = []
-        pk = ""
-        if request.data.get("store_id"):
-            pk = str(request.data.get("store_id"))
-        elif getPK(request.path) != "":
-            pk = getPK(request.path)
-        else:
-            return required_scopes
-        # TODO: Add in method switches
-        required_scopes.append("store_" + pk + ":manager")
-        return required_scopes
+        return super().get_scopes(request, view, "employee")
 
 
-class TokenHasStoreVendorScope(TokenHasScope):
+class TokenHasStoreManagerScope(TokenHasStoreScope):
     def get_scopes(self, request, view):
-        try:
-            required_scopes = super().get_scopes(request, view)
-        except ImproperlyConfigured:
-            required_scopes = []
-        pk = ""
-        if request.data.get("store_id"):
-            pk = str(request.data.get("store_id"))
-        elif getPK(request.path) != "":
-            pk = getPK(request.path)
-        else:
-            return required_scopes
-        # TODO: Add in method switches
-        required_scopes.append("store_" + pk + ":vendor")
-        return required_scopes
+        return super().get_scopes(request, view, "manager")
+
+
+class TokenHasStoreVendorScope(TokenHasStoreScope):
+    def get_scopes(self, request, view):
+        return super().get_scopes(request, view, "vendor")
