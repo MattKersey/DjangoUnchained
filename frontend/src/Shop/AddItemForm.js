@@ -40,7 +40,7 @@ const styles = theme => ({
   }
 })
 
-class AddShopForm extends React.Component {
+class AddItemForm extends React.Component {
   constructor (props) {
     super(props)
 
@@ -173,8 +173,8 @@ class AddShopForm extends React.Component {
   }
 }
 
-AddShopForm.propTypes = {
+AddItemForm.propTypes = {
   classes: PropTypes.any
 }
 
-export default withRouter(withStyles(styles, { withTheme: true })(AddShopForm))
+export default withRouter(withStyles(styles, { withTheme: true })(AddItemForm))

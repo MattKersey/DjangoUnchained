@@ -1,20 +1,133 @@
 /* global expect, test */
 
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+
 import React from 'react'
 import App from './App'
+import Shop from './Shop/Shop'
+import AddItemForm from './Shop/AddItemForm'
+import AddShopForm from './User/AddShopForm'
+import StoreCard from './User/StoreCard'
+import UserPage from './User/UserPage'
+
+
 import Login from './Login/Login'
+import { createMemoryHistory } from 'history'
+import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
 
-test('Get Login Screen by default', () => {
-  render(
-    <App />
-  )
-  // verify page content for expected route
-  // often you'd use a data-testid or role query, but this is also possible
-  expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
-})
+describe("<App />", () => {
+  it('Get Login Screen by default', () => {
+    render(
+      <App />
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
+  })
 
-test('Test Login Component', () => {
-  render(<Login />)
-  expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
-})
+  test('Test Login Component', () => {
+    render(<Login />)
+    expect(screen.getByText(/Sign into your PyMarket Account/i)).toBeInTheDocument()
+  })
+});
+
+
+describe("<Shop />", () => {
+  test('Test Shop Page', async () => {
+    render(
+      <Shop match={{params: {shopID: 6}, isExact: true, path: "", url: ""}} />
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/Add an Item/i)).toBeInTheDocument()
+  })
+  
+  test('Test Add an Item Button', async () => {
+    render(
+      <BrowserRouter>
+        <Shop match={{params: {shopID: 6}, isExact: true, path: "", url: ""}} />
+      </BrowserRouter>
+  
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    fireEvent.click(screen.getByText(/Add an Item/i))
+    expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
+  })
+  
+});
+
+describe("<AddItemForm />", () => {
+  test('Test AddItemForm', async () => {
+    render(
+      <BrowserRouter>
+        <AddItemForm />
+      </BrowserRouter>
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/Add Item/i)).toBeInTheDocument()
+  })
+  
+});
+
+
+describe("<AddShopForm />", () => {
+  test('Test AddShopForm', async () => {
+    let f = false
+    function flag(){
+      f=true
+    }
+    render(
+      <BrowserRouter>
+        <AddShopForm onSub={flag}/>
+      </BrowserRouter>
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    fireEvent.click(screen.getByTestId('submit'))
+    expect(f).toEqual(true)
+  })
+  
+});
+
+describe("<StoreCard />", () => {
+  test('Test StoreCard', async () => {
+    render(
+      <BrowserRouter>
+        <StoreCard name="testStore"/>
+      </BrowserRouter>
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/testStore/i)).toBeInTheDocument()
+  })
+  
+});
+
+describe("<UserPage />", () => {
+  test('Test UserPage', async () => {
+    render(
+      <BrowserRouter>
+        <UserPage/>
+      </BrowserRouter>
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/Your Stores/i)).toBeInTheDocument()
+  })
+
+  test('Test UserPage Open Modal', async () => {
+    render(
+      <BrowserRouter>
+        <UserPage/>
+      </BrowserRouter>
+    )
+    localStorage.setItem('token', 't6N1X1LWWell3fTUfzPcezEZxUcEQ6') 
+
+    fireEvent.click(screen.getByTestId('openModal'))
+    expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
+  })
+  
+});
