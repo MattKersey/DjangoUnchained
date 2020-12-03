@@ -3,8 +3,6 @@
 /* eslint react/prop-types: 0 */
 
 import React from 'react'
-import Typography from '@material-ui/core/Typography'
-import { Divider } from '@material-ui/core'
 
 class Success extends React.Component {
   constructor (props) {
