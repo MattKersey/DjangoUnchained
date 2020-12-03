@@ -10,6 +10,7 @@ import Error from './shared/Error'
 import NavBar from './shared/Navigation'
 import Register from './Login/Register'
 import Shop from './Shop/Shop'
+import Success from './Shop/Success'
 
 import Container from '@material-ui/core/Container'
 import LoginButtons from './OauthLogin/LoginButtons'
@@ -57,6 +58,7 @@ class App extends Component {
             <PrivateRoute path='/' component={UserPage} exact />
             <PrivateRoute path='/register' component={Register} exact />
             <PrivateRoute path='/shop/:shopID' component={Shop} exact />
+            <PrivateRoute path='/shop/:shopID/success' component={Success} exact />
             <Route path='/login' component={LoginButtons} exact />
             <Route path='/loginredirect' component={LoginRedirect} exact />
             <Route component={Error} />

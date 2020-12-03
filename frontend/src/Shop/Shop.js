@@ -101,10 +101,24 @@ class Shop extends React.Component {
       redirect: 'follow'
     }
 
-    fetch('http://127.0.0.1:8000/api/stores/' + this.state.store_id + '/purchase_items/', requestOptions)
-      .then(response => response.json())
-      .then(result => { stripe.redirectToCheckout({ sessionId: result }) })
-      .catch(error => alert(error))
+    fetch('http://127.0.0.1:8000/api/stores/' + this.state.store_id + '/create_checkout_session/', requestOptions)
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (session) {
+        return stripe.redirectToCheckout({ sessionId: session })
+      })
+      .then(function (result) {
+        // If `redirectToCheckout` fails due to a browser or network
+        // error, you should display the localized error message to your
+        // customer using `error.message`.
+        if (result.error) {
+          alert(result.error.message)
+        }
+      })
+      .catch(function (error) {
+        console.error('Error:', error)
+      })
     event.preventDefault()
   }
 
