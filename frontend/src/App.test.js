@@ -9,6 +9,8 @@ import Shop from './Shop/Shop'
 import AddItemForm from './Shop/AddItemForm'
 import AddShopForm from './User/AddShopForm'
 import StoreCard from './User/StoreCard'
+import UserPage from './User/UserPage'
+
 
 import Login from './Login/Login'
 import { createMemoryHistory } from 'history'
@@ -92,10 +94,6 @@ describe("<AddShopForm />", () => {
 
 describe("<StoreCard />", () => {
   test('Test StoreCard', async () => {
-    let f = false
-    function flag(){
-      f=true
-    }
     render(
       <BrowserRouter>
         <StoreCard name="testStore"/>
@@ -104,6 +102,32 @@ describe("<StoreCard />", () => {
     // verify page content for expected route
     // often you'd use a data-testid or role query, but this is also possible
     expect(screen.getByText(/testStore/i)).toBeInTheDocument()
+  })
+  
+});
+
+describe("<UserPage />", () => {
+  test('Test UserPage', async () => {
+    render(
+      <BrowserRouter>
+        <UserPage/>
+      </BrowserRouter>
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/Your Stores/i)).toBeInTheDocument()
+  })
+
+  test('Test UserPage Open Modal', async () => {
+    render(
+      <BrowserRouter>
+        <UserPage/>
+      </BrowserRouter>
+    )
+    localStorage.setItem('token', 't6N1X1LWWell3fTUfzPcezEZxUcEQ6') 
+
+    fireEvent.click(screen.getByTestId('openModal'))
+    expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
   })
   
 });
