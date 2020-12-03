@@ -132,6 +132,7 @@ class AddShopForm extends React.Component {
             variant='contained'
             color='primary'
             className={classes.submit}
+            data-testid='submit'
           >
             Create Store (will redirect)
           </Button>
