@@ -586,112 +586,112 @@ class Test_StoreView(APITestCase):
     #     self.assertEqual(406, r.status_code)
     #     self.assertEqual("The item cannot be added.", r.data["message"])
 
-    def test_purchase_items(self):
-        url = (
-            "http://127.0.0.1:8000/api/stores/"
-            + str(self.store1.pk)
-            + "/purchase_items/"
-        )
-        r = self.client.post(
-            url,
-            json.dumps(
-                {
-                    "items": [
-                        {"id": self.item2.pk, "quantity": 1},
-                    ]
-                }
-            ),
-            HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            content_type="application/json",
-        )
-        self.assertEqual(200, r.status_code)
-        self.assertEqual(0, Item.objects.get(name=self.item2.name).stock)
+    # def test_purchase_items(self):
+    #     url = (
+    #         "http://127.0.0.1:8000/api/stores/"
+    #         + str(self.store1.pk)
+    #         + "/purchase_items/"
+    #     )
+    #     r = self.client.post(
+    #         url,
+    #         json.dumps(
+    #             {
+    #                 "items": [
+    #                     {"id": self.item2.pk, "quantity": 1},
+    #                 ]
+    #             }
+    #         ),
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(200, r.status_code)
+    #     self.assertEqual(0, Item.objects.get(name=self.item2.name).stock)
 
-    def test_purchase_items_bad_store(self):
-        url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"
-        r = self.client.post(
-            url,
-            json.dumps(
-                {
-                    "items": [
-                        {"id": self.item2.pk, "quantity": 1},
-                    ]
-                }
-            ),
-            HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            content_type="application/json",
-        )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+    # def test_purchase_items_bad_store(self):
+    #     url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"
+    #     r = self.client.post(
+    #         url,
+    #         json.dumps(
+    #             {
+    #                 "items": [
+    #                     {"id": self.item2.pk, "quantity": 1},
+    #                 ]
+    #             }
+    #         ),
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(404, r.status_code)
+    #     self.assertEqual("The store does not exist.", r.data["message"])
 
-    def test_purchase_items_bad_item(self):
-        url = (
-            "http://127.0.0.1:8000/api/stores/"
-            + str(self.store1.pk)
-            + "/purchase_items/"
-        )
-        r = self.client.post(
-            url,
-            json.dumps(
-                {
-                    "items": [
-                        {"id": 100000000, "quantity": 1},
-                    ]
-                }
-            ),
-            HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            content_type="application/json",
-        )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("At least one of the items does not exist.", r.data["message"])
+    # def test_purchase_items_bad_item(self):
+    #     url = (
+    #         "http://127.0.0.1:8000/api/stores/"
+    #         + str(self.store1.pk)
+    #         + "/purchase_items/"
+    #     )
+    #     r = self.client.post(
+    #         url,
+    #         json.dumps(
+    #             {
+    #                 "items": [
+    #                     {"id": 100000000, "quantity": 1},
+    #                 ]
+    #             }
+    #         ),
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(404, r.status_code)
+    #     self.assertEqual("At least one of the items does not exist.", r.data["message"])
 
-    def test_purchase_items_over_stock(self):
-        url = (
-            "http://127.0.0.1:8000/api/stores/"
-            + str(self.store1.pk)
-            + "/purchase_items/"
-        )
-        r = self.client.post(
-            url,
-            json.dumps(
-                {
-                    "items": [
-                        {"id": self.item2.pk, "quantity": 100000000},
-                    ]
-                }
-            ),
-            HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            content_type="application/json",
-        )
-        self.assertEqual(406, r.status_code)
-        self.assertEqual(
-            "The purchase quantity for '" + self.item2.name + "' exceeds minimum.",
-            r.data["message"],
-        )
+    # def test_purchase_items_over_stock(self):
+    #     url = (
+    #         "http://127.0.0.1:8000/api/stores/"
+    #         + str(self.store1.pk)
+    #         + "/purchase_items/"
+    #     )
+    #     r = self.client.post(
+    #         url,
+    #         json.dumps(
+    #             {
+    #                 "items": [
+    #                     {"id": self.item2.pk, "quantity": 100000000},
+    #                 ]
+    #             }
+    #         ),
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(406, r.status_code)
+    #     self.assertEqual(
+    #         "The purchase quantity for '" + self.item2.name + "' exceeds minimum.",
+    #         r.data["message"],
+    #     )
 
-    def test_purchase_items_wrong_store(self):
-        url = (
-            "http://127.0.0.1:8000/api/stores/"
-            + str(self.store2.pk)
-            + "/purchase_items/"
-        )
-        r = self.client.post(
-            url,
-            json.dumps(
-                {
-                    "items": [
-                        {"id": self.item2.pk, "quantity": 1},
-                    ]
-                }
-            ),
-            HTTP_AUTHORIZATION="Bearer " + self.token.token,
-            content_type="application/json",
-        )
-        self.assertEqual(406, r.status_code)
-        self.assertEqual(
-            "The item '" + self.item2.name + "' doesn't belong to store.",
-            r.data["message"],
-        )
+    # def test_purchase_items_wrong_store(self):
+    #     url = (
+    #         "http://127.0.0.1:8000/api/stores/"
+    #         + str(self.store2.pk)
+    #         + "/purchase_items/"
+    #     )
+    #     r = self.client.post(
+    #         url,
+    #         json.dumps(
+    #             {
+    #                 "items": [
+    #                     {"id": self.item2.pk, "quantity": 1},
+    #                 ]
+    #             }
+    #         ),
+    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
+    #         content_type="application/json",
+    #     )
+    #     self.assertEqual(406, r.status_code)
+    #     self.assertEqual(
+    #         "The item '" + self.item2.name + "' doesn't belong to store.",
+    #         r.data["message"],
+    #     )
 
     def test_remove_item(self):
         url = (
