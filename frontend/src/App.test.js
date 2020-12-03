@@ -8,6 +8,8 @@ import App from './App'
 import Shop from './Shop/Shop'
 import AddItemForm from './Shop/AddItemForm'
 import AddShopForm from './User/AddShopForm'
+import StoreCard from './User/StoreCard'
+
 import Login from './Login/Login'
 import { createMemoryHistory } from 'history'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
@@ -84,6 +86,24 @@ describe("<AddShopForm />", () => {
     // often you'd use a data-testid or role query, but this is also possible
     fireEvent.click(screen.getByTestId('submit'))
     expect(f).toEqual(true)
+  })
+  
+});
+
+describe("<StoreCard />", () => {
+  test('Test StoreCard', async () => {
+    let f = false
+    function flag(){
+      f=true
+    }
+    render(
+      <BrowserRouter>
+        <StoreCard name="testStore"/>
+      </BrowserRouter>
+    )
+    // verify page content for expected route
+    // often you'd use a data-testid or role query, but this is also possible
+    expect(screen.getByText(/testStore/i)).toBeInTheDocument()
   })
   
 });
