@@ -62,7 +62,8 @@ class Product extends React.Component {
       description: '',
       quantity: '',
       price: 0.0,
-      original: {}
+      original: {},
+      deleted: false
 
     }
     this.handleChange = this.handleChange.bind(this)
@@ -110,7 +111,29 @@ class Product extends React.Component {
 
     fetch('http://127.0.0.1:8000/api/items/' + this.props.id + '/', requestOptions)
       .then(response => response.json())
-      .then(result => { })
+      .then(result => { this.setState({ open: false }) })
+      .catch(error => alert(error))
+    event.preventDefault()
+  }
+
+  handleDelete (event) {
+    const myHeaders = new Headers()
+    myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
+    myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
+
+    const urlencoded = new URLSearchParams()
+    urlencoded.append('item_id', this.props.id)
+
+    const requestOptions = {
+      method: 'POST',
+      headers: myHeaders,
+      body: urlencoded,
+      redirect: 'follow'
+    }
+
+    fetch('http://127.0.0.1:8000/api/stores/' + this.props.shopID + '/remove_item/', requestOptions)
+      .then(response => response.json())
+      .then(result => { window.location.reload() })
       .catch(error => alert(error))
     event.preventDefault()
   }
@@ -193,6 +216,7 @@ class Product extends React.Component {
               name='quantity'
               autoComplete='quantity'
               autoFocus
+              type='number'
               value={this.state.quantity}
               onChange={this.handleChange}
             />
@@ -218,7 +242,7 @@ class Product extends React.Component {
               color='secondary'
               className={classes.button}
               startIcon={<DeleteIcon />}
-              onClick={this.handleSubmit}
+              onClick={this.handleDelete.bind(this)}
             >
               Delete
             </Button>
