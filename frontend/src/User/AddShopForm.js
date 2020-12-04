@@ -100,6 +100,9 @@ class AddShopForm extends React.Component {
             autoComplete='store_name'
             autoFocus
             onChange={this.handleChange}
+            inputProps={{
+              'data-testid': 'name'
+            }}
           />
           <TextField
             variant='outlined'
@@ -111,6 +114,9 @@ class AddShopForm extends React.Component {
             name='address'
             autoComplete='last_name'
             onChange={this.handleChange}
+            inputProps={{
+              'data-testid': 'address'
+            }}
           />
           <FormControl className={classes.formControl}>
             <InputLabel id='demo-simple-select-label'>Category</InputLabel>
@@ -120,6 +126,9 @@ class AddShopForm extends React.Component {
               name='category'
               value={this.state.category}
               onChange={this.handleChange}
+              inputProps={{
+                'data-testid': 'category'
+              }}
             >
               <MenuItem value='Food'>Food</MenuItem>
               <MenuItem value='Clothing'>Clothing</MenuItem>
