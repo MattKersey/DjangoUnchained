@@ -124,7 +124,7 @@ class UserViewSet(viewsets.ViewSet):
                 category=data.get("category"),
             )
             store.save()
-            Association.objects.create(user=user, store=store)
+            Association.objects.create(user=user, store=store, role=Role.VENDOR)
             return Response(StoreSerializer(store).data)
         except User.DoesNotExist:
             return Response(
@@ -174,7 +174,6 @@ class UserViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["DELETE"])
     def delete_store(self, request, pk=None):
-        print("Hello")
         try:
             data = request.POST
             user = User.objects.get(pk=pk)
