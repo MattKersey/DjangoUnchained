@@ -102,7 +102,7 @@ class UserPage extends React.Component {
 }
 
 UserPage.propTypes = {
-  classes: PropTypes.any
+  onSub: PropTypes.any
 }
 
 export default UserPage
