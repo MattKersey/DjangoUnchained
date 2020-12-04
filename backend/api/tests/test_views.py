@@ -36,6 +36,8 @@ def setupOAuth(self, stores=[]):
     )
     self.application.save()
     scope = "read write"
+
+    # EMPLOYEE
     for pk in stores:
         scope += " store_" + str(pk) + ":employee"
     self.empToken = AccessToken.objects.create(
@@ -47,6 +49,7 @@ def setupOAuth(self, stores=[]):
     )
     self.empToken.save()
 
+    # MANAGER
     for pk in stores:
         scope += " store_" + str(pk) + ":manager"
     self.manToken = AccessToken.objects.create(
@@ -58,6 +61,7 @@ def setupOAuth(self, stores=[]):
     )
     self.manToken.save()
 
+    # VENDOR
     for pk in stores:
         scope += " store_" + str(pk) + ":vendor"
     self.token = AccessToken.objects.create(
@@ -489,7 +493,7 @@ class Test_StoreView(APITestCase):
             self.item2 = Item.objects.create(
                 image=file,
                 name="Item 2",
-                stock=1,
+                stock=2,
                 price=1.0,
                 description="Item 2",
             )
@@ -513,8 +517,8 @@ class Test_StoreView(APITestCase):
         self.history2 = History_of_Item.objects.create(
             before_name="Item 4",
             after_name="Item 2",
-            before_stock=1,
-            after_stock=1,
+            before_stock=2,
+            after_stock=2,
             before_price=0.5,
             after_price=1.0,
             before_description="Item 4",
@@ -688,7 +692,7 @@ class Test_StoreView(APITestCase):
     #     )
     #     self.assertEqual(406, r.status_code)
     #     self.assertEqual("The item cannot be added.", r.data["message"])
-    
+
     def test_create_checkout_session(self):
         url = (
             "http://127.0.0.1:8000/api/stores/"
@@ -709,7 +713,7 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertContains(r, "cs_test")
-    
+
     def test_add_item_employee_auth(self):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
         r = self.client.post(
@@ -734,15 +738,13 @@ class Test_StoreView(APITestCase):
             + str(self.store1.pk)
             + "/purchase_items/"
         )
-        print("TESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTING")
+        print(
+            "TESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTING"
+        )
         print(self.example_session_id)
         r = self.client.post(
             url,
-            json.dumps(
-                {
-                    "session_id": self.example_session_id
-                }
-            ),
+            json.dumps({"session_id": self.example_session_id}),
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             content_type="application/json",
         )
@@ -763,8 +765,7 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             content_type="application/json",
         )
-        self.assertEqual(404, r.status_code)
-        self.assertEqual("The store does not exist.", r.data["message"])
+        self.assertEqual(403, r.status_code)
 
     def test_purchase_items_over_stock(self):
         url = (
@@ -781,7 +782,7 @@ class Test_StoreView(APITestCase):
                     ]
                 }
             ),
-            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
             content_type="application/json",
         )
         self.assertEqual(406, r.status_code)

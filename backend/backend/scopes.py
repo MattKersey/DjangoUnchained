@@ -8,11 +8,11 @@ def getPK(path):
     elements = path.split("/")
     for i in range(len(elements)):
         if elements[i].upper() == "STORES":
-            if i + 1 < len(elements) and elements[i+1].isdigit():
-                return elements[i+1]
+            if i + 1 < len(elements) and elements[i + 1].isdigit():
+                return elements[i + 1]
         elif elements[i].upper() == "ITEMS":
-            if i + 1 < len(elements) and elements[i+1].isdigit():
-                store = Store.objects.filter(items__id=int(elements[i+1])).first()
+            if i + 1 < len(elements) and elements[i + 1].isdigit():
+                store = Store.objects.filter(items__id=int(elements[i + 1])).first()
                 if store is not None:
                     pk = str(store.pk)
                     return pk
@@ -24,9 +24,15 @@ class CustomScopes(BaseScopes):
     def get_common_scopes(self):
         scopes = {"read": "custom reading scope", "write": "custom writing scope"}
         for store in Store.objects.all():
-            scopes["store_" + str(store.pk) + ":employee"] = "Employee scope for " + store.name
-            scopes["store_" + str(store.pk) + ":manager"] = "Manager scope for " + store.name
-            scopes["store_" + str(store.pk) + ":vendor"] = "Vendor scope for " + store.name
+            scopes["store_" + str(store.pk) + ":employee"] = (
+                "Employee scope for " + store.name
+            )
+            scopes["store_" + str(store.pk) + ":manager"] = (
+                "Manager scope for " + store.name
+            )
+            scopes["store_" + str(store.pk) + ":vendor"] = (
+                "Vendor scope for " + store.name
+            )
         return scopes
 
     def get_all_scopes(self):

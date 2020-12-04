@@ -66,18 +66,18 @@ class Test_CustomScopes(TestCase):
 
     def test_get_all_scopes(self):
         scopes = self.customScopes.get_all_scopes()
-        self.assertTrue('store_1:employee' in scopes.keys())
-        self.assertTrue('store_1:manager' in scopes.keys())
-        self.assertTrue('store_1:vendor' in scopes.keys())
+        self.assertTrue("store_1:employee" in scopes.keys())
+        self.assertTrue("store_1:manager" in scopes.keys())
+        self.assertTrue("store_1:vendor" in scopes.keys())
 
     def test_get_available_scopes(self):
         scopes = self.customScopes.get_available_scopes()
-        self.assertTrue('store_1:employee' in scopes)
-        self.assertTrue('store_1:manager' in scopes)
-        self.assertTrue('store_1:vendor' in scopes)
+        self.assertTrue("store_1:employee" in scopes)
+        self.assertTrue("store_1:manager" in scopes)
+        self.assertTrue("store_1:vendor" in scopes)
 
     def test_get_default_scopes(self):
         scopes = self.customScopes.get_default_scopes()
-        self.assertTrue('store_1:employee' in scopes)
-        self.assertTrue('store_1:manager' in scopes)
-        self.assertTrue('store_1:vendor' in scopes)
+        self.assertTrue("store_1:employee" in scopes)
+        self.assertTrue("store_1:manager" in scopes)
+        self.assertTrue("store_1:vendor" in scopes)
