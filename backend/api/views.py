@@ -303,7 +303,6 @@ class StoreViewSet(viewsets.ViewSet):
                 "item_id"
             ]
             item = Item.objects.get(pk=int(item_id))
-            print(item)
             history = History_of_Item.objects.create(
                 before_stock=item.stock,
                 after_stock=item.stock - i["quantity"],

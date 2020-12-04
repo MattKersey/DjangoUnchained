@@ -745,7 +745,7 @@ class Test_StoreView(APITestCase):
             content_type="application/json",
         )
         self.assertEqual(200, r.status_code)
-        self.assertEqual(0, Item.objects.get(name=self.item2.name).stock)
+        self.assertEqual(1, Item.objects.get(name=self.item2.name).stock)
 
     def test_purchase_items_bad_store(self):
         url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"
