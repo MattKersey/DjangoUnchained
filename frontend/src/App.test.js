@@ -1,6 +1,6 @@
 /* global expect, test */
 
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent} from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 
 import React from 'react'
@@ -10,8 +10,8 @@ import AddItemForm from './Shop/AddItemForm'
 import AddShopForm from './User/AddShopForm'
 import StoreCard from './User/StoreCard'
 import UserPage from './User/UserPage'
-
-
+import Error from './shared/Error'
+import NavBar from './shared/Navigation'
 import Login from './Login/Login'
 import { createMemoryHistory } from 'history'
 import { BrowserRouter, Route, Switch, Redirect } from 'react-router-dom'
@@ -38,8 +38,6 @@ describe("<Shop />", () => {
     render(
       <Shop match={{params: {shopID: 6}, isExact: true, path: "", url: ""}} />
     )
-    // verify page content for expected route
-    // often you'd use a data-testid or role query, but this is also possible
     expect(screen.getByText(/Add an Item/i)).toBeInTheDocument()
   })
   
@@ -50,8 +48,6 @@ describe("<Shop />", () => {
       </BrowserRouter>
   
     )
-    // verify page content for expected route
-    // often you'd use a data-testid or role query, but this is also possible
     fireEvent.click(screen.getByText(/Add an Item/i))
     expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
   })
@@ -65,8 +61,6 @@ describe("<AddItemForm />", () => {
         <AddItemForm />
       </BrowserRouter>
     )
-    // verify page content for expected route
-    // often you'd use a data-testid or role query, but this is also possible
     expect(screen.getByText(/Add Item/i)).toBeInTheDocument()
   })
   
@@ -74,7 +68,7 @@ describe("<AddItemForm />", () => {
 
 
 describe("<AddShopForm />", () => {
-  test('Test AddShopForm', async () => {
+  test('Test submit AddShopForm', async () => {
     let f = false
     function flag(){
       f=true
@@ -84,10 +78,23 @@ describe("<AddShopForm />", () => {
         <AddShopForm onSub={flag}/>
       </BrowserRouter>
     )
-    // verify page content for expected route
-    // often you'd use a data-testid or role query, but this is also possible
     fireEvent.click(screen.getByTestId('submit'))
     expect(f).toEqual(true)
+  })
+
+  test('Test Change AddShopForm', async () => {
+    let f = false
+    function flag() {
+      f = true
+    }
+    render(
+      <BrowserRouter>
+        <AddShopForm onSub={flag} />
+      </BrowserRouter>
+    )
+    const name = screen.getByTestId('name')
+    fireEvent.change(name, { target: { value: 'new shop' } })
+    expect(name).toHaveValue('new shop')
   })
   
 });
@@ -99,9 +106,21 @@ describe("<StoreCard />", () => {
         <StoreCard name="testStore"/>
       </BrowserRouter>
     )
-    // verify page content for expected route
-    // often you'd use a data-testid or role query, but this is also possible
     expect(screen.getByText(/testStore/i)).toBeInTheDocument()
+  })
+
+  test('Test Click StoreCard', async () => {
+    let f = false
+    function flag() {
+      f = true
+    }
+    render(
+      <BrowserRouter>
+        <StoreCard name="testStore" onSub={flag}/>
+      </BrowserRouter>
+    )
+    fireEvent.click(screen.getByTestId('card'))
+    expect(f).toEqual(true)
   })
   
 });
@@ -113,8 +132,6 @@ describe("<UserPage />", () => {
         <UserPage/>
       </BrowserRouter>
     )
-    // verify page content for expected route
-    // often you'd use a data-testid or role query, but this is also possible
     expect(screen.getByText(/Your Stores/i)).toBeInTheDocument()
   })
 
@@ -129,5 +146,60 @@ describe("<UserPage />", () => {
     fireEvent.click(screen.getByTestId('openModal'))
     expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
   })
+
+  test('Test UserPage Close Modal', async () => {
+    render(
+      <BrowserRouter>
+        <UserPage  />
+      </BrowserRouter>
+    )
+
+    fireEvent.click(screen.getByTestId('openModal'))
+    fireEvent.click(screen.getByTestId('close'))
+    expect(screen.queryByText(/Cancel/i)).not.toBeNull()
+  })
+
   
+  test('Test UserPage Submit Modal', async () => {
+    let f = false
+    function flag() {
+      f = true
+    }
+    render(
+      <BrowserRouter>
+        <UserPage onSub={flag}/>
+      </BrowserRouter>
+    )
+
+    fireEvent.click(screen.getByTestId('openModal'))
+    fireEvent.change(screen.getByTestId('name'), { target: { value: 'new shop' } })
+    fireEvent.change(screen.getByTestId('address'), { target: { value: 'new address' } })
+    fireEvent.change(screen.getByTestId('category'), { target: { value: 'Food' } })
+    fireEvent.click(screen.getByTestId('submit'))
+    expect(f).toEqual(true)
+  })
+  
+});
+
+describe("<Error />", () => {
+  test('Test Error Page', async () => {
+    render(
+      <BrowserRouter>
+        <Error />
+      </BrowserRouter>
+    )
+    expect(screen.getByText(/Error: Page does not exist!/i)).toBeInTheDocument()
+  })
+});
+
+describe("<NavBar />", () => {
+  test('Test Navigation Bar', async () => {
+    render(
+      <BrowserRouter>
+        <NavBar />
+      </BrowserRouter>
+    )
+    fireEvent.click(screen.getByTestId('title'))
+    expect(screen.getByText(/PyMarket/i)).toBeInTheDocument()
+  })
 });

@@ -28,7 +28,7 @@ class NavBar extends React.Component {
         <AppBar position='static'>
           <Toolbar>
             <Typography variant='h6' noWrap>
-              <Link href='/' className='title' onClick={(event) => event.preventDefault}>
+              <Link href='/' data-testid='title' className='title' onClick={(event) => event.preventDefault}>
                 PyMarket
               </Link>
             </Typography>

@@ -15,6 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button'
 import AddShopForm from './AddShopForm.js'
+import PropTypes from 'prop-types'
 
 import './home.css'
 class UserPage extends React.Component {
@@ -52,6 +53,7 @@ class UserPage extends React.Component {
 
   handleSub (event) {
     this.setState({ open: false })
+    this.props.onSub()
   }
 
   render () {
@@ -88,7 +90,7 @@ class UserPage extends React.Component {
             <AddShopForm onSub={(event) => this.handleSub(event)} />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleClose.bind(this)} color='primary'>
+            <Button data-testid='close' onClick={this.handleClose.bind(this)} color='primary'>
               Cancel
             </Button>
           </DialogActions>
@@ -97,6 +99,10 @@ class UserPage extends React.Component {
       </div>
     )
   }
+}
+
+UserPage.propTypes = {
+  onSub: PropTypes.any
 }
 
 export default UserPage
