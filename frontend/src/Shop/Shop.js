@@ -1,4 +1,4 @@
-/* global localStorage, fetch, Headers, alert */
+/* global localStorage, fetch, Headers, alert, Stripe */
 /* istanbul ignore file */
 /* eslint react/prop-types: 0 */
 
@@ -88,6 +88,7 @@ class Shop extends React.Component {
   }
 
   handleCheckout (event) {
+    const stripe = Stripe('pk_test_51Hu2LSG8eUBzuEBEesc0XBxkWzW7RyHcK7ckx9DqgHL710Mh3BF0NRyowXw82xTUa8vBVIdamkyzkllOzHepdfPc00MoyUNiR6')
     const myHeaders = new Headers()
     myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
     myHeaders.append('Content-Type', 'application/json')
@@ -100,10 +101,24 @@ class Shop extends React.Component {
       redirect: 'follow'
     }
 
-    fetch('http://127.0.0.1:8000/api/stores/' + this.state.store_id + '/purchase_items/', requestOptions)
-      .then(response => response.json())
-      .then(result => { window.location.reload() })
-      .catch(error => alert(error))
+    fetch('http://127.0.0.1:8000/api/stores/' + this.state.store_id + '/create_checkout_session/', requestOptions)
+      .then(function (response) {
+        return response.json()
+      })
+      .then(function (session) {
+        return stripe.redirectToCheckout({ sessionId: session })
+      })
+      .then(function (result) {
+        // If `redirectToCheckout` fails due to a browser or network
+        // error, you should display the localized error message to your
+        // customer using `error.message`.
+        if (result.error) {
+          alert(result.error.message)
+        }
+      })
+      .catch(function (error) {
+        console.error('Error:', error)
+      })
     event.preventDefault()
   }
 
@@ -156,7 +171,7 @@ class Shop extends React.Component {
             </TableBody>
           </Table>
           <Box align='right'>
-            <Button onClick={this.handleCheckout.bind(this)} color='primary'>
+            <Button onClick={this.handleCheckout.bind(this)} role='link' color='primary'>
               Checkout
             </Button>
           </Box>

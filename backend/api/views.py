@@ -25,17 +25,21 @@ from rest_framework import status
 from django.db import IntegrityError
 from django.core.validators import ValidationError
 from django.utils import timezone
+
 import string
 import random
 import datetime
+import stripe
 from oauth2_provider.models import get_application_model, get_access_token_model
 from backend.scopes import (
     TokenHasStoreEmployeeScope,
     TokenHasStoreManagerScope,
     TokenHasStoreVendorScope,
 )
+
 Application = get_application_model()
 AccessToken = get_access_token_model()
+stripe.api_key = "sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv"
 
 
 class UserViewSet(viewsets.ViewSet):
@@ -48,11 +52,11 @@ class UserViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         permission_classes = []
-        if self.action in ['list', 'retrieve', 'update', 'add_store', 'current_user']:
+        if self.action in ["list", "retrieve", "update", "add_store", "current_user"]:
             permission_classes = [TokenHasStoreEmployeeScope]
-        elif self.action == 'remove_store':
+        elif self.action == "remove_store":
             permission_classes = [TokenHasStoreManagerScope]
-        elif self.action == 'delete_store':
+        elif self.action == "delete_store":
             permission_classes = [TokenHasStoreVendorScope]
         return [permission() for permission in permission_classes]
 
@@ -227,9 +231,9 @@ class StoreViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         permission_classes = []
-        if self.action in ['list', 'retrieve', 'purchase_items']:
+        if self.action in ["list", "retrieve", "purchase_items"]:
             permission_classes = [TokenHasStoreEmployeeScope]
-        elif self.action in ['update', 'add_item', 'remove_item', 'delete_item']:
+        elif self.action in ["update", "add_item", "remove_item", "delete_item"]:
             permission_classes = [TokenHasStoreVendorScope]
         return [permission() for permission in permission_classes]
 
@@ -290,6 +294,35 @@ class StoreViewSet(viewsets.ViewSet):
 
     @action(detail=True, methods=["POST"])
     def purchase_items(self, request, pk=None):
+        store = Store.objects.get(pk=pk)
+        line_items = stripe.checkout.Session.list_line_items(
+            request.data.get("session_id")
+        )
+        for i in line_items:
+            item_id = stripe.Product.retrieve(i["price"]["product"])["metadata"][
+                "item_id"
+            ]
+            item = Item.objects.get(pk=int(item_id))
+            print(item)
+            history = History_of_Item.objects.create(
+                before_stock=item.stock,
+                after_stock=item.stock - i["quantity"],
+                category=History_Category.PURCHASE,
+            )
+            item.history.add(history)
+            item.stock -= int(i["quantity"])
+            item.save()
+        serializer = StoreSerializer(store)
+        return Response(serializer.data)
+        # Won't reach this with new auth
+        # except Store.DoesNotExist:
+        #     return Response(
+        #         {"message": "The store does not exist."},
+        #         status=status.HTTP_404_NOT_FOUND,
+        #     )
+
+    @action(detail=True, methods=["POST"])
+    def create_checkout_session(self, request, pk=None):
         try:
             data = request.data
             store = Store.objects.get(pk=pk)
@@ -310,8 +343,22 @@ class StoreViewSet(viewsets.ViewSet):
                         },
                         status=status.HTTP_406_NOT_ACCEPTABLE,
                     )
+            to_send_stripe = []
             for purchase_item in data.get("items"):
+                # Build Stripe Payload
                 item = Item.objects.get(pk=purchase_item.get("id"))
+                a = {
+                    "price_data": {
+                        "currency": "usd",
+                        "product_data": {
+                            "name": item.name,
+                            "metadata": {"item_id": item.id},
+                        },
+                        "unit_amount_decimal": item.price * 100,
+                    },
+                    "quantity": purchase_item.get("quantity"),
+                }
+                to_send_stripe.append(a)
                 history = History_of_Item.objects.create(
                     before_stock=item.stock,
                     after_stock=item.stock - purchase_item.get("quantity"),
@@ -320,8 +367,17 @@ class StoreViewSet(viewsets.ViewSet):
                 item.history.add(history)
                 item.stock -= purchase_item.get("quantity")
                 item.save()
-            serializer = StoreSerializer(store)
-            return Response(serializer.data)
+            print(to_send_stripe)
+            session = stripe.checkout.Session.create(
+                payment_method_types=["card"],
+                line_items=to_send_stripe,
+                mode="payment",
+                success_url="http://localhost:1234/shop/"
+                + str(store.id)
+                + "/success?session_id={CHECKOUT_SESSION_ID}",
+                cancel_url="http://localhost:1234/shop/" + str(store.id),
+            )
+            return Response(session.id)
         # Won't reach this with new auth
         # except Store.DoesNotExist:
         #     return Response(
@@ -443,9 +499,9 @@ class ItemViewSet(viewsets.ViewSet):
 
     def get_permissions(self):
         permission_classes = []
-        if self.action in ['list', 'retrieve']:
+        if self.action in ["list", "retrieve"]:
             permission_classes = [TokenHasStoreEmployeeScope]
-        elif self.action in ['create', 'update']:
+        elif self.action in ["create", "update"]:
             permission_classes = [TokenHasStoreVendorScope]
         return [permission() for permission in permission_classes]
 
@@ -667,3 +723,32 @@ class PingViewSet(viewsets.ViewSet):
 
     def list(self, request):
         return Response(data={"ping": "pong"})
+
+
+# Webhook Just in Case
+# @csrf_exempt
+# def webhook(request):
+#     payload = request.body
+#     sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+#     event = None
+
+#     try:
+#         event = stripe.Webhook.construct_event(
+#         payload, sig_header, endpoint_secret
+#         )
+#     except ValueError as e:
+#         # Invalid payload
+#         return HttpResponse(status=400)
+#     except stripe.error.SignatureVerificationError as e:
+#         # Invalid signature
+#         return HttpResponse(status=400)
+
+#     # Handle the checkout.session.completed event
+#     if event['type'] == 'checkout.session.completed':
+#         session = event['data']['object']
+
+#         # Fulfill the purchase...
+#         purchase_items(session)
+
+#     # Passed signature verification
+#     return HttpResponse(status=200)

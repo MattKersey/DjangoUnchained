@@ -62,7 +62,14 @@ class AssociationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Association
-        fields = ["store_address", "store_name", "store_category", "membership", "role", "store_id"]
+        fields = [
+            "store_address",
+            "store_name",
+            "store_category",
+            "membership",
+            "role",
+            "store_id",
+        ]
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):

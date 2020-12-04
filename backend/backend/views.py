@@ -1,5 +1,6 @@
 # from django.utils import timezone
 from oauth2_provider.views import AuthorizationView
+
 # from oauth2_provider.exceptions import OAuthToolkitError
 # from oauth2_provider.scopes import get_scopes_backend
 # from oauth2_provider.models import get_access_token_model, get_application_model
