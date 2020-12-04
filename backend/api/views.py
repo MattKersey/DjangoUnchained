@@ -42,6 +42,23 @@ AccessToken = get_access_token_model()
 stripe.api_key = "sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv"
 
 
+def updateTokenScope(user):
+    tokens = AccessToken.objects.filter(user=user).all()
+    for token in tokens:
+        scopes = []
+        associations = Association.objects.filter(user=user)
+        for association in associations.all():
+            print(association.role)
+            if association.role in [Role.EMPLOYEE, Role.MANAGER, Role.VENDOR]:
+                scopes.append("store_" + str(association.store.pk) + ":employee")
+            if association.role in [Role.MANAGER, Role.VENDOR]:
+                scopes.append("store_" + str(association.store.pk) + ":manager")
+            if association.role == Role.VENDOR:
+                scopes.append("store_" + str(association.store.pk) + ":vendor")
+        token.scope = " ".join(scopes)
+        token.save()
+
+
 class UserViewSet(viewsets.ViewSet):
     """
     API endpoint that allows users to be viewed.
@@ -125,6 +142,7 @@ class UserViewSet(viewsets.ViewSet):
             )
             store.save()
             Association.objects.create(user=user, store=store, role=Role.VENDOR)
+            updateTokenScope(user)
             return Response(StoreSerializer(store).data)
         except User.DoesNotExist:
             return Response(
@@ -153,6 +171,7 @@ class UserViewSet(viewsets.ViewSet):
                 )
             user.stores.remove(store)
             user.save()
+            updateTokenScope(user)
             serializer = UserSerializer(User.objects.get(pk=user.id))
             return Response(serializer.data)
         except Association.DoesNotExist:
@@ -188,6 +207,7 @@ class UserViewSet(viewsets.ViewSet):
                 )
             user.stores.remove(store)
             store.delete()
+            updateTokenScope(user)
             return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
         except Association.DoesNotExist:
             return Response(
