@@ -303,7 +303,6 @@ class StoreViewSet(viewsets.ViewSet):
                 "item_id"
             ]
             item = Item.objects.get(pk=int(item_id))
-            print(item)
             history = History_of_Item.objects.create(
                 before_stock=item.stock,
                 after_stock=item.stock - i["quantity"],
@@ -314,12 +313,6 @@ class StoreViewSet(viewsets.ViewSet):
             item.save()
         serializer = StoreSerializer(store)
         return Response(serializer.data)
-        # Won't reach this with new auth
-        # except Store.DoesNotExist:
-        #     return Response(
-        #         {"message": "The store does not exist."},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
 
     @action(detail=True, methods=["POST"])
     def create_checkout_session(self, request, pk=None):
@@ -359,15 +352,6 @@ class StoreViewSet(viewsets.ViewSet):
                     "quantity": purchase_item.get("quantity"),
                 }
                 to_send_stripe.append(a)
-                history = History_of_Item.objects.create(
-                    before_stock=item.stock,
-                    after_stock=item.stock - purchase_item.get("quantity"),
-                    category=History_Category.PURCHASE,
-                )
-                item.history.add(history)
-                item.stock -= purchase_item.get("quantity")
-                item.save()
-            print(to_send_stripe)
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
                 line_items=to_send_stripe,
