@@ -738,10 +738,6 @@ class Test_StoreView(APITestCase):
             + str(self.store1.pk)
             + "/purchase_items/"
         )
-        print(
-            "TESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTINGTESTING"
-        )
-        print(self.example_session_id)
         r = self.client.post(
             url,
             json.dumps({"session_id": self.example_session_id}),
