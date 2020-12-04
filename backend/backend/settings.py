@@ -79,7 +79,8 @@ AUTH_PASSWORD_VALIDATORS = [
 
 OAUTH2_PROVIDER = {
     # this is the list of available scopes
-    "SCOPES": {"read": "Read scope", "write": "Write scope"}
+    # "SCOPES": {"read": "Read scope", "write": "Write scope"},
+    "SCOPES_BACKEND_CLASS": "backend.scopes.CustomScopes"
 }
 
 REST_FRAMEWORK = {
