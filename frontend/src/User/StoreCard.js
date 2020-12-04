@@ -15,7 +15,8 @@ class StoreCard extends React.Component {
     this.state = { id: this.props.id }
   }
 
-  handleCardClick () {
+  handleCardClick() {
+    this.props.onSub()
     window.location = '/shop/' + this.props.id
   }
 
@@ -27,6 +28,7 @@ class StoreCard extends React.Component {
             className='cardAction'
             onClick={this.handleCardClick.bind(this)}
             width='100%'
+            data-testid='card'
           >
             <CardContent width='100%'>{this.props.name}</CardContent>
           </ButtonBase>

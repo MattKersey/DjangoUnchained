@@ -52,6 +52,7 @@ class UserPage extends React.Component {
 
   handleSub (event) {
     this.setState({ open: false })
+    this.props.onSub()
   }
 
   render () {
@@ -88,7 +89,7 @@ class UserPage extends React.Component {
             <AddShopForm onSub={(event) => this.handleSub(event)} />
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleClose.bind(this)} color='primary'>
+            <Button data-testid='close' onClick={this.handleClose.bind(this)} color='primary'>
               Cancel
             </Button>
           </DialogActions>
