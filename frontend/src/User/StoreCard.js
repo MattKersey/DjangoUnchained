@@ -16,7 +16,6 @@ class StoreCard extends React.Component {
   }
 
   handleCardClick () {
-    this.props.onSub()
     window.location = '/shop/' + this.props.id
   }
 
