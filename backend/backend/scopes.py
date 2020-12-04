@@ -10,6 +10,13 @@ def getPK(path):
         if elements[i].upper() == "STORES":
             if i + 1 < len(elements) and elements[i+1].isdigit():
                 return elements[i+1]
+        elif elements[i].upper() == "ITEMS":
+            if i + 1 < len(elements) and elements[i+1].isdigit():
+                store = Store.objects.filter(items__id=int(elements[i+1])).first()
+                if store is not None:
+                    pk = str(store.pk)
+                    return pk
+
     return ""
 
 

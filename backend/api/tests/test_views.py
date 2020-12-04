@@ -941,6 +941,10 @@ class Test_ItemView(APITestCase):
         self.store1 = Store.objects.create(
             address="1 Main Street", name="Store 1", category=Category.FOOD
         )
+        self.store1.items.add(self.item1)
+        self.store1.items.add(self.item2)
+        self.store1.items.add(self.item3)
+        self.store1.save()
         setupOAuth(self, stores=[self.store1.pk])
 
     def test_retrieve_item(self):
@@ -977,7 +981,7 @@ class Test_ItemView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(201, r.status_code)
-        self.assertEqual(1, self.store1.items.count())
+        self.assertEqual(4, self.store1.items.count())
 
     def test_create_item_bad_store(self):
         url = "http://127.0.0.1:8000/api/items/"
@@ -1088,6 +1092,24 @@ class Test_ItemView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(1, Item.objects.filter(name="Item 3").count())
+
+    def test_update_item_employee_auth(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.put(
+            url + str(self.item3.pk) + "/",
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+            follow=True,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_update_item_manager_auth(self):
+        url = "http://127.0.0.1:8000/api/items/"
+        r = self.client.put(
+            url + str(self.item3.pk) + "/",
+            HTTP_AUTHORIZATION="Bearer " + self.manToken.token,
+            follow=True,
+        )
+        self.assertEqual(403, r.status_code)
 
     def test_update_item_invalid_prices(self):
         url = "http://127.0.0.1:8000/api/items/"
