@@ -49,6 +49,11 @@ jobs:
           python manage.py makemigrations api
           python manage.py migrate
           pytest ./ -v --cov=./ --cov-report=xml
+        env:
+          DB_HOST: ${{ secrets.BACKEND_POSTGRES_HOST }}
+          DB_USER: ${{ secrets.BACKEND_POSTGRES_USER }}
+          DB_PASSWORD: ${{ secrets.BACKEND_POSTGRES_PASSWORD }}
+          STRIPE_API_KEY: ${{ secrets.BACKEND_STRIPE_API_KEY }}
 
       - name: Removing Migrations File
         working-directory: ./backend
