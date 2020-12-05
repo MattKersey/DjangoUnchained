@@ -471,15 +471,14 @@ class Test_UserView(APITestCase):
 
     def test_change_role_no_association(self):
         url = (
-            "http://127.0.0.1:8000/api/users/"
-            + str(self.userMods.pk)
-            + "/change_role/"
+            "http://127.0.0.1:8000/api/users/change_role/"
         )
         r = self.client.post(
             url,
             {
                 "store_id": self.store2.pk,
                 "role": Role.EMPLOYEE,
+                "email": self.userMods.email,
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
@@ -495,15 +494,14 @@ class Test_UserView(APITestCase):
 
     def test_change_role_pre_association(self):
         url = (
-            "http://127.0.0.1:8000/api/users/"
-            + str(self.userMods.pk)
-            + "/change_role/"
+            "http://127.0.0.1:8000/api/users/change_role/"
         )
         r = self.client.post(
             url,
             {
                 "store_id": self.store3.pk,
                 "role": Role.MANAGER,
+                "email": self.userMods.email,
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
@@ -519,13 +517,14 @@ class Test_UserView(APITestCase):
 
     def test_change_role_bad_user(self):
         url = (
-            "http://127.0.0.1:8000/api/users/100000000/change_role/"
+            "http://127.0.0.1:8000/api/users/change_role/"
         )
         r = self.client.post(
             url,
             {
                 "store_id": self.store2.pk,
                 "role": Role.EMPLOYEE,
+                "email": "bad@bad.com",
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
@@ -534,15 +533,14 @@ class Test_UserView(APITestCase):
 
     def test_change_role_bad_store(self):
         url = (
-            "http://127.0.0.1:8000/api/users/"
-            + str(self.userMods.pk)
-            + "/change_role/"
+            "http://127.0.0.1:8000/api/users/change_role/"
         )
         r = self.client.post(
             url,
             {
                 "store_id": 10000000,
                 "role": Role.EMPLOYEE,
+                "email": self.userMods.email,
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
@@ -550,15 +548,14 @@ class Test_UserView(APITestCase):
 
     def test_change_role_bad_role(self):
         url = (
-            "http://127.0.0.1:8000/api/users/"
-            + str(self.userMods.pk)
-            + "/change_role/"
+            "http://127.0.0.1:8000/api/users/change_role/"
         )
         r = self.client.post(
             url,
             {
                 "store_id": self.store2.pk,
                 "role": "Fake Role",
+                "email": self.userMods.email,
             },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
