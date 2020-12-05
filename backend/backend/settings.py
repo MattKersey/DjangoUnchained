@@ -1,5 +1,5 @@
 from pathlib import Path
-# import os
+import os
 from dotenv import load_dotenv, find_dotenv
 
 load_dotenv(find_dotenv())
@@ -57,18 +57,18 @@ TEMPLATES = [
 WSGI_APPLICATION = "backend.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
     # "default": {
-    #     "ENGINE": "django.db.backends.postgresql_psycopg2",
-    #     "NAME": "PyMarket",
-    #     "USER": os.getenv("DB_USER"),
-    #     "PASSWORD": os.getenv("DB_PASSWORD"),
-    #     "HOST": os.getenv("DB_HOST"),
-    #     "PORT": "5432",
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
     # }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "PyMarket",
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": "5432",
+    }
 }
 
 VALIDATOR = "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
