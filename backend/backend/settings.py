@@ -66,7 +66,7 @@ DATABASES = {
         "NAME": "PyMarket",
         "USER": os.getenv("DB_USER"),
         "PASSWORD": os.getenv("DB_PASSWORD"),
-        "HOST": os.getenv("DB_HOST"),
+        "HOST": "pymarketdb.cegkuqi76jr6.us-east-2.rds.amazonaws.com",
         "PORT": "5432",
     }
 }
