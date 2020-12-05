@@ -3,7 +3,7 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
 from api.models import User, Store, Category, Item, Association, Role, History_of_Item
-from views import updateUserScope
+from api.views import updateTokenScope
 import datetime
 import requests_mock
 import os
@@ -1291,11 +1291,12 @@ class Test_OAuth(APITestCase):
         self.assertEqual(b'{"ping":"pong"}', r.content)
 
     def test_update_user_scopes(self):
-        updateUserScope(self.user)
-        scope = "store" + str(self.store.pk) + ":employee "
-        scope += "store" + str(self.store.pk) + ":manager "
-        scope += "store" + str(self.store.pk) + ":vendor"
-        self.assertEqual(1, AccessToken.objects.filter(user=self.user, scope=scope).count())
+        Association.objects.create(user=self.employeeUser, store=self.store, role=Role.VENDOR)
+        updateTokenScope(self.employeeUser)
+        scope = "store_" + str(self.store.pk) + ":employee "
+        scope += "store_" + str(self.store.pk) + ":manager "
+        scope += "store_" + str(self.store.pk) + ":vendor"
+        self.assertEqual(1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count())
 
     @requests_mock.Mocker()
     def test_OAuth_redirect(self, m):
