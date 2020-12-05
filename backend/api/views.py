@@ -56,7 +56,7 @@ class UserViewSet(viewsets.ViewSet):
             permission_classes = [TokenHasStoreEmployeeScope]
         elif self.action == "remove_store":
             permission_classes = [TokenHasStoreManagerScope]
-        elif self.action == "delete_store":
+        elif self.action in ["delete_store", "change_role"]:
             permission_classes = [TokenHasStoreVendorScope]
         return [permission() for permission in permission_classes]
 
@@ -165,16 +165,9 @@ class UserViewSet(viewsets.ViewSet):
                 {"message": "The user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Won't reach this with new auth
-        # except Store.DoesNotExist:
-        #     return Response(
-        #         {"message": "The store does not exist."},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
 
     @action(detail=True, methods=["DELETE"])
     def delete_store(self, request, pk=None):
-        print("Hello")
         try:
             data = request.POST
             user = User.objects.get(pk=pk)
@@ -200,25 +193,44 @@ class UserViewSet(viewsets.ViewSet):
                 {"message": "The user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        # Won't reach this with new auth
-        # except Store.DoesNotExist:
-        #     return Response(
-        #         {"message": "The store does not exist."},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
+
+    @action(detail=True, methods=["POST"])
+    def change_role(self, request, pk=None):
+        try:
+            data = request.POST
+            role = data.get("role")
+            if role not in [Role.EMPLOYEE, Role.MANAGER, Role.VENDOR]:
+                raise ValidationError("Invalid role")
+            user = User.objects.get(pk=pk)
+            store = Store.objects.get(pk=data.get("store_id"))
+            association = Association.objects.get(user=user, store=store)
+            association.role = role
+            association.save()
+            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        except Association.DoesNotExist:
+            Association.objects.create(user=user, store=store, role=role)
+            return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
+        except User.DoesNotExist:
+            return Response(
+                {"message": "The user does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except Store.DoesNotExist:
+            return Response(
+                {"message": "The store does not exist."},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except (IntegrityError, ValidationError):
+            return Response(
+                {"message": "The role cannot be updated."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
 
     @action(detail=False, methods=["GET"])
     def current_user(self, request):
-        # Since this is based on oauth token, there will never be a User.DoesNotExist
-        # try:
         user = request.user
         serializer = UserSerializer(user)
         return Response(serializer.data)
-        # except User.DoesNotExist:
-        #     return Response(
-        #         {"message": "The user does not exist."},
-        #         status=status.HTTP_404_NOT_FOUND,
-        #     )
 
 
 class StoreViewSet(viewsets.ViewSet):
