@@ -237,11 +237,6 @@ class UserViewSet(viewsets.ViewSet):
                 {"message": "The user does not exist."},
                 status=status.HTTP_404_NOT_FOUND,
             )
-        except Store.DoesNotExist:
-            return Response(
-                {"message": "The store does not exist."},
-                status=status.HTTP_404_NOT_FOUND,
-            )
         except (IntegrityError, ValidationError):
             return Response(
                 {"message": "The role cannot be updated."},
