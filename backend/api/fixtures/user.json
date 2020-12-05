@@ -86,7 +86,7 @@
          "email": "user6@columbia.edu",
          "password": "pbkdf2_sha256$216000$486ZfRmxCVLU$oScSHi8KejAl86lJOQsWH8ghdUmyXNMKf9Y4aEYpeYA=",
          "active": true,
-         "staff": false,
+         "staff": true,
          "admin": false,
          "is_superuser": false,
          "stores": [
