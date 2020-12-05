@@ -214,14 +214,14 @@ class UserViewSet(viewsets.ViewSet):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-    @action(detail=True, methods=["POST"])
-    def change_role(self, request, pk=None):
+    @action(detail=False, methods=["POST"])
+    def change_role(self, request):
         try:
             data = request.POST
             role = data.get("role")
             if role not in [Role.EMPLOYEE, Role.MANAGER, Role.VENDOR]:
                 raise ValidationError("Invalid role")
-            user = User.objects.get(pk=pk)
+            user = User.objects.get(email=data.get("email"))
             store = Store.objects.get(pk=data.get("store_id"))
             association = Association.objects.get(user=user, store=store)
             association.role = role
