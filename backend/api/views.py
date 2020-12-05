@@ -39,7 +39,7 @@ from backend.scopes import (
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
-stripe.api_key = "sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv"
+stripe.api_key = os.getenv("STRIPE_API_KEY")
 
 
 class UserViewSet(viewsets.ViewSet):
