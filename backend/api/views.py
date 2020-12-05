@@ -226,9 +226,11 @@ class UserViewSet(viewsets.ViewSet):
             association = Association.objects.get(user=user, store=store)
             association.role = role
             association.save()
+            updateTokenScope(user)
             return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
         except Association.DoesNotExist:
             Association.objects.create(user=user, store=store, role=role)
+            updateTokenScope(user)
             return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
         except User.DoesNotExist:
             return Response(
