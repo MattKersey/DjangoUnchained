@@ -1,4 +1,4 @@
-/* global localStorage, fetch, Headers */
+/* global localStorage */
 /* istanbul ignore file */
 /* eslint react/prop-types: 0 */
 
@@ -42,11 +42,7 @@ class History extends React.Component {
       { field: 'col4', headerName: 'After Stock', width: 150 },
       { field: 'col5', headerName: 'After Description', width: 300 }
     ]
-    /*
-    const rows = [
-      { id: 1, col1: 'Hello', col2: 'World', col3: '1', col4: '2', col5: '3' }
-    ]
-    */
+
     const rows = []
 
     for (const key in this.state.items) {
