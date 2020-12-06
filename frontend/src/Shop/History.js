@@ -36,11 +36,11 @@ class History extends React.Component {
 
   render () {
     const columns = [
-      { field: 'col1', headerName: 'date time', width: 150 },
-      { field: 'col2', headerName: 'item name', width: 150 },
-      { field: 'col3', headerName: 'after price', width: 150 },
-      { field: 'col4', headerName: 'after stock', width: 150 },
-      { field: 'col5', headerName: 'after description', width: 150 }
+      { field: 'col1', headerName: 'Date/Time', width: 200 },
+      { field: 'col2', headerName: 'Item Name', width: 150 },
+      { field: 'col3', headerName: 'After Price', width: 150 },
+      { field: 'col4', headerName: 'After Stock', width: 150 },
+      { field: 'col5', headerName: 'After Description', width: 300 }
     ]
     /*
     const rows = [
