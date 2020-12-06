@@ -3,7 +3,9 @@
 /* eslint react/prop-types: 0 */
 
 import React from 'react'
+import Typography from '@material-ui/core/Typography'
 import axios from 'axios'
+import Box from '@material-ui/core/Box'
 import { DataGrid } from '@material-ui/data-grid'
 
 class History extends React.Component {
@@ -12,65 +14,62 @@ class History extends React.Component {
 
     this.state = {
       storeName: '',
-      itemHistory: []
+      items: []
     }
   }
 
   componentDidMount () {
     const storeID = this.props.match.params.shopID
-    /*
-    const search = window.location.search
-    const params = new URLSearchParams(search)
-    const sessionID = params.get('session_id')
-    const myHeaders = new Headers()
-    myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
-    myHeaders.append('Content-Type', 'application/json')
-    const raw = JSON.stringify({ session_id: sessionID })
-    const requestOptions = {
-      method: 'GET',
-      headers: myHeaders,
-      body: raw,
-      redirect: 'follow'
-    }
-*/
     axios.get('http://127.0.0.1:8000/api/stores/' + storeID, {
       headers: {
         Authorization: `Bearer ${localStorage.getItem('token')}`
       }
     })
       .then((res) => {
-        this.setState({ storeName: res.data.name, itemHistory: res.data.items })
+        this.setState({ storeName: res.data.name, items: res.data.items })
         console.log(this.state)
       })
       .catch((error) => {
         console.error(error)
       })
-
-    /*
-    fetch('http://127.0.0.1:8000/api/stores/' + storeID, requestOptions)
-      .then(function (response) {
-        return response.json()
-      })
-      .then(function (result) {
-        window.location = '/shop/' + storeID + '/'
-      })
-      .then(function (result) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, you should display the localized error message to your
-        // customer using `error.message`.
-        if (result.error) {
-          console.log(result.error.message)
-        }
-      })
-      .catch(function (error) {
-        console.error('Error:', error)
-      })
-      */
   }
 
   render () {
+    const columns = [
+      { field: 'col1', headerName: 'date time', width: 150 },
+      { field: 'col2', headerName: 'item name', width: 150 },
+      { field: 'col3', headerName: 'after price', width: 150 },
+      { field: 'col4', headerName: 'after stock', width: 150 },
+      { field: 'col5', headerName: 'after description', width: 150 }
+    ]
+    /*
+    const rows = [
+      { id: 1, col1: 'Hello', col2: 'World', col3: '1', col4: '2', col5: '3' }
+    ]
+    */
+    const rows = []
+
+    for (const key in this.state.items) {
+      const hist = this.state.items[key]
+      for (let i = 0, l = hist.length; i < l; i++) {
+        const obj = hist[i]
+        const idd = rows.length + 1
+        const arr = { id: idd, col1: obj.datetime, col2: obj.after_name, col3: obj.after_price, col4: obj.after_stock, col5: obj.after_description }
+        rows.push(arr)
+      }
+    }
+
     return (
-      <div />
+      <div>
+        <Box mb={4} mt={2}>
+          <Typography component='h1' variant='h5'>
+            Item History for Your Store: {this.state.storeName}
+          </Typography>
+        </Box>
+        <Box style={{ height: 600, width: '100%' }}>
+          <DataGrid rows={rows} columns={columns} />
+        </Box>
+      </div>
     )
   }
 }
