@@ -249,6 +249,50 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["POST"])
+    def add_user_to_store(self, request, pk=None):
+        data = request.POST
+        user = User.objects.get(pk=pk)
+        try:
+            store = Store.objects.get(pk=data.get("store_id"))
+            if Association.objects.filter(user=user, store=store).exists():
+                return Response(
+                    {"message": "Invalid Store."},
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
+            role = data.get("role")
+            if role is None or role not in Role.all_roles:
+                return Response(
+                    {"message": "Invalid Role."},
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
+            if user.can_add_user(
+                user=user,
+                store=store,
+                new_user_role=role,
+            ):
+                new_user = User.objects.create_staffuser(
+                    email=data.get("email"),
+                    password=data.get("password")
+                )
+                _ = Association.objects.create(
+                    user=new_user,
+                    store=store,
+                    role=role
+                )
+                return Response(
+                        {"message": "New user created."},
+                        status=status.HTTP_201_CREATED
+                    )
+        except (IntegrityError, ValidationError) as e:
+            print(e.__dict__)
+            return Response(
+                {
+                    "message": "The new user cannot be created.",
+                },
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
+
 
 class StoreViewSet(viewsets.ViewSet):
     """

@@ -245,6 +245,18 @@ class User(AbstractBaseUser, PermissionsMixin):
         # return True for now
         return True
 
+    def can_add_user(self, user, store, new_user_role):
+        try:
+            assoc = Association.objects.get(user=user, store=store)
+        except Association.DoesNotExist:
+            return False
+        if assoc.role == Role.EMPLOYEE:
+            return False
+        elif assoc.role == Role.MANAGER:
+            return new_user_role in [Role.MANAGER, Role.EMPLOYEE]
+        elif assoc.role == Role.VENDOR:
+            return True
+
     @property
     def is_staff(self):
         "Is the user a member of staff?"
@@ -265,6 +277,10 @@ class Role(models.TextChoices):
     MANAGER = "Manager"
     VENDOR = "Vendor"
     EMPLOYEE = "Employee"
+
+    @property
+    def all_roles(self):
+        return [self.MANAGER, self.VENDOR, self.EMPLOYEE]
 
 
 class Association(models.Model):
