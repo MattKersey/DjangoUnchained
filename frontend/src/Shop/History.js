@@ -36,21 +36,25 @@ class History extends React.Component {
 
   render () {
     const columns = [
-      { field: 'col1', headerName: 'Date/Time', width: 200 },
-      { field: 'col2', headerName: 'Item Name', width: 150 },
-      { field: 'col3', headerName: 'After Price', width: 150 },
-      { field: 'col4', headerName: 'After Stock', width: 150 },
-      { field: 'col5', headerName: 'After Description', width: 300 }
+      { field: 'col1', headerName: 'Date/Time', width: 250 },
+      { field: 'col2', headerName: 'Action', width: 150 },
+      { field: 'col3', headerName: 'Item Name', width: 150 },
+      { field: 'col4', headerName: 'After Price', width: 150 },
+      { field: 'col5', headerName: 'After Stock', width: 150 },
+      { field: 'col6', headerName: 'After Description', width: 300 }
     ]
 
     const rows = []
 
     for (const key in this.state.items) {
       const hist = this.state.items[key]
-      for (let i = 0, l = hist.length; i < l; i++) {
-        const obj = hist[i]
+      const name = hist.name
+      const his = hist.history
+      let obj
+      if (his.length === 1) {
+        obj = his[0]
         const idd = rows.length + 1
-        const arr = { id: idd, col1: obj.datetime, col2: obj.after_name, col3: obj.after_price, col4: obj.after_stock, col5: obj.after_description }
+        const arr = { id: idd, col1: obj.datetime, col2: obj.category, col3: name, col4: obj.after_price, col5: obj.after_stock, col6: obj.after_description }
         rows.push(arr)
       }
     }
