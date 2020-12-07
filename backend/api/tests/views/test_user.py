@@ -402,9 +402,7 @@ class Test_UserView(APITestCase):
         )
 
     def test_change_role_no_association(self):
-        url = (
-            "http://127.0.0.1:8000/api/users/change_role/"
-        )
+        url = "http://127.0.0.1:8000/api/users/change_role/"
         r = self.client.post(
             url,
             {
@@ -418,16 +416,12 @@ class Test_UserView(APITestCase):
         self.assertEqual(
             1,
             Association.objects.filter(
-                user=self.userMods,
-                store=self.store2,
-                role=Role.EMPLOYEE
-            ).count()
+                user=self.userMods, store=self.store2, role=Role.EMPLOYEE
+            ).count(),
         )
 
     def test_change_role_pre_association(self):
-        url = (
-            "http://127.0.0.1:8000/api/users/change_role/"
-        )
+        url = "http://127.0.0.1:8000/api/users/change_role/"
         r = self.client.post(
             url,
             {
@@ -441,16 +435,12 @@ class Test_UserView(APITestCase):
         self.assertEqual(
             1,
             Association.objects.filter(
-                user=self.userMods,
-                store=self.store3,
-                role=Role.MANAGER
-            ).count()
+                user=self.userMods, store=self.store3, role=Role.MANAGER
+            ).count(),
         )
 
     def test_change_role_bad_user(self):
-        url = (
-            "http://127.0.0.1:8000/api/users/change_role/"
-        )
+        url = "http://127.0.0.1:8000/api/users/change_role/"
         r = self.client.post(
             url,
             {
@@ -464,9 +454,7 @@ class Test_UserView(APITestCase):
         self.assertEqual("The user does not exist.", r.data["message"])
 
     def test_change_role_bad_store(self):
-        url = (
-            "http://127.0.0.1:8000/api/users/change_role/"
-        )
+        url = "http://127.0.0.1:8000/api/users/change_role/"
         r = self.client.post(
             url,
             {
@@ -479,9 +467,7 @@ class Test_UserView(APITestCase):
         self.assertEqual(403, r.status_code)
 
     def test_change_role_bad_role(self):
-        url = (
-            "http://127.0.0.1:8000/api/users/change_role/"
-        )
+        url = "http://127.0.0.1:8000/api/users/change_role/"
         r = self.client.post(
             url,
             {

@@ -41,12 +41,16 @@ class Test_OAuth(APITestCase):
         self.assertEqual(b'{"ping":"pong"}', r.content)
 
     def test_update_user_scopes(self):
-        Association.objects.create(user=self.employeeUser, store=self.store, role=Role.VENDOR)
+        Association.objects.create(
+            user=self.employeeUser, store=self.store, role=Role.VENDOR
+        )
         updateTokenScope(self.employeeUser)
         scope = "store_" + str(self.store.pk) + ":employee "
         scope += "store_" + str(self.store.pk) + ":manager "
         scope += "store_" + str(self.store.pk) + ":vendor"
-        self.assertEqual(1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count())
+        self.assertEqual(
+            1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count()
+        )
 
     @requests_mock.Mocker()
     def test_OAuth_redirect(self, m):
