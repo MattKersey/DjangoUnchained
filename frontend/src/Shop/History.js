@@ -54,7 +54,8 @@ class History extends React.Component {
       if (his.length === 1) {
         obj = his[0]
         const idd = rows.length + 1
-        const arr = { id: idd, col1: obj.datetime, col2: obj.category, col3: name, col4: obj.after_price, col5: obj.after_stock, col6: obj.after_description }
+        const d = new Date(obj.datetime)
+        const arr = { id: idd, col1: d.toLocaleString('en-US', { timeZone: 'America/New_York' }), col2: obj.category, col3: name, col4: obj.after_price, col5: obj.after_stock, col6: obj.after_description }
         rows.push(arr)
       }
     }
@@ -67,7 +68,7 @@ class History extends React.Component {
           </Typography>
         </Box>
         <Box style={{ height: 600, width: '100%' }}>
-          <DataGrid rows={rows} columns={columns} />
+          <DataGrid sortingOrder={['desc', 'asc', null]} rows={rows} columns={columns} />
         </Box>
       </div>
     )
