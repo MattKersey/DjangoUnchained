@@ -58,7 +58,7 @@ class App extends Component {
         <Container fixed>
           <Switch>
             <PrivateRoute path='/' component={UserPage} exact />
-            <PrivateRoute path='/register' component={Register} exact />
+            <Route path='/register' component={Register} exact />
             <PrivateRoute path='/shop/:shopID' component={Shop} exact />
             <PrivateRoute path='/shop/:shopID/success' component={Success} exact />
             <Route path='/login' component={LoginButtons} exact />

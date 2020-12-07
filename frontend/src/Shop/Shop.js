@@ -24,6 +24,7 @@ import DialogContentText from '@material-ui/core/DialogContentText'
 import DialogTitle from '@material-ui/core/DialogTitle'
 import AddItemForm from './AddItemForm.js'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
+import TextField from '@material-ui/core/TextField'
 
 function subTotal (items) {
   return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
@@ -73,7 +74,7 @@ class Shop extends React.Component {
         console.log(json.items)
         const productElements = {}
         for (let i = 0; i < json.items.length; i++) {
-          productElements[json.items[i].pk] = <Grid item key={json.items[i].pk} md={3}><Product className='product' handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
+          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
         }
         this.setState({ products: productElements, storeName: json.name, store_id: storeID })
       })
@@ -106,12 +107,17 @@ class Shop extends React.Component {
         return response.json()
       })
       .then(function (session) {
-        return stripe.redirectToCheckout({ sessionId: session })
+        if (session.message) {
+          alert(session.message)
+        } else {
+          return stripe.redirectToCheckout({ sessionId: session })
+        }
       })
       .then(function (result) {
         // If `redirectToCheckout` fails due to a browser or network
         // error, you should display the localized error message to your
         // customer using `error.message`.
+        console.log(result)
         if (result.error) {
           alert(result.error.message)
         }
@@ -122,9 +128,28 @@ class Shop extends React.Component {
     event.preventDefault()
   }
 
+  handleQuantityChange (event, product) {
+    if (event.target.value === '') {
+      const newProd = { quantity: 0, productName: this.state.inCart[product].productName, price: this.state.inCart[product].price, id: product }
+      const oldCart = this.state.inCart
+      oldCart[product] = newProd
+      this.setState({ inCart: oldCart })
+    } else {
+      if (Number.isInteger(parseInt(event.target.value))) {
+        const newProd = { quantity: parseInt(event.target.value), productName: this.state.inCart[product].productName, price: this.state.inCart[product].price, id: product }
+        const oldCart = this.state.inCart
+        oldCart[product] = newProd
+        this.setState({ inCart: oldCart })
+      } else {
+        alert('Please insert an integer for quantity')
+      }
+    }
+    this.setState({ total: ccyFormat(subTotal(Object.values(this.state.inCart))) })
+  }
+
   render () {
     return (
-      <div>
+      <Box pt={10}>
         <Typography component='h1' variant='h5'>
           {this.state.storeName}
         </Typography>
@@ -154,17 +179,17 @@ class Shop extends React.Component {
             <TableBody>
               {Object.keys(this.state.inCart).map((product) => (
                 <TableRow key={this.state.inCart[product].productName}>
-                  <TableCell component='th' scope='row'>
+                  <TableCell width='80%' component='th' scope='row'>
                     {this.state.inCart[product].productName}
                   </TableCell>
-                  <TableCell align='right'>{this.state.inCart[product].quantity}</TableCell>
-                  <TableCell align='right'>{this.state.inCart[product].price}</TableCell>
+                  <TableCell align='center' width='10%'><TextField variant='outlined' width='80%' value={this.state.inCart[product].quantity} onChange={(event) => { this.handleQuantityChange(event, product) }} inputProps={{ style: { textAlign: 'right' } }} /></TableCell>
+                  <TableCell align='center' width='10%'>{this.state.inCart[product].price}</TableCell>
                 </TableRow>
               ))}
               <TableRow>
-                <TableCell component='th' scope='row' />
-                <TableCell align='right' />
-                <TableCell align='right'>
+                <TableCell width='80%' component='th' scope='row' />
+                <TableCell width='10%' align='center' />
+                <TableCell width='10%' align='center'>
                   <strong>Total: </strong> {this.state.total}
                 </TableCell>
               </TableRow>
@@ -190,7 +215,7 @@ class Shop extends React.Component {
             </Button>
           </DialogActions>
         </Dialog>
-      </div>
+      </Box>
     )
   }
 }
