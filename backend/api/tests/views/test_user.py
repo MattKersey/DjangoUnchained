@@ -401,6 +401,99 @@ class Test_UserView(APITestCase):
             "You don't have the permission to add an item", r.data["message"]
         )
 
+    def test_change_role_no_association(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/change_role/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store2.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.userMods.email,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(
+            1,
+            Association.objects.filter(
+                user=self.userMods,
+                store=self.store2,
+                role=Role.EMPLOYEE
+            ).count()
+        )
+
+    def test_change_role_pre_association(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/change_role/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store3.pk,
+                "role": Role.MANAGER,
+                "email": self.userMods.email,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(
+            1,
+            Association.objects.filter(
+                user=self.userMods,
+                store=self.store3,
+                role=Role.MANAGER
+            ).count()
+        )
+
+    def test_change_role_bad_user(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/change_role/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store2.pk,
+                "role": Role.EMPLOYEE,
+                "email": "bad@bad.com",
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual("The user does not exist.", r.data["message"])
+
+    def test_change_role_bad_store(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/change_role/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": 10000000,
+                "role": Role.EMPLOYEE,
+                "email": self.userMods.email,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(403, r.status_code)
+
+    def test_change_role_bad_role(self):
+        url = (
+            "http://127.0.0.1:8000/api/users/change_role/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store2.pk,
+                "role": "Fake Role",
+                "email": self.userMods.email,
+            },
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(406, r.status_code)
+        self.assertEqual("The role cannot be updated.", r.data["message"])
+
     def test_current_user(self):
         url = "http://127.0.0.1:8000/api/users/current_user/"
         r = self.client.get(
