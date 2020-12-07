@@ -68,10 +68,13 @@ class UserPage extends React.Component {
           </Typography>
         </Box>
         <Box mt={2} minHeight='100' className='shopContainer'>
-          <Grid container direction='row' alignItems='baseline' spacing={10}>
+          <Grid
+            container direction='row' justify='space-evenly'
+            alignItems='center' spacing={10}
+          >
             {this.state.shops.map((shop, index) =>
               <Grid item key={index} md={3}>
-                <StoreCard name={shop.store_name} id={shop.store_id} />
+                <StoreCard name={shop.store_name} role={shop.role} address={shop.store_address} category={shop.store_category} id={shop.store_id} />
               </Grid>
             )}
           </Grid>

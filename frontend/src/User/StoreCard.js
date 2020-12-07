@@ -5,8 +5,23 @@ import ButtonBase from '@material-ui/core/ButtonBase'
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import './home.css'
-const styles = makeStyles((theme) => ({
+import Typography from '@material-ui/core/Typography'
 
+const styles = makeStyles((theme) => ({
+  root: {
+    minWidth: 275
+  },
+  bullet: {
+    display: 'inline-block',
+    margin: '0 2px',
+    transform: 'scale(0.8)'
+  },
+  title: {
+    fontSize: 14
+  },
+  pos: {
+    marginBottom: 12
+  }
 }))
 
 class StoreCard extends React.Component {
@@ -20,16 +35,31 @@ class StoreCard extends React.Component {
   }
 
   render () {
+    const { classes } = this.props
+
     return (
       <div className='root'>
-        <Card className='card'>
+        <Card className='card' style={{ minHeight: '150px' }}>
           <ButtonBase
             className='cardAction'
             onClick={this.handleCardClick.bind(this)}
             width='100%'
             data-testid='card'
           >
-            <CardContent width='100%'>{this.props.name}</CardContent>
+            <CardContent width='100%'>
+              <Typography variant='h5' component='h2'>
+                {this.props.name}
+              </Typography>
+              <Typography className={classes.title} color='textSecondary' gutterBottom>
+                <strong>Address: </strong> {this.props.address}
+              </Typography>
+              <Typography variang='h6' className={classes.pos} color='textSecondary'>
+                <strong>Category: </strong> {this.props.category}
+              </Typography>
+              <Typography variang='h6' className={classes.pos} color='textSecondary'>
+                <strong>Your Role: </strong> {this.props.role}
+              </Typography>
+            </CardContent>
           </ButtonBase>
         </Card>
       </div>

@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import React from 'react'
 
 const Error = () => {

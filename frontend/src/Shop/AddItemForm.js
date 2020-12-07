@@ -86,7 +86,7 @@ class AddItemForm extends React.Component {
 
     fetch('http://127.0.0.1:8000/api/items/', requestOptions)
       .then(response => response.json())
-      .then(result => { window.location.reload() })
+      .then(result => { if (result.message) { alert('Order was invalid') } else { window.location.reload() } })
       .catch(error => alert(error))
     event.preventDefault()
   }
@@ -129,6 +129,7 @@ class AddItemForm extends React.Component {
             name='stock'
             autoComplete='stock'
             autoFocus
+            type='number'
             onChange={this.handleChange}
           />
 
@@ -139,6 +140,7 @@ class AddItemForm extends React.Component {
             id='stock'
             label='Price'
             name='price'
+            type='decimal'
             autoComplete='price'
             onChange={this.handleChange}
           />
@@ -150,6 +152,7 @@ class AddItemForm extends React.Component {
               name='type'
               value={this.state.type}
               onChange={this.handleChange}
+              required
             >
               <MenuItem value='Individual'>Individual</MenuItem>
               <MenuItem value='Bulk'>Bulk</MenuItem>
