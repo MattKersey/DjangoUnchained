@@ -488,3 +488,189 @@ class Test_UserView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual("superuserOAuth@email.com", r.data["email"])
+
+    def test_employee_add_user(self):
+        user_pk = True
+        token = True
+        store_id = True
+        role = True
+        email = True
+        password = True
+        url = f"http://127.0.0.1:8000/api/users/{user_pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_manager_add_user(self):
+        user_pk = True
+        token = True
+        store_id = True
+        role = True
+        email = True
+        password = True
+        url = f"http://127.0.0.1:8000/api/users/{user_pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_vendor_add_user(self):
+        user_pk = True
+        token = True
+        store_id = True
+        role = True
+        email = True
+        password = True
+        url = f"http://127.0.0.1:8000/api/users/{user_pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+
+    def test_add_user_to_invalid_store(self):
+        user_pk = True
+        token = True
+        store_id = True
+        role = True
+        email = True
+        password = True
+        url = f"http://127.0.0.1:8000/api/users/{user_pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_invalid_user_adds_user(self):
+        user_pk = True
+        token = True
+        store_id = True
+        role = True
+        email = True
+        password = True
+        url = f"http://127.0.0.1:8000/api/users/{user_pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_add_user_with_missing_fields(self):
+        user_pk = True
+        token = True
+        store_id = True
+        role = True
+        email = True
+        password = True
+        url = f"http://127.0.0.1:8000/api/users/{user_pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": store_id,
+                "role": role,
+                "email": email,
+                "password": password,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
