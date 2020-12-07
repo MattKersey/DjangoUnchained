@@ -4,6 +4,7 @@ import datetime
 import requests_mock
 from oauth2_provider.models import get_application_model, get_access_token_model
 from api.tests.views.utils import setupOAuth
+from api.views import updateTokenScope
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
@@ -38,6 +39,18 @@ class Test_OAuth(APITestCase):
         r = self.client.get(url, HTTP_AUTHORIZATION="Bearer " + self.token.token)
         self.assertEqual(200, r.status_code)
         self.assertEqual(b'{"ping":"pong"}', r.content)
+
+    def test_update_user_scopes(self):
+        Association.objects.create(
+            user=self.employeeUser, store=self.store, role=Role.VENDOR
+        )
+        updateTokenScope(self.employeeUser)
+        scope = "store_" + str(self.store.pk) + ":employee "
+        scope += "store_" + str(self.store.pk) + ":manager "
+        scope += "store_" + str(self.store.pk) + ":vendor"
+        self.assertEqual(
+            1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count()
+        )
 
     @requests_mock.Mocker()
     def test_OAuth_redirect(self, m):

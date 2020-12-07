@@ -400,18 +400,6 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(403, r.status_code)
 
-    # def test_remove_item_bad_combo(self):
-    #     url = (
-    #         "http://127.0.0.1:8000/api/stores/" + str(self.store2.pk) + "/remove_item/"
-    #     )
-    #     r = self.client.post(
-    #         url,
-    #         {"item_id": self.item2.pk},
-    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
-    #     )
-    #     self.assertEqual(406, r.status_code)
-    #     self.assertEqual("The item cannot be added.", r.data["message"])
-
     def test_delete_item(self):
         url = "http://127.0.0.1:8000/api/stores/delete_item/"
         r = self.client.delete(
