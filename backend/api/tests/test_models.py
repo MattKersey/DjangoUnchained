@@ -143,17 +143,23 @@ class Test_User_Model(TestCase):
         )
         _ = Association.objects.create(user=user, store=store, role=Role.VENDOR)
         self.assertFalse(
-            user.can_add_user(user=user, store=invalid_store, new_user_role=Role.EMPLOYEE)
+            user.can_add_user(
+                user=user, store=invalid_store, new_user_role=Role.EMPLOYEE
+            )
         )
 
     def test_invalid_user_cannot_add_user_to_store(self):
         user, store = self.create_user_and_store()
         invalid_user = User.objects.create_staffuser(
-            email="invalid_" + TEST_USER_EMAIL, password="invalid" + TEST_USER_PASSWORD, stores=None
+            email="invalid_" + TEST_USER_EMAIL,
+            password="invalid" + TEST_USER_PASSWORD,
+            stores=None,
         )
         _ = Association.objects.create(user=user, store=store, role=Role.VENDOR)
         self.assertFalse(
-            user.can_add_user(user=invalid_user, store=store, new_user_role=Role.EMPLOYEE)
+            user.can_add_user(
+                user=invalid_user, store=store, new_user_role=Role.EMPLOYEE
+            )
         )
 
 

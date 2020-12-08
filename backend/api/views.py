@@ -268,28 +268,22 @@ class UserViewSet(viewsets.ViewSet):
                 new_user_role=role,
             ):
                 new_user = User.objects.create_staffuser(
-                    email=data.get("email"),
-                    password=data.get("password")
+                    email=data.get("email"), password=data.get("password")
                 )
-                _ = Association.objects.create(
-                    user=new_user,
-                    store=store,
-                    role=role
-                )
+                _ = Association.objects.create(user=new_user, store=store, role=role)
                 return Response(
-                        {"message": "New user created."},
-                        status=status.HTTP_201_CREATED
-                    )
+                    {"message": "New user created."}, status=status.HTTP_201_CREATED
+                )
             else:
                 return Response(
-                        {"message": "Cannot add user because of your current role."},
-                        status=status.HTTP_406_NOT_ACCEPTABLE
-                    )
-        except Association.DoesNotExist:
-            return Response(
-                    {"message": "Invalid Store Association."},
+                    {"message": "Cannot add user because of your current role."},
                     status=status.HTTP_406_NOT_ACCEPTABLE,
                 )
+        except Association.DoesNotExist:
+            return Response(
+                {"message": "Invalid Store Association."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
         except (IntegrityError, ValidationError) as e:
             return Response(
                 {
