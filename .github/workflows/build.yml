@@ -71,6 +71,8 @@ jobs:
         run: |
           npm install
           npm test -- --watchAll=false --coverage
+        env:
+          STRIPE_API_KEY: ${{ secrets.FRONTEND_STRIPE_API_KEY }}
 
       - name: Lint + Bug Finding - ESLint
         working-directory: ./frontend

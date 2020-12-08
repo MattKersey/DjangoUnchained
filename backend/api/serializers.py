@@ -48,6 +48,7 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
 
 class StoreSerializer(serializers.HyperlinkedModelSerializer):
     items = ItemSerializer(many=True)
+
     class Meta:
         model = Store
         fields = ["pk", "address", "name", "category", "items"]
