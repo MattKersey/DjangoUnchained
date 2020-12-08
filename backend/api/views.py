@@ -40,7 +40,7 @@ from backend.scopes import (
 
 Application = get_application_model()
 AccessToken = get_access_token_model()
-stripe.api_key = "sk_test_51Hu2LSG8eUBzuEBE83xKbP5GrcDJVnBclJ7P5u95qOCF33C3NjdHqLlR4ICvYIQNYeVknFYjeZUxGD9aRcXX1TnT00i227Z5Pv"
+stripe.api_key = os.getenv("STRIPE_API_KEY")
 
 
 def updateTokenScope(user):
@@ -317,8 +317,8 @@ class StoreViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=["GET"])
-    def get_associations(self,request, pk=None):
-        a=Association.objects.filter(store=pk).all()
+    def get_associations(self, request, pk=None):
+        a = Association.objects.filter(store=pk).all()
         serializer = AssociationSerializer(a, many=True)
         return Response(serializer.data)
 
@@ -342,7 +342,7 @@ class StoreViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         # try:
         user = request.user
-        
+
         store = Store.objects.get(pk=pk)
         serializer = StoreSerializer(store)
         data = serializer.data
@@ -351,7 +351,7 @@ class StoreViewSet(viewsets.ViewSet):
             data["role"] = a.role
         except Association.DoesNotExist:
             a = None
-    
+
         return Response(data)
         # Won't reach this with new auth
         # except Store.DoesNotExist:
