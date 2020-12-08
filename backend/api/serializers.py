@@ -48,7 +48,6 @@ class ItemSerializer(serializers.HyperlinkedModelSerializer):
 
 class StoreSerializer(serializers.HyperlinkedModelSerializer):
     items = ItemSerializer(many=True)
-
     class Meta:
         model = Store
         fields = ["pk", "address", "name", "category", "items"]
@@ -59,6 +58,8 @@ class AssociationSerializer(serializers.ModelSerializer):
     store_name = serializers.ReadOnlyField(source="store.name")
     store_category = serializers.ReadOnlyField(source="store.category")
     store_id = serializers.ReadOnlyField(source="store.pk")
+    user_id = serializers.ReadOnlyField(source="user.pk")
+    user_email = serializers.ReadOnlyField(source="user.email")
 
     class Meta:
         model = Association
@@ -69,6 +70,8 @@ class AssociationSerializer(serializers.ModelSerializer):
             "membership",
             "role",
             "store_id",
+            "user_id",
+            "user_email"
         ]
 
 

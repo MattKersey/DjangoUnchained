@@ -25,6 +25,9 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import AddItemForm from './AddItemForm.js'
 import ShoppingCartIcon from '@material-ui/icons/ShoppingCart'
 import TextField from '@material-ui/core/TextField'
+import SettingsIcon from '@material-ui/icons/Settings'
+import HistoryIcon from '@material-ui/icons/History'
+import IconButton from '@material-ui/core/IconButton'
 
 function subTotal (items) {
   return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
@@ -42,7 +45,8 @@ class Shop extends React.Component {
       storeName: '',
       open: false,
       store_id: -1,
-      total: 0
+      total: 0,
+      role: ''
     }
   }
 
@@ -71,12 +75,12 @@ class Shop extends React.Component {
     })
       .then(res => res.json())
       .then(json => {
-        console.log(json.items)
         const productElements = {}
         for (let i = 0; i < json.items.length; i++) {
-          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
+          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} role={json.role} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
         }
-        this.setState({ products: productElements, storeName: json.name, store_id: storeID })
+
+        this.setState({ products: productElements, storeName: json.name, store_id: storeID, role: json.role })
       })
   }
 
@@ -147,13 +151,32 @@ class Shop extends React.Component {
     this.setState({ total: ccyFormat(subTotal(Object.values(this.state.inCart))) })
   }
 
+  handleSettings () {
+    window.location = window.location + '/settings'
+  }
+
+  handleHistory () {
+    window.location = window.location + '/history'
+  }
+
   render () {
     return (
-      <Box pt={10}>
-        <Typography component='h1' variant='h5'>
-          {this.state.storeName}
-        </Typography>
-        <Box align='center'>
+      <Box mt={1}>
+        <Box display='flex'>
+          <Typography component='h1' variant='h5'>
+            {this.state.storeName}
+          </Typography>
+          {(this.state.role === 'Vendor') &&
+            <Box ml={3}>
+              <IconButton onClick={this.handleSettings} size='small'>
+                <SettingsIcon fontSize='small' />
+              </IconButton>
+              <IconButton onClick={this.handleHistory} size='small'>
+                <HistoryIcon fontSize='small' />
+              </IconButton>
+            </Box>}
+        </Box>
+        <Box mt={2} align='center'>
           <Grid container direction='row' justify='flex-start' alignItems='baseline' spacing={10}>
             {Object.values(this.state.products)}
           </Grid>

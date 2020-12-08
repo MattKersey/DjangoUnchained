@@ -63,18 +63,21 @@ class Product extends React.Component {
       quantity: '',
       price: 0.0,
       original: {},
-      deleted: false
+      deleted: false,
+      role: ''
 
     }
     this.handleChange = this.handleChange.bind(this)
   }
 
   componentDidMount () {
-    this.setState({ name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price })
-    this.setState({ original: { name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price } })
+    this.setState({ name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role })
+    this.setState({ original: { name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role } })
   }
 
   handleExpandClick (event) {
+    console.log(this.state)
+
     this.setState({ expanded: !this.state.expanded })
   }
 
@@ -143,14 +146,12 @@ class Product extends React.Component {
     return (
       <div>
         <Card className={classes.root}>
-          <CardHeader
-            action={
-              <IconButton aria-label='settings' onClick={this.handleOpen.bind(this)}>
-                <CreateIcon />
-              </IconButton>
-        }
-            title={this.state.name}
-          />
+          {(this.state.role === 'Vendor')
+            ? <CardHeader
+                action={<IconButton aria-label='settings' onClick={this.handleOpen.bind(this)}> <CreateIcon /></IconButton>}
+                title={this.state.name}
+              />
+            : <CardHeader title={this.state.name} />}
           <CardMedia
             className={classes.media}
             component='img'
