@@ -101,7 +101,7 @@ class Test_StoreView(APITestCase):
         )
         self.example_session_id = sess_res.data
 
-    def test_retrieve_store(self):
+    def test_retrieve_store_no_assoc(self):
         url = "http://127.0.0.1:8000/api/stores/"
         r = self.client.get(
             url + str(self.store1.pk) + "/",
@@ -109,6 +109,23 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual("Store 1", r.data["name"])
+        self.assertFalse("role" in r.data)
+
+    def test_retrieve_store_assoc(self):
+        a = Association.objects.create(
+            user=self.user,
+            store=self.store1,
+            role=Role.VENDOR
+        )
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.get(
+            url + str(self.store1.pk) + "/",
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual("Store 1", r.data["name"])
+        self.assertEqual(Role.VENDOR, r.data["role"])
+        a.delete()
 
     def test_retrieve_store_bad(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -229,16 +246,6 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(403, r.status_code)
-
-    # def test_add_item_bad_combo(self):
-    #     url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
-    #     r = self.client.post(
-    #         url,
-    #         {"item_id": self.item2.pk},
-    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
-    #     )
-    #     self.assertEqual(406, r.status_code)
-    #     self.assertEqual("The item cannot be added.", r.data["message"])
 
     def test_create_checkout_session(self):
         url = (
@@ -512,6 +519,5 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(200, r.status_code)
-        print(r.data)
         self.assertEqual(self.blankUser.pk, r.data[0]["user_id"])
         a.delete()

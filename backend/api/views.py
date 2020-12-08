@@ -280,7 +280,7 @@ class UserViewSet(viewsets.ViewSet):
         except (IntegrityError, ValidationError) as e:
             return Response(
                 {
-                    "message": f"The new user cannot be created. {e.message}",
+                    "message": f"The new user cannot be created. {e}",
                 },
                 status=status.HTTP_406_NOT_ACCEPTABLE,
             )
