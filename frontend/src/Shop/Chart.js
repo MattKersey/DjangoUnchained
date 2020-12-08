@@ -1,3 +1,6 @@
+/* istanbul ignore file */
+/* eslint react/prop-types: 0 */
+
 import React from 'react'
 import { XYPlot, VerticalBarSeries, XAxis, YAxis, LabelSeries } from 'react-vis'
 import Box from '@material-ui/core/Box'
