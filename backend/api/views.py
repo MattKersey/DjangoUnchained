@@ -250,6 +250,51 @@ class UserViewSet(viewsets.ViewSet):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    @action(detail=True, methods=["POST"])
+    def add_user_to_store(self, request, pk=None):
+        data = request.POST
+        user = User.objects.get(pk=pk)
+        try:
+            store = Store.objects.get(pk=data.get("store_id"))
+            role = data.get("role")
+            if role is None or role not in [Role.MANAGER, Role.VENDOR, Role.EMPLOYEE]:
+                return Response(
+                    {"message": "Invalid Role."},
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
+            if Association.objects.get(user=user, store=store).role == Role.VENDOR:
+                new_user = User.objects.create_staffuser(
+                    email=data.get("email"), password=data.get("password")
+                )
+                _ = Association.objects.create(user=new_user, store=store, role=role)
+                return Response(
+                    {"message": "New user created."}, status=status.HTTP_201_CREATED
+                )
+            else:
+                return Response(
+                    {"message": "Cannot add user because of your current role."},
+                    status=status.HTTP_406_NOT_ACCEPTABLE,
+                )
+        except Association.DoesNotExist:
+            return Response(
+                {"message": "Invalid Store Association."},
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
+        except (IntegrityError, ValidationError) as e:
+            return Response(
+                {
+                    "message": f"The new user cannot be created. {e.message}",
+                },
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
+        except (ValueError) as e:
+            return Response(
+                {
+                    "message": f"Missing fields for creating new user. {e}",
+                },
+                status=status.HTTP_406_NOT_ACCEPTABLE,
+            )
+
 
 class StoreViewSet(viewsets.ViewSet):
     """

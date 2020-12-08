@@ -32,6 +32,15 @@ class Test_UserView(APITestCase):
         )
         self.association1.role = Role.EMPLOYEE
         self.association1.save()
+        self.employee_user = User.objects.create_user(
+            email="employee@example.com", password="employee"
+        )
+        self.manager_user = User.objects.create_user(
+            email="manager@example.com", password="manager"
+        )
+        self.vendor_user = User.objects.create_user(
+            email="vendor@example.com", password="vendor"
+        )
         setupOAuth(self, stores=[self.store1.pk, self.store2.pk, self.store3.pk])
 
     def test_register_good(self):
@@ -488,3 +497,181 @@ class Test_UserView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual("superuserOAuth@email.com", r.data["email"])
+
+    TEMP_EMAIL = "temp@email.com"
+    TEMP_PASSWORD = "temp-password"
+
+    def test_employee_add_user(self):
+        token = self.token.token
+        _ = Association.objects.create(
+            user=self.employee_user, store=self.store1, role=Role.EMPLOYEE
+        )
+        url = f"http://127.0.0.1:8000/api/users/{self.employee_user.pk}/add_user_to_store/"
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.TEMP_EMAIL,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_manager_add_user(self):
+        token = self.token.token
+        _ = Association.objects.create(
+            user=self.manager_user, store=self.store1, role=Role.MANAGER
+        )
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.manager_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.TEMP_EMAIL+"1",
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_vendor_add_user(self):
+        token = self.token.token
+        _ = Association.objects.create(
+            user=self.vendor_user, store=self.store1, role=Role.VENDOR
+        )
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.TEMP_EMAIL+"1",
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.MANAGER,
+                "email": self.TEMP_EMAIL+"2",
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.VENDOR,
+                "email": self.TEMP_EMAIL+"3",
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(201, r.status_code)
+
+    def test_add_user_to_invalid_store(self):
+        token = self.token.token
+        _ = Association.objects.create(
+            user=self.vendor_user, store=self.store1, role=Role.VENDOR
+        )
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store2.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.TEMP_EMAIL,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_invalid_user_adds_user(self):
+        token = self.token.token
+        # No association created
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.TEMP_EMAIL,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_add_user_with_missing_fields(self):
+        token = self.token.token
+        _ = Association.objects.create(
+            user=self.vendor_user, store=self.store1, role=Role.VENDOR
+        )
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "email": self.TEMP_EMAIL,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.TEMP_EMAIL,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
+
+    def test_adds_user_duplicate_email(self):
+        token = self.token.token
+        # No association created
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.userExists.email,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)
