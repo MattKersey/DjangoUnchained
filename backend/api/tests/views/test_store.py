@@ -58,10 +58,10 @@ class Test_StoreView(APITestCase):
         )
         self.item4 = Item.objects.create(
                 name="Item 4",
-                stock=1,
+                stock=3,
                 price=1.0,
                 description="Item 3",
-                bulkMinimum=0,
+                bulkMinimum=1,
                 bulkPrice=.5,
                 orderType="Bulk"
             )
@@ -341,7 +341,7 @@ class Test_StoreView(APITestCase):
             content_type="application/json",
         )
         self.assertEqual(200, r.status_code)
-        self.assertEqual(0, Item.objects.get(name=self.item4.name).stock)
+        self.assertEqual(2, Item.objects.get(name=self.item4.name).stock)
     
 
     def test_purchase_items_bad_store(self):
