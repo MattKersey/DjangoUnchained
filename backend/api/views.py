@@ -297,11 +297,16 @@ class StoreViewSet(viewsets.ViewSet):
     def retrieve(self, request, pk=None):
         # try:
         user = request.user
-        a = Association.objects.get(user=user, store=pk)
+        
         store = Store.objects.get(pk=pk)
         serializer = StoreSerializer(store)
         data = serializer.data
-        data["role"] = a.role
+        try:
+            a = Association.objects.get(user=user, store=pk)
+            data["role"] = a.role
+        except Association.DoesNotExist:
+            a = None
+    
         return Response(data)
         # Won't reach this with new auth
         # except Store.DoesNotExist:
