@@ -537,28 +537,6 @@ class Test_UserView(APITestCase):
             },
             HTTP_AUTHORIZATION="Bearer " + token,
         )
-        self.assertEqual(201, r.status_code)
-        r = self.client.post(
-            url,
-            {
-                "store_id": self.store1.pk,
-                "role": Role.MANAGER,
-                "email": self.TEMP_EMAIL+"2",
-                "password": self.TEMP_PASSWORD,
-            },
-            HTTP_AUTHORIZATION="Bearer " + token,
-        )
-        self.assertEqual(201, r.status_code)
-        r = self.client.post(
-            url,
-            {
-                "store_id": self.store1.pk,
-                "role": Role.VENDOR,
-                "email": self.TEMP_EMAIL+"3",
-                "password": self.TEMP_PASSWORD,
-            },
-            HTTP_AUTHORIZATION="Bearer " + token,
-        )
         self.assertEqual(406, r.status_code)
 
     def test_vendor_add_user(self):

@@ -101,67 +101,6 @@ class Test_User_Model(TestCase):
         )
         return user, store
 
-    def test_employee_add(self):
-        user, store = self.create_user_and_store()
-        _ = Association.objects.create(user=user, store=store, role=Role.EMPLOYEE)
-        self.assertFalse(
-            user.can_add_user(user=user, store=store, new_user_role=Role.EMPLOYEE)
-        )
-
-    def test_manager_add(self):
-        user, store = self.create_user_and_store()
-        _ = Association.objects.create(user=user, store=store, role=Role.MANAGER)
-        self.assertTrue(
-            user.can_add_user(user=user, store=store, new_user_role=Role.EMPLOYEE)
-        )
-        self.assertTrue(
-            user.can_add_user(user=user, store=store, new_user_role=Role.MANAGER)
-        )
-        self.assertFalse(
-            user.can_add_user(user=user, store=store, new_user_role=Role.VENDOR)
-        )
-
-    def test_vendor_add(self):
-        user, store = self.create_user_and_store()
-        _ = Association.objects.create(user=user, store=store, role=Role.VENDOR)
-        self.assertTrue(
-            user.can_add_user(user=user, store=store, new_user_role=Role.EMPLOYEE)
-        )
-        self.assertTrue(
-            user.can_add_user(user=user, store=store, new_user_role=Role.MANAGER)
-        )
-        self.assertTrue(
-            user.can_add_user(user=user, store=store, new_user_role=Role.VENDOR)
-        )
-
-    def test_cannot_add_user_to_invalid_store(self):
-        user, store = self.create_user_and_store()
-        invalid_store = Store.objects.create(
-            name="Invalid " + TEST_STORE_NAME,
-            address="Invalid " + TEST_STORE_ADDRESS,
-            category=TEST_STORE_CATEGORY,
-        )
-        _ = Association.objects.create(user=user, store=store, role=Role.VENDOR)
-        self.assertFalse(
-            user.can_add_user(
-                user=user, store=invalid_store, new_user_role=Role.EMPLOYEE
-            )
-        )
-
-    def test_invalid_user_cannot_add_user_to_store(self):
-        user, store = self.create_user_and_store()
-        invalid_user = User.objects.create_staffuser(
-            email="invalid_" + TEST_USER_EMAIL,
-            password="invalid" + TEST_USER_PASSWORD,
-            stores=None,
-        )
-        _ = Association.objects.create(user=user, store=store, role=Role.VENDOR)
-        self.assertFalse(
-            user.can_add_user(
-                user=invalid_user, store=store, new_user_role=Role.EMPLOYEE
-            )
-        )
-
 
 class Test_UserManager_Model(TestCase):
     def test_value_error(self):

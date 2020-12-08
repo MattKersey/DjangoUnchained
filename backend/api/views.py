@@ -255,18 +255,13 @@ class UserViewSet(viewsets.ViewSet):
         user = User.objects.get(pk=pk)
         try:
             store = Store.objects.get(pk=data.get("store_id"))
-            _ = Association.objects.get(user=user, store=store)
             role = data.get("role")
             if role is None or role not in [Role.MANAGER, Role.VENDOR, Role.EMPLOYEE]:
                 return Response(
                     {"message": "Invalid Role."},
                     status=status.HTTP_406_NOT_ACCEPTABLE,
                 )
-            if user.can_add_user(
-                user=user,
-                store=store,
-                new_user_role=role,
-            ):
+            if Association.objects.get(user=user, store=store).role == Role.VENDOR:
                 new_user = User.objects.create_staffuser(
                     email=data.get("email"), password=data.get("password")
                 )
