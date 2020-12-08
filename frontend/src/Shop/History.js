@@ -7,14 +7,17 @@ import Typography from '@material-ui/core/Typography'
 import axios from 'axios'
 import Box from '@material-ui/core/Box'
 import { DataGrid } from '@material-ui/data-grid'
+import '../../node_modules/react-vis/dist/style.css'
 
+import Chart from './Chart'
 class History extends React.Component {
   constructor (props) {
     super(props)
 
     this.state = {
       storeName: '',
-      items: []
+      items: [],
+      histories: []
     }
   }
 
@@ -37,25 +40,37 @@ class History extends React.Component {
   render () {
     const columns = [
       { field: 'col1', headerName: 'Date/Time', width: 250 },
-      { field: 'col2', headerName: 'Action', width: 150 },
+      { field: 'col2', headerName: 'Action', width: 100 },
       { field: 'col3', headerName: 'Item Name', width: 150 },
-      { field: 'col4', headerName: 'After Price', width: 150 },
-      { field: 'col5', headerName: 'After Stock', width: 150 },
-      { field: 'col6', headerName: 'After Description', width: 300 }
+      { field: 'col4', headerName: 'Before Price', width: 150 },
+      { field: 'col5', headerName: 'After Price', width: 150 },
+      { field: 'col6', headerName: 'Before Stock', width: 150 },
+      { field: 'col7', headerName: 'After Stock', width: 150 },
+      { field: 'col8', headerName: 'Description', width: 300 }
     ]
 
     const rows = []
-
+    const histData = []
+    const purchaseCount = {}
+    let bestSelling = ''
+    let rev = 0
     for (const key in this.state.items) {
-      const hist = this.state.items[key]
-      const name = hist.name
-      const his = hist.history
+      const i = this.state.items[key]
+      const name = i.name
+      purchaseCount[name] = 0
+      const his = i.history
       let obj
-      if (his.length === 1) {
-        obj = his[0]
+      for (let i = 0; i < his.length; i++) {
+        obj = his[i]
         const idd = rows.length + 1
         const d = new Date(obj.datetime)
-        const arr = { id: idd, col1: d.toLocaleString('en-US', { timeZone: 'America/New_York' }), col2: obj.category, col3: name, col4: obj.after_price, col5: obj.after_stock, col6: obj.after_description }
+        const arr = { id: idd, col1: d.toLocaleString('en-US', { timeZone: 'America/New_York' }), col2: obj.category, col3: name, col4: obj.before_price, col5: obj.after_price, col6: obj.before_stock, col7: obj.after_stock, col8: obj.description }
+        if (obj.category === 'Purchase') {
+          histData.push({ x: d.getTime(), y: ((obj.before_stock - obj.after_stock) * obj.after_price) })
+          rev += ((obj.before_stock - obj.after_stock) * obj.after_price)
+          purchaseCount[name] += (obj.before_stock - obj.after_stock)
+        }
+        bestSelling = Object.keys(purchaseCount).reduce((a, b) => purchaseCount[a] > purchaseCount[b] ? a : b)
         rows.push(arr)
       }
     }
@@ -70,6 +85,12 @@ class History extends React.Component {
         <Box style={{ height: 600, width: '100%' }}>
           <DataGrid sortingOrder={['desc', 'asc', null]} rows={rows} columns={columns} />
         </Box>
+        <Box mb={4} mt={2}>
+          <Typography component='h1' variant='h5'>
+            Purchase History Chart
+          </Typography>
+        </Box>
+        <Chart data={histData} revenue={rev} bestSelling={bestSelling} bestSellingPurchaseCount={purchaseCount[bestSelling]} />
       </div>
     )
   }
