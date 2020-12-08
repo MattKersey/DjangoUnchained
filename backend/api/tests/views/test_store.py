@@ -98,6 +98,24 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             content_type="application/json",
         )
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store1.pk)
+            + "/create_checkout_session/"
+        )
+        sess_res2 = self.client.post(
+            url,
+            json.dumps(
+                {
+                    "items": [
+                        {"id": self.item4.pk, "quantity": 1},
+                    ]
+                }
+            ),
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type="application/json",
+        )
+        self.example_session_id2 = sess_res2.data
         self.example_session_id = sess_res.data
 
     def test_retrieve_store(self):
@@ -256,7 +274,7 @@ class Test_StoreView(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertContains(r, "cs_test")
     
-    def test_create_checkout_session2(self):
+    def test_create_checkout_session_bulk(self):
         url = (
             "http://127.0.0.1:8000/api/stores/"
             + str(self.store1.pk)
@@ -309,6 +327,22 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(1, Item.objects.get(name=self.item2.name).stock)
+    
+    def test_purchase_items_bulk(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store1.pk)
+            + "/purchase_items/"
+        )
+        r = self.client.post(
+            url,
+            json.dumps({"session_id": self.example_session_id2}),
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type="application/json",
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(0, Item.objects.get(name=self.item4.name).stock)
+    
 
     def test_purchase_items_bad_store(self):
         url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"

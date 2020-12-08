@@ -28,6 +28,7 @@ class UserPage extends React.Component {
     }
   }
 
+  /* istanbul ignore next */
   componentDidMount () {
     axios.get('http://127.0.0.1:8000/api/users/current_user/', {
       headers: {
@@ -36,7 +37,6 @@ class UserPage extends React.Component {
     })
       .then((res) => {
         this.setState({ email: res.data.email, shops: res.data.stores })
-        console.log(res.data.stores)
       })
       .catch((error) => {
         console.error(error)
@@ -57,6 +57,7 @@ class UserPage extends React.Component {
   }
 
   render () {
+    /* istanbul ignore next */
     return (
       <div align='center'>
         <Box mb={4} mt={2}>

@@ -21,6 +21,7 @@ const styles = makeStyles((theme) => ({
 }))
 
 class NavBar extends React.Component {
+  /* istanbul ignore next */
   render () {
     const { classes } = this.props
     return (
