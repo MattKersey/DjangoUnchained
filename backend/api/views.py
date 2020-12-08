@@ -352,6 +352,7 @@ class StoreViewSet(viewsets.ViewSet):
                 before_stock=item.stock,
                 after_stock=item.stock - i["quantity"],
                 category=History_Category.PURCHASE,
+                after_price=item.price
             )
             item.history.add(history)
             item.stock -= int(i["quantity"])
