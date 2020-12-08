@@ -192,6 +192,8 @@ class UserManager(BaseUserManager):
         """
         Creates and saves a staff user with the given email and password.
         """
+        if password is None:
+            raise ValueError("Users must have a password")
         user = self.create_user(
             email,
             password=password,
@@ -206,6 +208,8 @@ class UserManager(BaseUserManager):
         """
         Creates and saves a superuser with the given email and password.
         """
+        if password is None:
+            raise ValueError("Users must have a password")
         user = self.create_user(
             email,
             password=password,
@@ -277,10 +281,6 @@ class Role(models.TextChoices):
     MANAGER = "Manager"
     VENDOR = "Vendor"
     EMPLOYEE = "Employee"
-
-    @property
-    def all_roles(self):
-        return [self.MANAGER, self.VENDOR, self.EMPLOYEE]
 
 
 class Association(models.Model):
