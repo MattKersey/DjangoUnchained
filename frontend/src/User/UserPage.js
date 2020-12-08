@@ -67,13 +67,13 @@ class UserPage extends React.Component {
             Your Stores:
           </Typography>
         </Box>
-        <Box mt={2} minHeight='100' className='shopContainer'>
+        <Box mt={2} minWidth='400' minHeight='100' className='shopContainer'>
           <Grid
             container direction='row' justify='space-evenly'
             alignItems='center' spacing={10}
           >
             {this.state.shops.map((shop, index) =>
-              <Grid item key={index} md={3}>
+              <Grid item key={index} xs={12} md={4}>
                 <StoreCard name={shop.store_name} role={shop.role} address={shop.store_address} category={shop.store_category} id={shop.store_id} />
               </Grid>
             )}

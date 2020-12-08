@@ -15,6 +15,7 @@ from api.serializers import (
     StoreSerializer,
     ItemSerializer,
     ItemHistorySerializer,
+    AssociationSerializer
 )
 from rest_framework.decorators import action
 from oauth2_provider.contrib.rest_framework import (
@@ -271,6 +272,12 @@ class StoreViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=True, methods=["GET"])
+    def get_associations(self,request, pk=None):
+        a=Association.objects.filter(store=pk).all()
+        serializer = AssociationSerializer(a, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=["GET"])
     def my_retrieve(self, request, pk=None):
         try:
             store = Store.objects.get(pk=pk)
@@ -289,9 +296,13 @@ class StoreViewSet(viewsets.ViewSet):
 
     def retrieve(self, request, pk=None):
         # try:
+        user = request.user
+        a = Association.objects.get(user=user, store=pk)
         store = Store.objects.get(pk=pk)
         serializer = StoreSerializer(store)
-        return Response(serializer.data)
+        data = serializer.data
+        data["role"] = a.role
+        return Response(data)
         # Won't reach this with new auth
         # except Store.DoesNotExist:
         #     return Response(
