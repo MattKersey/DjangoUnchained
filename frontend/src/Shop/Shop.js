@@ -81,6 +81,7 @@ class Shop extends React.Component {
         }
 
         this.setState({ products: productElements, storeName: json.name, store_id: storeID, role: json.role })
+        console.log(this.state.role)
       })
   }
 
@@ -152,11 +153,11 @@ class Shop extends React.Component {
   }
 
   handleSettings () {
-    window.location = window.location + '/settings'
+    window.location = '/shop/' + this.state.store_id + '/settings'
   }
 
   handleHistory () {
-    window.location = window.location + '/history'
+    window.location = '/shop/' + this.state.store_id + '/history'
   }
 
   render () {
@@ -168,10 +169,10 @@ class Shop extends React.Component {
           </Typography>
           {(this.state.role === 'Vendor') &&
             <Box ml={3}>
-              <IconButton onClick={this.handleSettings} size='small'>
+              <IconButton onClick={this.handleSettings.bind(this)} size='small'>
                 <SettingsIcon fontSize='small' />
               </IconButton>
-              <IconButton onClick={this.handleHistory} size='small'>
+              <IconButton onClick={this.handleHistory.bind(this)} size='small'>
                 <HistoryIcon fontSize='small' />
               </IconButton>
             </Box>}

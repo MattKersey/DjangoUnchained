@@ -54,7 +54,7 @@ class ShopSettings extends React.Component {
     this.setState({ oldUsers })
 
     const myHeaders = new Headers()
-    myHeaders.append('Authorization', 'Bearer 8DlOLGRXtVcDohvAwP4mo0YH1ZAv8R')
+    myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
     myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
     myHeaders.append('Cookie', 'csrftoken=fwv3jTStrI5oyvMGcQMBNdlyN6YTKdsfCMTqHYp7gC2JxrAIHAEBhF0BYWXWhmBb')
 
@@ -82,7 +82,7 @@ class ShopSettings extends React.Component {
 
   handleAddMember () {
     const myHeaders = new Headers()
-    myHeaders.append('Authorization', 'Bearer 8DlOLGRXtVcDohvAwP4mo0YH1ZAv8R')
+    myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
     myHeaders.append('Content-Type', 'application/x-www-form-urlencoded')
     myHeaders.append('Cookie', 'csrftoken=fwv3jTStrI5oyvMGcQMBNdlyN6YTKdsfCMTqHYp7gC2JxrAIHAEBhF0BYWXWhmBb')
 

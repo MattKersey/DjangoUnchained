@@ -51,8 +51,8 @@ class History extends React.Component {
       const name = hist.name
       const his = hist.history
       let obj
-      if (his.length === 1) {
-        obj = his[0]
+      for (let i = 0; i < his.length; i++) {
+        obj = his[i]
         const idd = rows.length + 1
         const d = new Date(obj.datetime)
         const arr = { id: idd, col1: d.toLocaleString('en-US', { timeZone: 'America/New_York' }), col2: obj.category, col3: name, col4: obj.after_price, col5: obj.after_stock, col6: obj.after_description }
