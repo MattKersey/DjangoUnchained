@@ -56,6 +56,15 @@ class Test_StoreView(APITestCase):
             before_description="Item 4",
             after_description="Item 2",
         )
+        self.item4 = Item.objects.create(
+                name="Item 4",
+                stock=3,
+                price=1.0,
+                description="Item 3",
+                bulkMinimum=1,
+                bulkPrice=.5,
+                orderType="Bulk"
+            )
         self.item3.history.add(self.history1)
         self.item3.save()
         self.item2.history.add(self.history2)
@@ -67,6 +76,7 @@ class Test_StoreView(APITestCase):
             address="2 Main Street", name="Store 2", category=Category.FOOD
         )
         self.store1.items.add(self.item2)
+        self.store1.items.add(self.item4)
         self.store1.save()
         self.store2.items.add(self.item3)
         self.store2.save()
@@ -88,6 +98,24 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             content_type="application/json",
         )
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store1.pk)
+            + "/create_checkout_session/"
+        )
+        sess_res2 = self.client.post(
+            url,
+            json.dumps(
+                {
+                    "items": [
+                        {"id": self.item4.pk, "quantity": 1},
+                    ]
+                }
+            ),
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type="application/json",
+        )
+        self.example_session_id2 = sess_res2.data
         self.example_session_id = sess_res.data
 
     def test_retrieve_store(self):
@@ -192,9 +220,9 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(200, r.status_code)
-        self.assertEqual(2, len(self.store1.items.all()))
+        self.assertEqual(3, len(self.store1.items.all()))
         self.store1.items.remove(self.item1)
-        self.assertEqual(1, len(self.store1.items.all()))
+        self.assertEqual(2, len(self.store1.items.all()))
 
     def test_add_item_bad_item(self):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
@@ -245,6 +273,27 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertContains(r, "cs_test")
+    
+    def test_create_checkout_session_bulk(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store1.pk)
+            + "/create_checkout_session/"
+        )
+        r = self.client.post(
+            url,
+            json.dumps(
+                {
+                    "items": [
+                        {"id": self.item4.pk, "quantity": 1},
+                    ]
+                }
+            ),
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type="application/json",
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertContains(r, "cs_test")
 
     def test_add_item_employee_auth(self):
         url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
@@ -278,6 +327,22 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(1, Item.objects.get(name=self.item2.name).stock)
+    
+    def test_purchase_items_bulk(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store1.pk)
+            + "/purchase_items/"
+        )
+        r = self.client.post(
+            url,
+            json.dumps({"session_id": self.example_session_id2}),
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+            content_type="application/json",
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(2, Item.objects.get(name=self.item4.name).stock)
+    
 
     def test_purchase_items_bad_store(self):
         url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"
@@ -353,9 +418,9 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(200, r.status_code)
-        self.assertEqual(0, len(self.store1.items.all()))
-        self.store1.items.add(self.item2)
         self.assertEqual(1, len(self.store1.items.all()))
+        self.store1.items.add(self.item2)
+        self.assertEqual(2, len(self.store1.items.all()))
 
     def test_remove_item_bad_item(self):
         url = (

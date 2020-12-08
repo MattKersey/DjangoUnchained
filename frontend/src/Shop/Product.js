@@ -24,10 +24,11 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button'
 import TextField from '@material-ui/core/TextField'
 import DeleteIcon from '@material-ui/icons/Delete'
+import Badge from '@material-ui/core/Badge'
+import Box from '@material-ui/core/Box'
 
 const styles = makeStyles((theme) => ({
   root: {
-    maxWidth: 345
   },
   media: {
     height: 0,
@@ -64,14 +65,25 @@ class Product extends React.Component {
       price: 0.0,
       original: {},
       deleted: false,
-      role: ''
+      role: '',
+      bulkMin: null,
+      bulkPrice: null
 
     }
     this.handleChange = this.handleChange.bind(this)
   }
 
   componentDidMount () {
-    this.setState({ name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role })
+    let bulkMin
+    let bulkPrice
+    if (this.props.bulkMin > 0) {
+      bulkMin = this.props.bulkMin
+      bulkPrice = parseFloat(this.props.bulkPrice)
+    } else {
+      bulkMin = null
+      bulkPrice = null
+    }
+    this.setState({ bulkMin: bulkMin, bulkPrice: bulkPrice, name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role })
     this.setState({ original: { name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role } })
   }
 
@@ -145,118 +157,133 @@ class Product extends React.Component {
     const { classes } = this.props
     return (
       <div>
-        <Card className={classes.root}>
-          {(this.state.role === 'Vendor')
-            ? <CardHeader
-                action={<IconButton aria-label='settings' onClick={this.handleOpen.bind(this)}> <CreateIcon /></IconButton>}
-                title={this.state.name}
+        <Badge badgeContent={this.state.bulkMin ? 'Bulk' : null} color='primary'>
+          <Card className={classes.root}>
+            {(this.state.role === 'Vendor')
+              ? <CardHeader
+                  action={<IconButton aria-label='settings' onClick={this.handleOpen.bind(this)}> <CreateIcon /></IconButton>}
+                  title={this.state.name}
+                />
+              : <CardHeader title={this.state.name} />}
+            <CardMedia
+              className={classes.media}
+              component='img'
+              src='https://source.unsplash.com/random'
+              title='Paella dish'
+              height='140'
+            />
+            <CardActions style={{ justifyContent: 'space-between' }} disableSpacing>
+              <IconButton
+                className={clsx(classes.expand, { [classes.expandOpen]: this.state.expanded })}
+                onClick={this.handleExpandClick.bind(this)}
+                aria-expanded={this.state.expanded}
+                aria-label='show more'
+              >
+                <ExpandMoreIcon />
+              </IconButton>
+              <Box m={1}>
+                <Typography paragraph><strong>Quantity </strong>{this.state.quantity} </Typography>
+              </Box>
+              <Box m={1}>
+                <Typography paragraph><strong>Price </strong> ${this.state.price} </Typography>
+              </Box>
+              <IconButton onClick={this.props.handleAddToCart} aria-label='share'>
+                <AddShoppingCartIcon />
+              </IconButton>
+            </CardActions>
+            <Collapse in={this.state.expanded} timeout='auto' unmountOnExit>
+              <CardContent>
+                <Typography paragraph><strong>Description: </strong> {this.state.description} </Typography>
+                {this.state.bulkMin &&
+                  <>
+                    <Box m={1}>
+                      <Typography paragraph><strong>Bulk Minimum: </strong> {this.state.bulkMin} </Typography>
+                    </Box>
+                    <Box m={1}>
+                      <Typography paragraph><strong>Bulk Price </strong> ${this.state.bulkPrice} </Typography>
+                    </Box>
+                  </>}
+              </CardContent>
+            </Collapse>
+          </Card>
+          <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
+            <DialogTitle id='form-dialog-title'>Edit {this.state.name}</DialogTitle>
+            <DialogContent>
+              <TextField
+                variant='outlined'
+                margin='normal'
+                required
+                fullWidth
+                id='shop_name'
+                label='Item Name'
+                name='name'
+                autoComplete='item_name'
+                autoFocus
+                value={this.state.name}
+                onChange={this.handleChange}
               />
-            : <CardHeader title={this.state.name} />}
-          <CardMedia
-            className={classes.media}
-            component='img'
-            src='https://source.unsplash.com/random'
-            title='Paella dish'
-            height='140'
-          />
-          <CardActions style={{ justifyContent: 'space-between' }} disableSpacing>
-            <IconButton
-              className={clsx(classes.expand, { [classes.expandOpen]: this.state.expanded })}
-              onClick={this.handleExpandClick.bind(this)}
-              aria-expanded={this.state.expanded}
-              aria-label='show more'
-            >
-              <ExpandMoreIcon />
-            </IconButton>
-            <Typography paragraph><strong>Quantity: </strong>{this.state.quantity} </Typography>
-            <Typography paragraph><strong>Price: </strong> ${this.state.price} </Typography>
-            <IconButton onClick={this.props.handleAddToCart} aria-label='share'>
-              <AddShoppingCartIcon />
-            </IconButton>
-          </CardActions>
-          <Collapse in={this.state.expanded} timeout='auto' unmountOnExit>
-            <CardContent>
-              <Typography paragraph>Description: {this.state.description} </Typography>
-            </CardContent>
-          </Collapse>
-        </Card>
-        <Dialog open={this.state.open} onClose={this.handleClose} aria-labelledby='form-dialog-title'>
-          <DialogTitle id='form-dialog-title'>Edit {this.state.name}</DialogTitle>
-          <DialogContent>
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              fullWidth
-              id='shop_name'
-              label='Item Name'
-              name='name'
-              autoComplete='item_name'
-              autoFocus
-              value={this.state.name}
-              onChange={this.handleChange}
-            />
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              id='description'
-              label='Description'
-              name='description'
-              fullWidth
-              autoComplete='description'
-              value={this.state.description}
-              onChange={this.handleChange}
-            />
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              id='quantity'
-              label='Quantity'
-              name='quantity'
-              autoComplete='quantity'
-              autoFocus
-              type='number'
-              value={this.state.quantity}
-              onChange={this.handleChange}
-            />
+              <TextField
+                variant='outlined'
+                margin='normal'
+                required
+                id='description'
+                label='Description'
+                name='description'
+                fullWidth
+                autoComplete='description'
+                value={this.state.description}
+                onChange={this.handleChange}
+              />
+              <TextField
+                variant='outlined'
+                margin='normal'
+                required
+                id='quantity'
+                label='Quantity'
+                name='quantity'
+                autoComplete='quantity'
+                autoFocus
+                type='number'
+                value={this.state.quantity}
+                onChange={this.handleChange}
+              />
 
-            <TextField
-              variant='outlined'
-              margin='normal'
-              required
-              id='price'
-              label='Price'
-              name='price'
-              autoComplete='price'
-              value={this.state.price}
-              onChange={this.handleChange}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={this.handleClose.bind(this)} color='primary'>
-              Cancel
-            </Button>
-            <Button
-              variant='contained'
-              color='secondary'
-              className={classes.button}
-              startIcon={<DeleteIcon />}
-              onClick={this.handleDelete.bind(this)}
-            >
-              Delete
-            </Button>
-            <Button
-              variant='contained'
-              color='primary'
-              className={classes.button}
-              onClick={this.handleSubmit.bind(this)}
-            >
-              Confirm
-            </Button>
-          </DialogActions>
-        </Dialog>
+              <TextField
+                variant='outlined'
+                margin='normal'
+                required
+                id='price'
+                label='Price'
+                name='price'
+                autoComplete='price'
+                value={this.state.price}
+                onChange={this.handleChange}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={this.handleClose.bind(this)} color='primary'>
+                Cancel
+              </Button>
+              <Button
+                variant='contained'
+                color='secondary'
+                className={classes.button}
+                startIcon={<DeleteIcon />}
+                onClick={this.handleDelete.bind(this)}
+              >
+                Delete
+              </Button>
+              <Button
+                variant='contained'
+                color='primary'
+                className={classes.button}
+                onClick={this.handleSubmit.bind(this)}
+              >
+                Confirm
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Badge>
       </div>
     )
   }

@@ -393,11 +393,15 @@ class StoreViewSet(viewsets.ViewSet):
                 "item_id"
             ]
             item = Item.objects.get(pk=int(item_id))
+            if((item.bulkMinimum <= i["quantity"]) and (item.bulkMinimum > 0)):
+                price = item.bulkPrice
+            else:
+                price = item.price
             history = History_of_Item.objects.create(
                 before_stock=item.stock,
                 after_stock=item.stock - i["quantity"],
                 category=History_Category.PURCHASE,
-                after_price=item.price
+                after_price=price
             )
             item.history.add(history)
             item.stock -= int(i["quantity"])
@@ -431,6 +435,10 @@ class StoreViewSet(viewsets.ViewSet):
             for purchase_item in data.get("items"):
                 # Build Stripe Payload
                 item = Item.objects.get(pk=purchase_item.get("id"))
+                if((item.bulkMinimum <= purchase_item.get("quantity")) and (item.bulkMinimum > 0)):
+                    price = item.bulkPrice
+                else:
+                    price = item.price
                 a = {
                     "price_data": {
                         "currency": "usd",
@@ -438,7 +446,7 @@ class StoreViewSet(viewsets.ViewSet):
                             "name": item.name,
                             "metadata": {"item_id": item.id},
                         },
-                        "unit_amount_decimal": item.price * 100,
+                        "unit_amount_decimal": price * 100,
                     },
                     "quantity": purchase_item.get("quantity"),
                 }

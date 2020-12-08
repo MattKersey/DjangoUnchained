@@ -75,7 +75,7 @@ class AddShopForm extends React.Component {
       body: urlencoded,
       redirect: 'follow'
     }
-
+    /* istanbul ignore next */
     fetch('http://127.0.0.1:8000/api/users/' + localStorage.getItem('user_id') + '/add_store/', requestOptions)
       .then(response => response.json())
       .then(result => { window.location = '/shop/' + result.pk })
