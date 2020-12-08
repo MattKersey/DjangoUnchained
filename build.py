@@ -8,7 +8,9 @@ import os
 
 CUR_DIR = os.getcwd()
 BACKEND_DIR = CUR_DIR + "/backend"
+BACKEND_REPORT_DIR = CUR_DIR + "/reports/backend"
 FRONTEND_DIR = CUR_DIR + "/frontend"
+FRONTEND_REPORT_DIR = CUR_DIR + "/reports/frontend"
 SUPER_EMAIL = "superuser@email.com"
 SUPER_PASSWORD = "superuser@123"
 
@@ -37,7 +39,8 @@ def clean():
 def install_backend():
     """Installs Backend Dependencies"""
     subprocess.run(
-        args=[sys.executable, "-m", "pip", "install", "--upgrade", "pip"], cwd=BACKEND_DIR
+        args=[sys.executable, "-m", "pip", "install", "--upgrade", "pip"],
+        cwd=BACKEND_DIR,
     )
     subprocess.run(args=["pip3", "install", "-r", "requirements.txt"], cwd=BACKEND_DIR)
 
@@ -90,10 +93,22 @@ def add_data_to_db():
     """Creates Superuser and Adds Fixtures to DB"""
     print(">>> Uploading Fixtures to DB.")
     # the order below matters
-    models = ["item", "store", "user", "association", "oauth_application", "oauth_accesstoken"]
+    models = [
+        "item",
+        "store",
+        "user",
+        "association",
+        "oauth_application",
+        "oauth_accesstoken",
+    ]
     for model in models:
         subprocess.run(
-            args=[sys.executable, "manage.py", "loaddata", f"api/fixtures/{model}.json"],
+            args=[
+                sys.executable,
+                "manage.py",
+                "loaddata",
+                f"api/fixtures/{model}.json",
+            ],
             cwd=BACKEND_DIR,
         )
     print("Finish: Add Data to DB")
@@ -128,9 +143,40 @@ def test_frontend():
 
 
 @task()
+def cover_backend():
+    """Generates Coverage Report for Backend"""
+    subprocess.run(args=["coverage", "erase"], cwd=BACKEND_DIR)
+    subprocess.run(args=["coverage", "run", "-m", "pytest"], cwd=BACKEND_DIR)
+    f = open(f"{BACKEND_REPORT_DIR}/coverage.txt", "w")
+    subprocess.run(args=["coverage", "report", "-m"], cwd=BACKEND_DIR, stdout=f)
+    f.close()
+
+
+@task()
+def cover_frontend():
+    """Generates Coverage Report for Frontend"""
+    subprocess.run(args=["coverage", "erase"], cwd=FRONTEND_DIR)
+    f = open(f"{FRONTEND_REPORT_DIR}/coverage.txt", "w")
+    subprocess.run(
+        args=["npm", "test", "--", "--watchAll=false", "--coverage"],
+        cwd=FRONTEND_DIR,
+        stdout=f,
+    )
+    f.close()
+
+
+@task(cover_backend, cover_frontend)
+def cover_everything():
+    """Generates Coverage Reports for Project"""
+    pass
+
+
+@task()
 def start_backend():
     """Runs Backend App"""
-    subprocess.run(args=[sys.executable, "manage.py", "runserver", "8000"], cwd=BACKEND_DIR)
+    subprocess.run(
+        args=[sys.executable, "manage.py", "runserver", "8000"], cwd=BACKEND_DIR
+    )
 
 
 @task()

@@ -60,6 +60,14 @@ jobs:
           echo "Finished Creating Backend Reports"
         shell: bash
 
+      - name: Coverage Reports
+        run: |
+          rm -f reports/*/coverage.txt
+          echo "Removed Coverage Files"
+          pynt cover_everything
+          echo "Finished Generating Coverage Reports"
+        shell: bash
+
       - name: Commiting Reports
         run: |
           git config --local user.email "action@github.com"
