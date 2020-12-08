@@ -93,7 +93,7 @@ class Shop extends React.Component {
   }
 
   handleCheckout (event) {
-    const stripe = Stripe('pk_test_51Hu2LSG8eUBzuEBEesc0XBxkWzW7RyHcK7ckx9DqgHL710Mh3BF0NRyowXw82xTUa8vBVIdamkyzkllOzHepdfPc00MoyUNiR6')
+    const stripe = Stripe(process.env.STRIPE_API_KEY)
     const myHeaders = new Headers()
     myHeaders.append('Authorization', 'Bearer ' + localStorage.getItem('token'))
     myHeaders.append('Content-Type', 'application/json')
