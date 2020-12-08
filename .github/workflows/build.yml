@@ -49,6 +49,10 @@ jobs:
           python manage.py makemigrations api
           python manage.py migrate
           pytest ./ -v --cov=./ --cov-report=xml
+        env:
+          CLIENT_ID: ${{ secrets.BACKEND_OAUTH_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.BACKEND_OAUTH_CLIENT_SECRET }}
+          STRIPE_API_KEY: ${{ secrets.BACKEND_STRIPE_API_KEY }}
 
       - name: Removing Migrations File
         working-directory: ./backend
