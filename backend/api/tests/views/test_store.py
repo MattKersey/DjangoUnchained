@@ -135,13 +135,17 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/"
         r = self.client.put(
             url + str(self.store2.pk) + "/",
-            {"name": "Updated Name"},
+            {
+                "name": "Updated Name",
+                "address": "Updated Address",
+            },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             follow=True,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Store.objects.filter(name="Store 2").count())
         self.assertEqual(1, Store.objects.filter(name="Updated Name").count())
+        self.assertEqual(1, Store.objects.filter(address="Updated Address").count())
 
     def test_update_store_bad(self):
         url = "http://127.0.0.1:8000/api/stores/"

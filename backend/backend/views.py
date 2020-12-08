@@ -43,9 +43,7 @@ class StoreAuthorizationView(AuthorizationView):
         user = User.objects.filter(email=request.user).first()
         associations = Association.objects.filter(user=user)
         for association in associations.all():
-            print(association.role)
-            if association.role in [Role.EMPLOYEE, Role.MANAGER, Role.VENDOR]:
-                scopes.append("store_" + str(association.store.pk) + ":employee")
+            scopes.append("store_" + str(association.store.pk) + ":employee")
             if association.role in [Role.MANAGER, Role.VENDOR]:
                 scopes.append("store_" + str(association.store.pk) + ":manager")
             if association.role == Role.VENDOR:
