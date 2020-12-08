@@ -13,7 +13,7 @@ import NavBar from './shared/Navigation'
 import Register from './Login/Register'
 import Shop from './Shop/Shop'
 import Success from './Shop/Success'
-
+import History from './Shop/History'
 import Container from '@material-ui/core/Container'
 import LoginButtons from './OauthLogin/LoginButtons'
 import LoginRedirect from './OauthLogin/LoginRedirect'
@@ -63,6 +63,7 @@ class App extends Component {
             <PrivateRoute path='/shop/:shopID' component={Shop} exact />
             <PrivateRoute path='/shop/:shopID/success' component={Success} exact />
             <PrivateRoute path='/shop/:shopID/settings' component={ShopSettings} exact />
+            <PrivateRoute path='/shop/:shopID/history' component={History} exact />
             <Route path='/login' component={LoginButtons} exact />
             <Route path='/loginredirect' component={LoginRedirect} exact />
             <Route component={Error} />
