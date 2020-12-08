@@ -30,7 +30,7 @@ import HistoryIcon from '@material-ui/icons/History'
 import IconButton from '@material-ui/core/IconButton'
 
 function subTotal (items) {
-  return items.map(({ price, quantity }) => price * quantity).reduce((sum, i) => sum + i, 0)
+  return items.map(({ price, quantity, bulkMin, bulkPrice }) => ((bulkMin > 0) && (quantity >= bulkMin)) ? (bulkPrice * quantity) : (price * quantity)).reduce((sum, i) => sum + i, 0)
 }
 function ccyFormat (num) {
   return `${num.toFixed(2)}`
@@ -52,12 +52,12 @@ class Shop extends React.Component {
 
   onAddToCart (event, data) {
     if (data.pk in this.state.inCart) {
-      const newProd = { quantity: this.state.inCart[data.pk].quantity + 1, productName: data.name, price: data.price, id: data.pk }
+      const newProd = { quantity: this.state.inCart[data.pk].quantity + 1, productName: data.name, price: data.price, id: data.pk, bulkMin: data.bulkMinimum, bulkPrice: data.bulkPrice }
       const oldCart = this.state.inCart
       oldCart[data.pk] = newProd
       this.setState({ inCart: oldCart })
     } else {
-      const newProd = { quantity: 1, productName: data.name, price: data.price, id: data.pk }
+      const newProd = { quantity: 1, productName: data.name, price: data.price, id: data.pk, bulkMin: data.bulkMinimum, bulkPrice: data.bulkPrice }
       const oldCart = this.state.inCart
       oldCart[data.pk] = newProd
       this.setState({ inCart: oldCart })
@@ -77,7 +77,7 @@ class Shop extends React.Component {
       .then(json => {
         const productElements = {}
         for (let i = 0; i < json.items.length; i++) {
-          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} role={json.role} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
+          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} role={json.role} bulkMin={json.items[i].bulkMinimum} bulkPrice={json.items[i].bulkPrice} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
         }
 
         this.setState({ products: productElements, storeName: json.name, store_id: storeID, role: json.role })
@@ -135,13 +135,13 @@ class Shop extends React.Component {
 
   handleQuantityChange (event, product) {
     if (event.target.value === '') {
-      const newProd = { quantity: 0, productName: this.state.inCart[product].productName, price: this.state.inCart[product].price, id: product }
+      const newProd = { quantity: 0, productName: this.state.inCart[product].productName, price: this.state.inCart[product].price, id: product, bulkPrice: this.state.inCart[product].bulkPrice, bulkMin: this.state.inCart[product].bulkMin }
       const oldCart = this.state.inCart
       oldCart[product] = newProd
       this.setState({ inCart: oldCart })
     } else {
       if (Number.isInteger(parseInt(event.target.value))) {
-        const newProd = { quantity: parseInt(event.target.value), productName: this.state.inCart[product].productName, price: this.state.inCart[product].price, id: product }
+        const newProd = { quantity: parseInt(event.target.value), productName: this.state.inCart[product].productName, price: this.state.inCart[product].price, id: product, bulkPrice: this.state.inCart[product].bulkPrice, bulkMin: this.state.inCart[product].bulkMin }
         const oldCart = this.state.inCart
         oldCart[product] = newProd
         this.setState({ inCart: oldCart })
@@ -207,7 +207,7 @@ class Shop extends React.Component {
                     {this.state.inCart[product].productName}
                   </TableCell>
                   <TableCell align='center' width='10%'><TextField variant='outlined' width='80%' value={this.state.inCart[product].quantity} onChange={(event) => { this.handleQuantityChange(event, product) }} inputProps={{ style: { textAlign: 'right' } }} /></TableCell>
-                  <TableCell align='center' width='10%'>{this.state.inCart[product].price}</TableCell>
+                  <TableCell align='center' width='10%'>{((this.state.inCart[product].bulkMin > 0) && (this.state.inCart[product].quantity >= this.state.inCart[product].bulkMin)) ? this.state.inCart[product].bulkPrice : this.state.inCart[product].price}</TableCell>
                 </TableRow>
               ))}
               <TableRow>
