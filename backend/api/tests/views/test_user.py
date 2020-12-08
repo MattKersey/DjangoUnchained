@@ -657,3 +657,21 @@ class Test_UserView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + token,
         )
         self.assertEqual(406, r.status_code)
+
+    def test_adds_user_duplicate_email(self):
+        token = self.token.token
+        # No association created
+        url = (
+            f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
+        )
+        r = self.client.post(
+            url,
+            {
+                "store_id": self.store1.pk,
+                "role": Role.EMPLOYEE,
+                "email": self.userExists.email,
+                "password": self.TEMP_PASSWORD,
+            },
+            HTTP_AUTHORIZATION="Bearer " + token,
+        )
+        self.assertEqual(406, r.status_code)

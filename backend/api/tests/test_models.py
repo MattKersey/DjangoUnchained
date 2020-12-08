@@ -90,6 +90,12 @@ class Test_User_Model(TestCase):
         self.assertEqual(user.email, user.__str__())
         self.assertEqual(0, user.stores.count())
 
+    def test_superuser_no_password(self):
+        with self.assertRaises(ValueError):
+            _ = User.objects.create_superuser(
+                email=TEST_USER_EMAIL,
+            )
+
 
 class Test_UserManager_Model(TestCase):
     def test_value_error(self):

@@ -188,7 +188,7 @@ class UserManager(BaseUserManager):
             user.save()
         return user
 
-    def create_staffuser(self, email, password, stores=None):
+    def create_staffuser(self, email, password=None, stores=None):
         """
         Creates and saves a staff user with the given email and password.
         """
@@ -204,7 +204,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, password, stores=None):
+    def create_superuser(self, email, password=None, stores=None):
         """
         Creates and saves a superuser with the given email and password.
         """
