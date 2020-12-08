@@ -90,17 +90,6 @@ class Test_User_Model(TestCase):
         self.assertEqual(user.email, user.__str__())
         self.assertEqual(0, user.stores.count())
 
-    def create_user_and_store(self):
-        user = User.objects.create_staffuser(
-            email=TEST_USER_EMAIL, password=TEST_USER_PASSWORD, stores=None
-        )
-        store = Store.objects.create(
-            name=TEST_STORE_NAME,
-            address=TEST_STORE_ADDRESS,
-            category=TEST_STORE_CATEGORY,
-        )
-        return user, store
-
 
 class Test_UserManager_Model(TestCase):
     def test_value_error(self):
