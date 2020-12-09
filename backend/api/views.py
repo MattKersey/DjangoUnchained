@@ -435,13 +435,13 @@ class StoreViewSet(viewsets.ViewSet):
                     "quantity": purchase_item.get("quantity"),
                 }
                 to_send_stripe.append(a)
+            success_url = f"http://localhost:1234/shop/{store.id}"
+            success_url += "/success?session_id={CHECKOUT_SESSION_ID}"
             session = stripe.checkout.Session.create(
                 payment_method_types=["card"],
                 line_items=to_send_stripe,
                 mode="payment",
-                success_url="http://localhost:1234/shop/"
-                + str(store.id)
-                + "/success?session_id={CHECKOUT_SESSION_ID}",
+                success_url=success_url,
                 cancel_url="http://localhost:1234/shop/" + str(store.id),
             )
             return Response(session.id)
