@@ -1,7 +1,15 @@
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from rest_framework.test import APITestCase
-from api.models import Store, Category, Item, History_of_Item
+from api.models import (
+    User,
+    Store,
+    Category,
+    Item,
+    History_of_Item,
+    Association,
+    Role,
+)
 import json
 from oauth2_provider.models import get_application_model, get_access_token_model
 from api.tests.views.utils import setupOAuth
@@ -12,6 +20,9 @@ AccessToken = get_access_token_model()
 
 class Test_StoreView(APITestCase):
     def setUp(self):
+        self.blankUser = User.objects.create_user(
+            email="blank@email.com", password="password"
+        )
         self.file_path = settings.BASE_DIR / "api/fixtures/food.jpeg"
         with open(file=self.file_path, mode="rb") as infile:
             file = SimpleUploadedFile(self.file_path, infile.read())
@@ -118,7 +129,7 @@ class Test_StoreView(APITestCase):
         self.example_session_id2 = sess_res2.data
         self.example_session_id = sess_res.data
 
-    def test_retrieve_store(self):
+    def test_retrieve_store_no_assoc(self):
         url = "http://127.0.0.1:8000/api/stores/"
         r = self.client.get(
             url + str(self.store1.pk) + "/",
@@ -126,6 +137,23 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual("Store 1", r.data["name"])
+        self.assertFalse("role" in r.data)
+
+    def test_retrieve_store_assoc(self):
+        a = Association.objects.create(
+            user=self.user,
+            store=self.store1,
+            role=Role.VENDOR
+        )
+        url = "http://127.0.0.1:8000/api/stores/"
+        r = self.client.get(
+            url + str(self.store1.pk) + "/",
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual("Store 1", r.data["name"])
+        self.assertEqual(Role.VENDOR, r.data["role"])
+        a.delete()
 
     def test_retrieve_store_bad(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -163,13 +191,17 @@ class Test_StoreView(APITestCase):
         url = "http://127.0.0.1:8000/api/stores/"
         r = self.client.put(
             url + str(self.store2.pk) + "/",
-            {"name": "Updated Name"},
+            {
+                "name": "Updated Name",
+                "address": "Updated Address",
+            },
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
             follow=True,
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(0, Store.objects.filter(name="Store 2").count())
         self.assertEqual(1, Store.objects.filter(name="Updated Name").count())
+        self.assertEqual(1, Store.objects.filter(address="Updated Address").count())
 
     def test_update_store_bad(self):
         url = "http://127.0.0.1:8000/api/stores/"
@@ -242,16 +274,6 @@ class Test_StoreView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + self.token.token,
         )
         self.assertEqual(403, r.status_code)
-
-    # def test_add_item_bad_combo(self):
-    #     url = "http://127.0.0.1:8000/api/stores/" + str(self.store1.pk) + "/add_item/"
-    #     r = self.client.post(
-    #         url,
-    #         {"item_id": self.item2.pk},
-    #         HTTP_AUTHORIZATION="Bearer " + self.token.token,
-    #     )
-    #     self.assertEqual(406, r.status_code)
-    #     self.assertEqual("The item cannot be added.", r.data["message"])
 
     def test_create_checkout_session(self):
         url = (
@@ -381,6 +403,30 @@ class Test_StoreView(APITestCase):
         self.assertEqual(406, r.status_code)
         self.assertEqual(
             "The purchase quantity for '" + self.item2.name + "' exceeds minimum.",
+            r.data["message"],
+        )
+
+    def test_purchase_items_bad_item(self):
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store1.pk)
+            + "/create_checkout_session/"
+        )
+        r = self.client.post(
+            url,
+            json.dumps(
+                {
+                    "items": [
+                        {"id": 1000000, "quantity": 100000000000000},
+                    ]
+                }
+            ),
+            HTTP_AUTHORIZATION="Bearer " + self.empToken.token,
+            content_type="application/json",
+        )
+        self.assertEqual(404, r.status_code)
+        self.assertEqual(
+            "At least one of the items does not exist.",
             r.data["message"],
         )
 
@@ -521,3 +567,22 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(406, r.status_code)
         self.assertEqual("The item cannot be deleted.", r.data["message"])
+
+    def test_get_associations(self):
+        a = Association.objects.create(
+            user=self.blankUser,
+            store=self.store2,
+            role=Role.EMPLOYEE,
+        )
+        url = (
+            "http://127.0.0.1:8000/api/stores/"
+            + str(self.store2.pk)
+            + "/get_associations/"
+        )
+        r = self.client.get(
+            url,
+            HTTP_AUTHORIZATION="Bearer " + self.token.token,
+        )
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(self.blankUser.pk, r.data[0]["user_id"])
+        a.delete()

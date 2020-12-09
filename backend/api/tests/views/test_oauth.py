@@ -40,8 +40,8 @@ class Test_OAuth(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertEqual(b'{"ping":"pong"}', r.content)
 
-    def test_update_user_scopes(self):
-        Association.objects.create(
+    def test_update_user_scopes_vendor(self):
+        a = Association.objects.create(
             user=self.employeeUser, store=self.store, role=Role.VENDOR
         )
         updateTokenScope(self.employeeUser)
@@ -51,6 +51,30 @@ class Test_OAuth(APITestCase):
         self.assertEqual(
             1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count()
         )
+        a.delete()
+
+    def test_update_user_scopes_manager(self):
+        a = Association.objects.create(
+            user=self.employeeUser, store=self.store, role=Role.MANAGER
+        )
+        updateTokenScope(self.employeeUser)
+        scope = "store_" + str(self.store.pk) + ":employee "
+        scope += "store_" + str(self.store.pk) + ":manager"
+        self.assertEqual(
+            1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count()
+        )
+        a.delete()
+
+    def test_update_user_scopes_employee(self):
+        a = Association.objects.create(
+            user=self.employeeUser, store=self.store, role=Role.EMPLOYEE
+        )
+        updateTokenScope(self.employeeUser)
+        scope = "store_" + str(self.store.pk) + ":employee"
+        self.assertEqual(
+            1, AccessToken.objects.filter(user=self.employeeUser, scope=scope).count()
+        )
+        a.delete()
 
     @requests_mock.Mocker()
     def test_OAuth_redirect(self, m):
@@ -68,6 +92,26 @@ class Test_OAuth(APITestCase):
         self.assertEqual(200, r.status_code)
         self.assertEqual(b'{"testdata":"hello world!"}', r.content)
         pass
+
+    @requests_mock.Mocker()
+    def test_OAuth_redirect_employee(self, m):
+        a = Association.objects.create(
+            user=self.employeeUser, store=self.store, role=Role.EMPLOYEE
+        )
+        self.client.force_login(self.employeeUser)
+        m.register_uri(
+            "POST",
+            "http://127.0.0.1:8000/o/token/",
+            text='{"testdata": "hello world!"}',
+        )
+        url = "http://127.0.0.1:8000/o/authorize/"
+        url += "?response_type=code"
+        url += "&client_id=" + self.application.client_id
+        url += "&redirect_uri=http://127.0.0.1:8000/authredirect/"
+        r = self.client.get(url, follow=True)
+        self.assertEqual(200, r.status_code)
+        self.assertEqual(b'{"testdata":"hello world!"}', r.content)
+        a.delete()
 
     def tearDown(self):
         self.user.delete()

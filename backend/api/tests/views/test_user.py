@@ -660,7 +660,9 @@ class Test_UserView(APITestCase):
 
     def test_adds_user_duplicate_email(self):
         token = self.token.token
-        # No association created
+        _ = Association.objects.create(
+            user=self.vendor_user, store=self.store1, role=Role.VENDOR
+        )
         url = (
             f"http://127.0.0.1:8000/api/users/{self.vendor_user.pk}/add_user_to_store/"
         )
@@ -675,3 +677,7 @@ class Test_UserView(APITestCase):
             HTTP_AUTHORIZATION="Bearer " + token,
         )
         self.assertEqual(406, r.status_code)
+        self.assertEqual(
+            "The new user cannot be created. UNIQUE constraint failed: api_user.email",
+            r.data["message"]
+        )
