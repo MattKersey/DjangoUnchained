@@ -44,6 +44,18 @@ jobs:
           flake8 ./*/*.py --show-source --statistics --verbose --max-line-length=100 --ignore=E --output-file=../reports/backend/GOOD_Lint_report.txt
           echo "Finished Creating Backend Reports"
         shell: bash
+
+      - name: Backend - Creating Coverage Report
+        run: |
+          rm -f reports/backend/coverage.txt
+          echo "Removed Backend Coverage File"
+          pynt cover_backend
+          echo "Finished Generating Backend Coverage Report"
+        shell: bash
+        env:
+          CLIENT_ID: ${{ secrets.BACKEND_OAUTH_CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.BACKEND_OAUTH_CLIENT_SECRET }}
+          STRIPE_API_KEY: ${{ secrets.BACKEND_STRIPE_API_KEY }}
           
       - name: Frontend - Installing Requirements
         working-directory: ./frontend
@@ -54,19 +66,21 @@ jobs:
         working-directory: ./frontend
         run: |
           rm -f ../reports/frontend/*_report.*
-          echo "Finished Deleting Backend Reports"
+          echo "Finished Deleting Frontend Reports"
           npx eslint . -f node_modules/eslint-html-reporter/reporter.js -o ../reports/frontend/GOOD_Bug_report.html
           npx standard | npx standard-reporter --json > ../reports/frontend/GOOD_Lint_report.json
           echo "Finished Creating Backend Reports"
         shell: bash
 
-      - name: Coverage Reports
+      - name: Frontend - Creating Coverage Report
         run: |
-          rm -f reports/*/coverage.txt
-          echo "Removed Coverage Files"
-          pynt cover_everything
-          echo "Finished Generating Coverage Reports"
+          rm -f reports/frontend/coverage.txt
+          echo "Removed Frontend Coverage File"
+          pynt cover_frontend
+          echo "Finished Generating Frontend Coverage Report"
         shell: bash
+        env:
+          STRIPE_API_KEY: ${{ secrets.FRONTEND_STRIPE_API_KEY }}
 
       - name: Commiting Reports
         run: |
