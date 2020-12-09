@@ -182,10 +182,13 @@ class Shop extends React.Component {
             {Object.values(this.state.products)}
           </Grid>
           <br />
-          <Fab color='primary' onClick={this.handleOpen.bind(this)} aria-label='add' variant='extended'>
-            <AddIcon />
-            Add an Item
-          </Fab>
+          {
+            (this.state.role === 'Vendor') &&
+            <Fab color='primary' onClick={this.handleOpen.bind(this)} aria-label='add' variant='extended'>
+              <AddIcon />
+              Add an Item
+            </Fab>
+          }
         </Box>
         <br />
         <Typography component='h1' variant='h5'>

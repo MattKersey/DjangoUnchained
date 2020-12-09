@@ -86,7 +86,7 @@ class AddItemForm extends React.Component {
 
     fetch('http://127.0.0.1:8000/api/items/', requestOptions)
       .then(response => response.json())
-      .then(result => { if (result.message) { alert('Order was invalid') } else { window.location.reload() } })
+      .then(result => { if (result.Error) { alert('Item was invalid') } else { window.location.reload() } })
       .catch(error => alert(error))
     event.preventDefault()
   }
