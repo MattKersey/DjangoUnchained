@@ -37,19 +37,19 @@ describe('<Shop />', () => {
     render(
       <Shop match={{ params: { shopID: 6 }, isExact: true, path: '', url: '' }} />
     )
-    expect(screen.getByText(/Add an Item/i)).toBeInTheDocument()
+    expect(screen.getByText(/Checkout/i)).toBeInTheDocument()
   })
 
-  test('Test Add an Item Button', async () => {
-    render(
-      <BrowserRouter>
-        <Shop match={{ params: { shopID: 6 }, isExact: true, path: '', url: '' }} />
-      </BrowserRouter>
+  // test('Test Add an Item Button', async () => {
+  //   render(
+  //     <BrowserRouter>
+  //       <Shop match={{ params: { shopID: 6 }, isExact: true, path: '', url: '' }} />
+  //     </BrowserRouter>
 
-    )
-    fireEvent.click(screen.getByText(/Add an Item/i))
-    expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
-  })
+  //   )
+  //   fireEvent.click(screen.getByText(/Add an Item/i))
+  //   expect(screen.getByText(/Fill out the following form to create an item/i)).toBeInTheDocument()
+  // })
 })
 
 describe('<AddItemForm />', () => {
