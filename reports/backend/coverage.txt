@@ -1,0 +1,15 @@
+Name                  Stmts   Miss Branch BrPart  Cover   Missing
+-----------------------------------------------------------------
+api/__init__.py           0      0      0      0   100%
+api/admin.py              9      2      2      0    82%   10-11
+api/models.py           146      0     30      0   100%
+api/serializers.py       31      0      0      0   100%
+api/urls.py               9      0      0      0   100%
+api/views.py            428      0    104      1    99%   534->536
+backend/__init__.py       0      0      0      0   100%
+backend/scopes.py        54      0     18      0   100%
+backend/settings.py      28      0      0      0   100%
+backend/urls.py           8      0      0      0   100%
+backend/views.py         32      0      6      0   100%
+-----------------------------------------------------------------
+TOTAL                   745      2    160      1    99%
