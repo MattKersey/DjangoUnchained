@@ -47,7 +47,7 @@ jobs:
 
       - name: Backend - Creating Coverage Report
         run: |
-          rm -f reports/frontend/coverage.txt
+          rm -f reports/backend/coverage.txt
           echo "Removed Backend Coverage File"
           pynt cover_backend
           echo "Finished Generating Backend Coverage Report"
