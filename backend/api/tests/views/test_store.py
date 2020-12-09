@@ -295,7 +295,7 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertContains(r, "cs_test")
-    
+
     def test_create_checkout_session_bulk(self):
         url = (
             "http://127.0.0.1:8000/api/stores/"
@@ -349,7 +349,7 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(1, Item.objects.get(name=self.item2.name).stock)
-    
+
     def test_purchase_items_bulk(self):
         url = (
             "http://127.0.0.1:8000/api/stores/"
@@ -364,7 +364,6 @@ class Test_StoreView(APITestCase):
         )
         self.assertEqual(200, r.status_code)
         self.assertEqual(2, Item.objects.get(name=self.item4.name).stock)
-    
 
     def test_purchase_items_bad_store(self):
         url = "http://127.0.0.1:8000/api/stores/100000000/purchase_items/"
