@@ -77,7 +77,7 @@ class Shop extends React.Component {
       .then(json => {
         const productElements = {}
         for (let i = 0; i < json.items.length; i++) {
-          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} role={json.role} bulkMin={json.items[i].bulkMinimum} bulkPrice={json.items[i].bulkPrice} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} imageURL={json.items[i].image} /></Grid>
+          productElements[json.items[i].pk] = <Grid style={{ minWidth: '300px' }} item key={json.items[i].pk} md={3}><Product shopID={storeID} role={json.role} bulkMin={json.items[i].bulkMinimum} bulkPrice={json.items[i].bulkPrice} className='product' id={json.items[i].pk} handleAddToCart={(event) => this.onAddToCart(event, json.items[i], i)} stock={json.items[i].stock} description={json.items[i].description} productName={json.items[i].name} price={json.items[i].price} image={json.items[i].image} /></Grid>
         }
 
         this.setState({ products: productElements, storeName: json.name, store_id: storeID, role: json.role })
