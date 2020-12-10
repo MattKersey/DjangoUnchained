@@ -659,6 +659,7 @@ class ItemViewSet(viewsets.ViewSet):
             else:
                 try:
                     item.name = data.get("name", item.name)
+                    item.image = data.get("image", item.image)
                     item.description = data.get("description", item.description)
                     item.stock = data.get("stock", item.stock)
                     item.price = data.get("price", item.price)
