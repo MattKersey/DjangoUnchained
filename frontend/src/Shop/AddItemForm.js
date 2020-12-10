@@ -46,6 +46,7 @@ class AddItemForm extends React.Component {
 
     this.state = {
       item_name: '',
+      image: '',
       stock: 0,
       price: 0,
       type: '',
@@ -70,6 +71,7 @@ class AddItemForm extends React.Component {
     const urlencoded = new URLSearchParams()
     urlencoded.append('store_id', parseInt(this.props.match.params.shopID))
     urlencoded.append('name', this.state.item_name)
+    urlencoded.append('image', this.state.image)
     urlencoded.append('stock', parseInt(this.state.stock))
     urlencoded.append('price', parseFloat(this.state.price))
     urlencoded.append('orderType', this.state.type)
@@ -108,6 +110,19 @@ class AddItemForm extends React.Component {
             autoFocus
             onChange={this.handleChange}
           />
+
+          <TextField
+            variant='outlined'
+            margin='normal'
+            required
+            id='image'
+            label='Image URL'
+            name='image'
+            fullWidth
+            autoComplete='image'
+            onChange={this.handleChange}
+          />
+
           <TextField
             variant='outlined'
             margin='normal'

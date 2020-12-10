@@ -60,6 +60,7 @@ class Product extends React.Component {
       expanded: false,
       open: false,
       name: '',
+      image: '',
       description: '',
       quantity: '',
       price: 0.0,
@@ -83,8 +84,8 @@ class Product extends React.Component {
       bulkMin = null
       bulkPrice = null
     }
-    this.setState({ bulkMin: bulkMin, bulkPrice: bulkPrice, name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role })
-    this.setState({ original: { name: this.props.productName, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role } })
+    this.setState({ bulkMin: bulkMin, bulkPrice: bulkPrice, name: this.props.productName, image: this.props.image, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role })
+    this.setState({ original: { name: this.props.productName, image: this.props.image, description: this.props.description, quantity: this.props.stock, price: this.props.price, role: this.props.role } })
   }
 
   handleExpandClick (event) {
@@ -113,6 +114,7 @@ class Product extends React.Component {
 
     const urlencoded = new URLSearchParams()
     urlencoded.append('name', this.state.name)
+    urlencoded.append('image', this.state.image)
     urlencoded.append('stock', parseInt(this.state.quantity))
     urlencoded.append('price', parseFloat(this.state.price))
     urlencoded.append('description', this.state.description)
@@ -168,8 +170,8 @@ class Product extends React.Component {
             <CardMedia
               className={classes.media}
               component='img'
-              src='https://source.unsplash.com/random'
-              title='Paella dish'
+              src={this.state.image}
+              title='Image URL'
               height='140'
             />
             <CardActions style={{ justifyContent: 'space-between' }} disableSpacing>
@@ -220,6 +222,18 @@ class Product extends React.Component {
                 autoComplete='item_name'
                 autoFocus
                 value={this.state.name}
+                onChange={this.handleChange}
+              />
+              <TextField
+                variant='outlined'
+                margin='normal'
+                required
+                fullWidth
+                id='image'
+                label='Image URL'
+                name='image'
+                autoComplete='image'
+                value={this.state.image}
                 onChange={this.handleChange}
               />
               <TextField
